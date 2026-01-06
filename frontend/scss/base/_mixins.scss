@@ -1,0 +1,29 @@
+@use 'variables' as *;
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin button-primary {
+  background: $naranja;
+  color: $verde-oscuro;
+  border: none;
+  border-radius: 30px;
+  padding: 0.9rem 1.6rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+
+  &:hover {
+    transform: scale(1.03);
+    opacity: 0.95;
+  }
+}
+
+@mixin card {
+  background: $manteca;
+  border-radius: $radius-lg;
+  box-shadow: $sombra-card;
+}

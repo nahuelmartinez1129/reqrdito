@@ -1,0 +1,124 @@
+@use 'sass:color';
+@use '../base/variables' as v;
+@use '../base/mixins' as m;
+
+.crear-body {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    v.$verde-claro,
+    v.$verde-oscuro
+  );
+  @include m.flex-center;
+  padding: 2rem;
+}
+
+.crear-card {
+  @include m.card;
+  width: 100%;
+  max-width: 460px;
+  padding: 2.5rem 2.2rem;
+  animation: fadeUp 0.6s ease;
+
+  h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    color: v.$verde-oscuro;
+  }
+
+  p {
+    text-align: center;
+    font-size: 0.95rem;
+    color: color.adjust(v.$verde-oscuro, $lightness: -10%);
+    margin-bottom: 2rem;
+  }
+}
+
+.form-group {
+  margin-bottom: 1.6rem;
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+    color: v.$verde-oscuro;
+    font-weight: 600;
+  }
+
+  input[type="text"],
+  input[type="file"] {
+    width: 100%;
+    padding: 0.85rem 0.9rem;
+    border-radius: v.$radius-sm;
+    border: 1px solid color.adjust(v.$verde-oscuro, $lightness: 35%);
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+    background-color: v.$blanco;
+
+    &:focus {
+      outline: none;
+      border-color: v.$verde-claro;
+      box-shadow: 0 0 0 3px rgba(107, 172, 115, 0.25);
+    }
+  }
+
+  input[type="file"] {
+    padding: 0.65rem;
+    background-color: color.adjust(v.$manteca, $lightness: 4%);
+    cursor: pointer;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    color: #777;
+  }
+}
+
+.preescucha {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.preescucha audio {
+  width: 100%;
+  
+}
+
+
+.form-submit {
+  margin-top: 2rem;
+
+  button {
+    @include m.button-primary;
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.9rem;
+    letter-spacing: 0.5px;
+  }
+}
+
+.form-note {
+  margin-top: 1.2rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: #777;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .crear-card {
+    padding: 2rem 1.6rem;
+  }
+}

@@ -1,0 +1,424 @@
+@charset "UTF-8";
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #F9ECD9;
+  color: #166D20;
+  line-height: 1.6;
+}
+
+/* =========================
+   HEADER / HERO
+========================= */
+header {
+  min-height: 90vh;
+  background: linear-gradient(135deg, #6BAC73, #166D20);
+  color: #F9ECD9;
+  text-align: center;
+  padding: 4rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+header h1 {
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  margin-bottom: 1.2rem;
+  max-width: 700px;
+}
+header p {
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+header a {
+  background: #EBAF2B;
+  color: #166D20;
+  border: none;
+  border-radius: 30px;
+  padding: 0.9rem 1.6rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+header a:hover {
+  transform: scale(1.03);
+  opacity: 0.95;
+}
+header a {
+  font-size: 1.05rem;
+  text-decoration: none;
+}
+
+/* =========================
+   SECCIONES GENERALES
+========================= */
+section {
+  padding: 4rem 1.5rem;
+  background-color: #F9ECD9;
+  color: #333;
+}
+
+/* =========================
+   TÍTULOS
+========================= */
+.section-title {
+  text-align: center;
+  font-size: 2.1rem;
+  margin-bottom: 3rem;
+  color: #166D20;
+}
+
+/* =========================
+   STEPS
+========================= */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.step {
+  background: #F9ECD9;
+  border-radius: 22px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+.step span {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+.step h3 {
+  color: #166D20;
+  margin-bottom: 0.5rem;
+}
+.step p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* =========================
+   CTA FINAL
+========================= */
+.cta {
+  background: linear-gradient(135deg, #EBAF2B, #6BAC73);
+  color: #ffffff;
+  text-align: center;
+}
+.cta h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+.cta p {
+  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+}
+.cta a {
+  background: #EBAF2B;
+  color: #166D20;
+  border: none;
+  border-radius: 30px;
+  padding: 0.9rem 1.6rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.cta a:hover {
+  transform: scale(1.03);
+  opacity: 0.95;
+}
+.cta a {
+  background-color: #ffffff;
+  color: #166D20;
+  text-decoration: none;
+}
+.cta a:hover {
+  background-color: #F9ECD9;
+}
+
+/* =========================
+   FOOTER
+========================= */
+footer {
+  background-color: #166D20;
+  color: #F9ECD9;
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.85rem;
+}
+
+.crear-body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #6BAC73, #166D20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.crear-card {
+  background: #F9ECD9;
+  border-radius: 22px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 460px;
+  padding: 2.5rem 2.2rem;
+  animation: fadeUp 0.6s ease;
+}
+.crear-card h1 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  color: #166D20;
+}
+.crear-card p {
+  text-align: center;
+  font-size: 0.95rem;
+  color: rgb(13.4351145038, 66.5648854962, 19.5419847328);
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.6rem;
+}
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+  color: #166D20;
+  font-weight: 600;
+}
+.form-group input[type=text],
+.form-group input[type=file] {
+  width: 100%;
+  padding: 0.85rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgb(88.1717557252, 221.3282442748, 103.4770992366);
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  background-color: #ffffff;
+}
+.form-group input[type=text]:focus,
+.form-group input[type=file]:focus {
+  outline: none;
+  border-color: #6BAC73;
+  box-shadow: 0 0 0 3px rgba(107, 172, 115, 0.25);
+}
+.form-group input[type=file] {
+  padding: 0.65rem;
+  background-color: rgb(251.7818181818, 244.8090909091, 234.6181818182);
+  cursor: pointer;
+}
+.form-group small {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: #777;
+}
+
+.preescucha {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.preescucha audio {
+  width: 100%;
+}
+
+.form-submit {
+  margin-top: 2rem;
+}
+.form-submit button {
+  background: #EBAF2B;
+  color: #166D20;
+  border: none;
+  border-radius: 30px;
+  padding: 0.9rem 1.6rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.form-submit button:hover {
+  transform: scale(1.03);
+  opacity: 0.95;
+}
+.form-submit button {
+  width: 100%;
+  font-size: 1rem;
+  padding: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.form-note {
+  margin-top: 1.2rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: #777;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 480px) {
+  .crear-card {
+    padding: 2rem 1.6rem;
+  }
+}
+.exito-card {
+  text-align: center;
+  gap: 1.2rem;
+}
+.exito-card .subtitle {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.qr-box img {
+  width: 180px;
+  height: 180px;
+  margin-bottom: 0.5rem;
+}
+.qr-box .qr-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.link-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.link-box input {
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #6bac73;
+  text-align: center;
+  font-size: 0.85rem;
+}
+.link-box button {
+  background: #6bac73;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.info-box {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.audio-player {
+  background: #F9ECD9;
+  border-radius: 22px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  padding: 2rem;
+  text-align: center;
+}
+.audio-player audio {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* =========================
+   BOTÓN PAGAR RECUERDO
+   ========================= */
+.btn-pagar {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #6BAC73, #166D20);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* Hover */
+.btn-pagar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(135deg, #7ecf8b, #1c8a2d);
+}
+
+/* Active (click) */
+.btn-pagar:active {
+  transform: scale(0.97);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* Disabled (si lo usás luego) */
+.btn-pagar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.recuerdo-body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #6BAC73, #166D20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.recuerdo-card {
+  background: #F9ECD9;
+  border-radius: 18px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+.recuerdo-card h1 {
+  color: #166D20;
+  margin-bottom: 0.5rem;
+}
+.recuerdo-card .subtitle {
+  font-size: 0.9rem;
+  margin-bottom: 1.2rem;
+  opacity: 0.85;
+}
+.recuerdo-card audio {
+  width: 100%;
+  margin: 1rem 0;
+}
+.recuerdo-card .nota {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+.recuerdo-card .estado {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+/*# sourceMappingURL=main.css.map */

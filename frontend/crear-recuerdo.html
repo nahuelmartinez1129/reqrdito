@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Crear recuerdo | ReQRdito</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body class="crear-body">
+
+  <div class="crear-card">
+
+    <h1>Crear tu recuerdo</h1>
+    <p>Subí un audio y transformalo en un QR eterno</p>
+
+    <form id="crearRecuerdoForm">
+
+      <div class="form-group">
+        <label for="nombre">Nombre del recuerdo</label>
+        <input
+          type="text"
+          id="nombre"
+          name="nombre"
+          placeholder="Ej: Para mamá ❤️"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="audio">Seleccionar audio</label>
+        <input
+          type="file"
+          id="audio"
+          name="audio"
+          accept="audio/*"
+          required
+        >
+        <small>Duración máxima recomendada: 2 minutos</small>
+      </div>
+
+
+      <div class="preescucha">
+        <p class="label">Pre-escucha del audio</p>
+        <audio id="previewAudio" controls></audio>
+        <small>
+            Podés escuchar tu audio antes de continuar al pago
+        </small>
+     </div>
+
+      <div class="form-submit">
+      <button type="submit">Continuar al pago</button>
+      </div>
+
+    </form>
+
+    <div class="form-note">
+      Tu audio será privado y accesible solo desde tu código QR
+    </div>
+
+    <p id="estado" style="margin-top:15px;"></p>
+
+  </div>
+
+<script>
+const form = document.getElementById("crearRecuerdoForm");
+const estado = document.getElementById("estado");
+
+const audioInput = document.getElementById("audio");
+const previewAudio = document.getElementById("previewAudio");
+
+audioInput.addEventListener("change", () => {
+  const file = audioInput.files[0];
+
+  if (!file) return;
+
+  const url = URL.createObjectURL(file);
+  previewAudio.src = url;
+  previewAudio.load();
+});
+
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const nombre = document.getElementById("nombre").value;
+  const audio = document.getElementById("audio").files[0];
+
+  if (!audio) {
+    estado.textContent = "⚠️ Seleccioná un audio";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("nombre", nombre);
+  formData.append("audio", audio);
+
+  try {
+    estado.textContent = "⏳ Creando recuerdo...";
+
+    const res = await fetch("http://localhost:5000/api/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.id) {
+      throw new Error("No se pudo crear el recuerdo");
+    }
+
+    // ✅ ACÁ termina este archivo
+  window.location.href =
+  `pago.html?id=${data.id}&audio=${encodeURIComponent(data.audioUrl)}`;
+
+
+
+  } catch (err) {
+    console.error(err);
+    estado.textContent = "❌ Error al crear el recuerdo";
+  }
+});
+</script>
+
+</body>
+</html>

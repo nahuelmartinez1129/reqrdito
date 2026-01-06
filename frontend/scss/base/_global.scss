@@ -1,0 +1,8 @@
+@use 'variables' as *;
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: $manteca;
+  color: $verde-oscuro;
+  line-height: 1.6;
+}

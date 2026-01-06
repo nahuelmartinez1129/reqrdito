@@ -1,0 +1,11 @@
+@use 'base/reset';
+@use 'base/variables';
+@use 'base/mixins';
+@use 'base/global';
+
+@use 'pages/index';
+@use 'pages/crear-recuerdo';
+@use 'pages/exito';
+@use 'pages/audio';
+@use "pages/pago";
+@use "pages/recuerdo";

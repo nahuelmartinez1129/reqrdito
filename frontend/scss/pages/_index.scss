@@ -1,0 +1,142 @@
+@use '../base/variables' as v;
+@use '../base/mixins' as m;
+
+/* =========================
+   HEADER / HERO
+========================= */
+
+header {
+  min-height: 90vh;
+  background: linear-gradient(
+    135deg,
+    v.$verde-claro,
+    v.$verde-oscuro
+  );
+  color: v.$manteca;
+  text-align: center;
+  padding: 4rem 1.5rem;
+
+  @include m.flex-center;
+  flex-direction: column;
+
+  h1 {
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    margin-bottom: 1.2rem;
+    max-width: 700px;
+  }
+
+  p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  a {
+    @include m.button-primary;
+    font-size: 1.05rem;
+    text-decoration: none;
+  }
+}
+
+/* =========================
+   SECCIONES GENERALES
+========================= */
+
+section {
+  padding: 4rem 1.5rem;
+  background-color: v.$manteca;
+  color: v.$negro;
+}
+
+/* =========================
+   TÍTULOS
+========================= */
+
+.section-title {
+  text-align: center;
+  font-size: 2.1rem;
+  margin-bottom: 3rem;
+  color: v.$verde-oscuro;
+}
+
+/* =========================
+   STEPS
+========================= */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.step {
+  @include m.card;
+  text-align: center;
+  padding: 2rem 1.5rem;
+
+  span {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    color: v.$verde-oscuro;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+}
+
+/* =========================
+   CTA FINAL
+========================= */
+
+.cta {
+  background: linear-gradient(
+    135deg,
+    v.$naranja,
+    v.$verde-claro
+  );
+  color: v.$blanco;
+  text-align: center;
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    margin-bottom: 1.5rem;
+    font-size: 1.05rem;
+  }
+
+  a {
+    @include m.button-primary;
+    background-color: v.$blanco;
+    color: v.$verde-oscuro;
+    text-decoration: none;
+
+    &:hover {
+      background-color: v.$manteca;
+    }
+  }
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+  background-color: v.$verde-oscuro;
+  color: v.$manteca;
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.85rem;
+}

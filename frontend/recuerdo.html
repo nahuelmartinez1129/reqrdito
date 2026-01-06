@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Un recuerdo para siempre | ReQRdito</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/main.css">
+</head>
+
+<body class="recuerdo-body">
+
+  <div class="recuerdo-card">
+
+    <h1 id="titulo">💚 Un recuerdo especial</h1>
+    <p class="subtitle">
+      Este mensaje fue creado para ser escuchado con el corazón
+    </p>
+
+    <audio id="audio" controls></audio>
+
+    <p class="nota">
+      Creado con <strong>ReQRdito</strong>
+    </p>
+
+    <p id="estado" class="estado"></p>
+
+  </div>
+
+<script>
+const estado = document.getElementById("estado");
+const titulo = document.getElementById("titulo");
+const audio = document.getElementById("audio");
+
+// obtener ID desde la URL (/r/:id)
+const id = window.location.pathname.split("/").pop();
+
+fetch(`/api/recuerdo/${id}`)
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      estado.textContent = "❌ Recuerdo no disponible";
+      return;
+    }
+
+    if (data.estado !== "activo") {
+      estado.textContent = "⏳ Este recuerdo aún no fue activado";
+      audio.style.display = "none";
+      return;
+    }
+
+    titulo.textContent = data.nombre;
+    audio.src = data.audio;
+  })
+  .catch(() => {
+    estado.textContent = "❌ Error al cargar el recuerdo";
+  });
+</script>
+
+</body>
+</html>
