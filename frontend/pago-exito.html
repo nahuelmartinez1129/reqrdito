@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Pago exitoso | ReQRdito</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/main.css?v=2026.01">
+</head>
+
+<body class="pago-exito-body">
+
+  <main class="pago-exito-card">
+
+    <div class="icon-success">
+      <i data-lucide="check-circle"></i>
+    </div>
+
+    <h1>Pago confirmado</h1>
+
+    <p class="mensaje-principal">
+      Tu recuerdo ya empezó a tomar forma 💚<br>
+      En segundos vas a poder escucharlo y compartirlo.
+    </p>
+
+    <div class="acciones">
+      <a id="verRecuerdo" class="btn-ver-recuerdo">
+        <i data-lucide="headphones"></i>
+        Ver mi recuerdo
+      </a>
+
+      <a href="mis-recuerdos.html" class="btn-secundario">
+        <i data-lucide="folder-heart"></i>
+        Ir a mis recuerdos
+      </a>
+    </div>
+
+    <p class="nota">
+      Si todavía no aparece, esperá unos segundos y volvé a intentar.<br>
+      Siempre lo vas a encontrar en <strong>Mis recuerdos</strong>.
+    </p>
+
+  </main>
+
+  <!-- LUCIDE -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    lucide.createIcons();
+
+    const params = new URLSearchParams(window.location.search);
+    const externalRef = params.get("external_reference");
+
+    const btn = document.getElementById("verRecuerdo");
+
+    if (externalRef && externalRef.startsWith("REQRDITO_")) {
+      const id = externalRef.replace("REQRDITO_", "");
+      btn.href = `recuerdo.html?id=${id}`;
+    } else {
+      btn.classList.add("disabled");
+      btn.innerHTML = "Recuerdo no disponible";
+      btn.removeAttribute("href");
+    }
+  </script>
+
+</body>
+</html>

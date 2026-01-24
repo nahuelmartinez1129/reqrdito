@@ -1,60 +1,70 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
 const { Payment } = require("mercadopago");
 const client = require("../config/mercadopago");
+const Recuerdo = require("../models/Recuerdo");
+const enviarEmail = require("../utils/enviarEmail");
 
 const router = express.Router();
-const DATA_PATH = path.join(__dirname, "../data/recuerdos.json");
+const payment = new Payment(client);
 
 router.post("/webhook", async (req, res) => {
   try {
-    if (req.body.type !== "payment") {
+    const paymentId = req.body?.data?.id;
+
+    if (!paymentId) {
       return res.sendStatus(200);
     }
 
-    const paymentId = req.body.data.id;
+    const info = await payment.get({ id: paymentId });
 
-    // 🔥 CONSULTAR EL PAGO REAL
-    const payment = new Payment(client);
-    const response = await payment.get({ id: paymentId });
-
-    const pago = response;
-
-    // Solo si está aprobado
-    if (pago.status !== "approved") {
+    if (info.status !== "approved") {
       return res.sendStatus(200);
     }
 
-    const recuerdoId = pago.metadata?.recuerdo_id;
+    const externalRef = info.external_reference;
 
-    if (!recuerdoId) {
-      console.log("Pago aprobado pero sin recuerdo_id");
+    if (!externalRef || !externalRef.startsWith("REQRDITO_")) {
+      console.warn("⚠️ External reference inválida:", externalRef);
       return res.sendStatus(200);
     }
 
-    const recuerdos = JSON.parse(fs.readFileSync(DATA_PATH));
-    const index = recuerdos.findIndex(r => r.id === recuerdoId);
+    const recuerdoId = externalRef.replace("REQRDITO_", "");
 
-    if (index === -1) {
-      console.log("Recuerdo no encontrado:", recuerdoId);
+    // 🔎 Buscar recuerdo por ID real
+    const recuerdo = await Recuerdo.findOne({ recuerdoId });
+
+
+    if (!recuerdo) {
+      console.error("❌ No se encontró el recuerdo:", recuerdoId);
       return res.sendStatus(200);
     }
 
-    recuerdos[index].estado = "activo";
-    recuerdos[index].pagado = true;
-    recuerdos[index].payment_id = paymentId;
+    // 🛑 Webhook duplicado
+    if (recuerdo.pagado) {
+      console.log("ℹ️ Webhook duplicado ignorado:", recuerdoId);
+      return res.sendStatus(200);
+    }
 
-    fs.writeFileSync(DATA_PATH, JSON.stringify(recuerdos, null, 2));
+    // ✅ Marcar pago
+    recuerdo.pagado = true;
+    recuerdo.payment_id = paymentId;
+    recuerdo.payerEmail = info.payer?.email || null;
 
-    console.log("✅ Recuerdo activado:", recuerdoId);
+    await recuerdo.save();
+
+    // 📧 Mail al dueño del recuerdo
+    await enviarEmail(recuerdo.userEmail, recuerdo.recuerdoId);
+
+
+    console.log("🟢 Pago confirmado:", recuerdo._id);
 
     res.sendStatus(200);
 
-  } catch (error) {
-    console.error("❌ Error en webhook:", error);
+  } catch (err) {
+    console.error("🔥 WEBHOOK ERROR:", err);
     res.sendStatus(500);
   }
 });
+
 
 module.exports = router;

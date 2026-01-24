@@ -1,59 +1,108 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Un recuerdo para siempre | ReQRdito</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/css/main.css">
+  <meta charset="UTF-8" />
+  <title>Mi Recuerdo | ReQRdito</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/main.css?v=2026" />
 </head>
 
 <body class="recuerdo-body">
 
-  <div class="recuerdo-card">
+  <div class="recuerdo-card" id="card">
+    <h1 id="titulo">⏳ Tu recuerdo se está preparando</h1>
 
-    <h1 id="titulo">💚 Un recuerdo especial</h1>
-    <p class="subtitle">
-      Este mensaje fue creado para ser escuchado con el corazón
+    <p class="subtitle" id="mensaje">
+      Estamos confirmando tu pago.<br>
+      Esto puede tardar unos segundos.
     </p>
 
-    <audio id="audio" controls></audio>
+    <div id="spinner" class="spinner"></div>
 
-    <p class="nota">
-      Creado con <strong>ReQRdito</strong>
-    </p>
 
-    <p id="estado" class="estado"></p>
+    <div id="contenido" class="contenido" style="display:none">
+      <img id="qrImg" alt="Código QR del recuerdo" />
 
+      <a id="descargarQr" class="btn-descargar-qr">
+        ⬇ Descargar QR
+      </a>
+
+      <div id="audioContainer"></div>
+    </div>
   </div>
 
 <script>
-const estado = document.getElementById("estado");
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
 const titulo = document.getElementById("titulo");
-const audio = document.getElementById("audio");
+const mensaje = document.getElementById("mensaje");
+const contenido = document.getElementById("contenido");
+const qrImg = document.getElementById("qrImg");
+const descargarQr = document.getElementById("descargarQr");
+const audioContainer = document.getElementById("audioContainer");
 
-// obtener ID desde la URL (/r/:id)
-const id = window.location.pathname.split("/").pop();
+if (!id) {
+  document.getElementById("card").innerHTML = `
+    <h1>❌ Recuerdo inválido</h1>
+    <p>No se pudo cargar este recuerdo.</p>
+  `;
+} else {
 
-fetch(`/api/recuerdo/${id}`)
-  .then(res => res.json())
-  .then(data => {
-    if (data.error) {
-      estado.textContent = "❌ Recuerdo no disponible";
-      return;
+  let intentos = 0;
+  const maxIntentos = 12; // ~36 segundos
+
+  const intervalo = setInterval(async () => {
+    intentos++;
+
+    try {
+      const res = await fetch(`https://api.reqrdito.com/api/recuerdo/${id}`);
+      const data = await res.json();
+
+      if (data.pagado) {
+        clearInterval(intervalo);
+        mostrarRecuerdo(data);
+        return;
+      }
+
+      // si tarda demasiado
+      if (intentos >= maxIntentos) {
+        clearInterval(intervalo);
+        titulo.textContent = "⏳ Seguimos preparando tu recuerdo";
+        mensaje.innerHTML = `
+          El pago fue recibido, pero la confirmación está demorando un poco.<br>
+          Podés volver más tarde o verlo desde <b>Mis recuerdos</b>.
+        `;
+      }
+
+    } catch (err) {
+      clearInterval(intervalo);
+      titulo.textContent = "❌ Error";
+      mensaje.textContent = "No se pudo cargar el recuerdo.";
     }
 
-    if (data.estado !== "activo") {
-      estado.textContent = "⏳ Este recuerdo aún no fue activado";
-      audio.style.display = "none";
-      return;
-    }
+  }, 3000);
+}
 
-    titulo.textContent = data.nombre;
-    audio.src = data.audio;
-  })
-  .catch(() => {
-    estado.textContent = "❌ Error al cargar el recuerdo";
-  });
+function mostrarRecuerdo(data) {
+  titulo.textContent = "🎧 Tu recuerdo está listo";
+  mensaje.textContent = "Este recuerdo fue creado especialmente para vos 💚";
+
+  document.getElementById("spinner").style.display = "none";
+
+
+  contenido.style.display = "block";
+
+  qrImg.src = `https://api.reqrdito.com${data.qrUrl}`;
+  descargarQr.href = `https://api.reqrdito.com/api/descargar-qr/${id}`;
+
+  const audio = document.createElement("audio");
+  audio.controls = true;
+  audio.src = `https://api.reqrdito.com${data.audioUrl}`;
+  audio.className = "recuerdo-audio";
+
+  audioContainer.appendChild(audio);
+}
 </script>
 
 </body>

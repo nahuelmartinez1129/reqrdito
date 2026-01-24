@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mis recuerdos | ReQRdito</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/main.css?v=2026" />
+</head>
+
+<body class="mis-recuerdos-body">
+
+  <header class="simple-header">
+    <h1>🎧 Mis recuerdos</h1>
+    <button id="logoutBtn" class="btn-link">Cerrar sesión</button>
+  </header>
+
+  <main class="mis-recuerdos-container" id="listaRecuerdos">
+    <p class="loading">Cargando tus recuerdos...</p>
+  </main>
+
+<script>
+const token = localStorage.getItem("authToken");
+const container = document.getElementById("listaRecuerdos");
+
+// 🔐 Protección de ruta
+if (!token) {
+  logout();
+}
+
+// 🚪 Logout centralizado
+function logout(msg) {
+  localStorage.removeItem("authToken");
+  if (msg) alert(msg);
+  window.location.href = "index.html";
+}
+
+// 📦 Obtener recuerdos
+fetch("https://api.reqrdito.com/api/mis-recuerdos", {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+})
+.then(res => {
+  if (res.status === 401) {
+    logout("Tu sesión expiró. Volvé a iniciar sesión.");
+    return;
+  }
+  return res.json();
+})
+.then(data => {
+  container.innerHTML = "";
+
+  // 🟡 Sin recuerdos
+  if (!data || !data.length) {
+    container.innerHTML = `
+      <p class="empty">
+        Todavía no tenés recuerdos 🎧<br>
+        Cuando completes un pago, aparecerán acá.
+      </p>
+    `;
+    return;
+  }
+
+  // 🟢 Render recuerdos
+  data.forEach(r => {
+    const card = document.createElement("div");
+    card.className = "recuerdo-item";
+
+    card.innerHTML = `
+      <h3>${r.nombre || "Recuerdo sin nombre"}</h3>
+
+      <audio controls src="https://api.reqrdito.com${r.audioUrl}"></audio>
+
+      <img
+        src="https://api.reqrdito.com${r.qrUrl || r.qrPath}"
+        alt="QR del recuerdo"
+      >
+
+      <a
+        href="https://api.reqrdito.com/api/descargar-qr/${r._id}"
+        class="btn-primary"
+      >
+        Descargar QR
+      </a>
+    `;
+
+    container.appendChild(card);
+  });
+})
+.catch(() => {
+  container.innerHTML = `
+    <p class="error">
+      ❌ Ocurrió un error cargando tus recuerdos.
+    </p>
+  `;
+});
+
+// 🚪 Logout manual
+document.getElementById("logoutBtn").onclick = () => {
+  logout("Cerraste sesión correctamente.");
+};
+</script>
+
+
+<script src="js/auth-utils.js"></script>
+
+</body>
+</html>

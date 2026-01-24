@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Pago | ReQRdito</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/main.css?v=2026.04" />
 </head>
 
 <body class="crear-body">
@@ -13,83 +13,145 @@
 
     <h1>Confirmar tu recuerdo</h1>
     <p class="subtitle">
-      Estás a un paso de crear un recuerdo único y eterno 💚
+      Estás a un paso de crear un recuerdo único y eterno
     </p>
 
-    <!-- 🧾 RESUMEN DEL PRODUCTO -->
+    <!-- 🧾 RESUMEN -->
     <div class="producto-resumen">
-      <h3>🎧 Recuerdo en QR</h3>
+      <h3>
+        <i data-lucide="headphones"></i>
+        Recuerdo en QR
+      </h3>
       <ul>
-        <li>✔ Audio privado</li>
-        <li>✔ Código QR único</li>
-        <li>✔ Acceso permanente</li>
-        <li>✔ Ideal para regalos y llaveros</li>
+        <li>
+          <i data-lucide="check-circle"></i>
+          Audio privado
+        </li>
+        <li>
+          <i data-lucide="qr-code"></i>
+          Código QR único
+        </li>
+        <li>
+          <i data-lucide="infinity"></i>
+          Acceso permanente
+        </li>
+        <li>
+          <i data-lucide="gift"></i>
+          Ideal para regalos y llaveros
+        </li>
       </ul>
     </div>
 
     <!-- 💰 PRECIO -->
     <div class="precio-box">
       <span>Total</span>
-      <strong>$1.000 ARS</strong>
+      <strong>$6.900 ARS</strong>
     </div>
 
     <!-- 🔐 SEGURIDAD -->
     <div class="seguridad">
-      🔒 Pago seguro procesado por Mercado Pago
+      <i data-lucide="lock"></i>
+      Pago seguro procesado por Mercado Pago
     </div>
 
     <!-- 💳 BOTÓN -->
     <button id="pagarBtn" class="btn-pagar">
-      💳 Pagar recuerdo
+      <i data-lucide="credit-card"></i>
+      Pagar recuerdo
     </button>
 
     <p id="estado" style="margin-top:15px;"></p>
 
   </div>
 
-<script>
-/* =========================
-   PAGO CON MERCADO PAGO
-   ========================= */
+  <!-- 🔒 MODAL SESIÓN EXPIRADA -->
+  <div id="sessionModal" class="session-modal oculto">
+    <div class="session-card">
+      <h2>
+        <i data-lucide="shield-alert"></i>
+        Sesión expirada
+      </h2>
+      <p>
+        Por seguridad, tu sesión finalizó.<br>
+        Volvé a iniciar para continuar.
+      </p>
+      <button id="sessionBtn" class="btn-primary">
+        Volver al inicio
+      </button>
+    </div>
+  </div>
 
-const estado = document.getElementById("estado");
-const pagarBtn = document.getElementById("pagarBtn");
+  <!-- AUTH UTILS -->
+  <script src="js/auth-utils.js?v=2"></script>
 
-// obtener id del recuerdo desde la URL
-const params = new URLSearchParams(window.location.search);
-const recuerdoId = params.get("id");
+  <!-- LUCIDE -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-pagarBtn.addEventListener("click", async () => {
-  estado.textContent = "⏳ Redirigiendo a Mercado Pago...";
-  pagarBtn.disabled = true;
+  <!-- SCRIPT -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
 
-  try {
-    const res = await fetch("http://localhost:5000/api/crear-preferencia", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        titulo: "Recuerdo en QR",
-        recuerdoId
-      })
+      const estado = document.getElementById("estado");
+      const pagarBtn = document.getElementById("pagarBtn");
+
+      // 🔐 Validar sesión
+      const token = checkSession();
+
+      // ⏳ Logout automático (5 minutos)
+      setTimeout(() => {
+        logout("Por seguridad, tu sesión expiró.");
+      }, 5 * 60 * 1000);
+
+      // 📦 Obtener ID del recuerdo
+      const params = new URLSearchParams(window.location.search);
+      const recuerdoId = params.get("id");
+
+      if (!recuerdoId) {
+        estado.textContent = "❌ No se encontró el recuerdo";
+        pagarBtn.disabled = true;
+      }
+
+      // 💳 Pagar
+      pagarBtn.addEventListener("click", async () => {
+        estado.textContent = "Redirigiendo a Mercado Pago...";
+        pagarBtn.disabled = true;
+
+        try {
+          const res = await fetch("https://api.reqrdito.com/api/crear-preferencia", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ recuerdoId })
+          });
+
+          if (res.status === 401) {
+            logout("Tu sesión expiró.");
+            return;
+          }
+
+          const data = await res.json();
+
+          if (!res.ok || !data.init_point) {
+            throw new Error("Error creando pago");
+          }
+
+          window.location.href = data.init_point;
+
+        } catch (err) {
+          console.error(err);
+          estado.textContent = "❌ Error iniciando el pago";
+          pagarBtn.disabled = false;
+          pagarBtn.innerHTML = '<i data-lucide="credit-card"></i> Pagar recuerdo';
+          lucide.createIcons();
+        }
+      });
+
+      // Inicializar íconos
+      lucide.createIcons();
+
     });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.init_point) {
-      throw new Error("Error creando pago");
-    }
-
-    // 🔥 Redirección real al checkout
-    window.location.href = data.init_point;
-
-  } catch (err) {
-    console.error(err);
-    estado.textContent = "❌ Error iniciando el pago";
-    pagarBtn.disabled = false;
-    pagarBtn.textContent = "💳 Pagar recuerdo";
-  }
-});
-</script>
+  </script>
 
 </body>
 </html>

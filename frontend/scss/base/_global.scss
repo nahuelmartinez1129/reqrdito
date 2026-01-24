@@ -1,8 +1,40 @@
 @use 'variables' as *;
-
+@use '../base/variables' as v;
 body {
   font-family: 'Segoe UI', sans-serif;
   background: $manteca;
   color: $verde-oscuro;
   line-height: 1.6;
+}
+
+/* =========================
+   ICONOS (GLOBAL)
+========================= */
+
+i[data-lucide] {
+  width: 36px;
+  height: 36px;
+  stroke-width: 1.8;
+  color: v.$verde-oscuro;
+  display: inline-block;
+}
+
+/* Iconos dentro de cards */
+.use i,
+.step i {
+  margin-bottom: 1rem;
+}
+
+/* Hover premium */
+.use,
+.step {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+
+    i {
+      color: v.$naranja;
+    }
+  }
 }

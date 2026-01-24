@@ -1,0 +1,46 @@
+/* =========================
+   MODAL LOGIN
+========================= */
+@use '../base/variables' as v;
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal.oculto {
+  display: none;
+}
+
+.modal-card {
+  background: v.$manteca;
+  padding: 2rem;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,.2);
+
+  h2 {
+    color: v.$verde-oscuro;
+    margin-bottom: .5rem;
+  }
+
+  p {
+    font-size: .95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-bottom: 1.2rem;
+    font-size: 1rem;
+  }
+}

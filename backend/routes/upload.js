@@ -1,67 +1,104 @@
 const express = require("express");
 const multer = require("multer");
-const { v4: uuidv4 } = require("uuid");
-const fs = require("fs");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 const QRCode = require("qrcode");
+const Recuerdo = require("../models/Recuerdo");
+const auth = require("../middleware/auth");
 
 const router = express.Router();
 
-const DATA_PATH = path.join(__dirname, "../data/recuerdos.json");
-
+/* =========================
+   CONFIG MULTER
+   Compatible desktop + mobile
+========================= */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/audio");
+    cb(null, path.join(__dirname, "../uploads/audio"));
   },
   filename: (req, file, cb) => {
-    const id = uuidv4();
-    cb(null, `${id}${path.extname(file.originalname)}`);
+    const ext = path.extname(file.originalname) || ".mp3";
+    cb(null, `${uuidv4()}${ext}`);
   }
 });
 
-const upload = multer({ storage });
-
-router.post("/upload", upload.single("audio"), async (req, res) => {
-  try {
-    const nombre = req.body.nombre;
-    if (!req.file || !nombre) {
-      return res.status(400).json({ error: "Datos incompletos" });
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10 MB
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype && file.mimetype.startsWith("audio/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Solo se permiten archivos de audio"));
     }
-
-    const id = req.file.filename.split(".")[0];
-
-    // 👉 URL pública del recuerdo
-    const urlRecuerdo = `http://localhost:5000/r/${id}`;
-
-    // 👉 generar QR
-    const qrPath = `uploads/qr/${id}.png`;
-    await QRCode.toFile(qrPath, urlRecuerdo);
-
-    const nuevoRecuerdo = {
-      id,
-      nombre,
-      archivo: req.file.filename,
-      qr: `${id}.png`,
-      estado: "pendiente_pago",
-      creado: new Date().toISOString()
-    };
-
-    const recuerdos = JSON.parse(fs.readFileSync(DATA_PATH));
-    recuerdos.push(nuevoRecuerdo);
-    fs.writeFileSync(DATA_PATH, JSON.stringify(recuerdos, null, 2));
-
-    // ✅ ACÁ ESTÁ LO NUEVO
-    res.json({
-      id,
-      audioUrl: `/audio/${req.file.filename}`,
-      qr: `/uploads/qr/${id}.png`,
-      url: urlRecuerdo
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al generar el recuerdo" });
   }
 });
+
+/* =========================
+   POST /api/upload
+   Protegida con JWT
+========================= */
+router.post(
+  "/upload",
+  auth,
+  upload.single("audio"),
+  async (req, res) => {
+    try {
+      const { nombre } = req.body;
+
+      if (!nombre) {
+        return res.status(400).json({ error: "Falta el nombre del recuerdo" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ error: "No se subió ningún audio" });
+      }
+
+      // 🔎 LOG (útil para debug mobile)
+      console.log("📥 AUDIO SUBIDO:", {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        sizeMB: (req.file.size / 1024 / 1024).toFixed(2)
+      });
+
+      const recuerdoId = uuidv4();
+
+      const audioUrl = `/audio/${req.file.filename}`;
+      const recuerdoUrl = `https://reqrdito.com/recuerdo.html?id=${recuerdoId}`;
+
+      // 📦 Generar QR
+      const qrFileName = `${recuerdoId}.png`;
+      const qrPath = path.join(__dirname, "../uploads/qr", qrFileName);
+
+      await QRCode.toFile(qrPath, recuerdoUrl);
+
+      const qrUrl = `/qr/${qrFileName}`;
+
+      // 🧠 Guardar recuerdo
+      await Recuerdo.create({
+        recuerdoId,
+        nombre,
+        audioUrl,
+        qrUrl,
+        pagado: false,
+        userEmail: req.user.email
+      });
+
+      // ✅ Respuesta
+      res.json({
+        id: recuerdoId,
+        audioUrl
+      });
+
+    } catch (error) {
+      console.error("❌ UPLOAD ERROR:", error.message || error);
+      res.status(500).json({
+        error: "Error al crear el recuerdo"
+      });
+    }
+  }
+);
 
 module.exports = router;

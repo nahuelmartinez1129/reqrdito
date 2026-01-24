@@ -106,6 +106,114 @@
   color: #777;
 }
 
+/* =========================
+   Botón CONTINUAR
+   ========================= */
+#btnContinuar {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.9rem 1.2rem;
+  background: #166D20;          /* verde fuerte */
+  color: #F9ECD9;               /* manteca */
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: 
+    background 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  box-shadow: 0 10px 25px rgba(22, 109, 32, 0.25);
+}
+
+/* Hover */
+#btnContinuar:hover {
+  background: #1f8a2f;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(22, 109, 32, 0.35);
+}
+
+/* Click */
+#btnContinuar:active {
+  transform: translateY(0);
+  box-shadow: 0 8px 18px rgba(22, 109, 32, 0.3);
+}
+
+/* Disabled */
+#btnContinuar:disabled {
+  background: #9bbfa5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  #btnContinuar {
+    font-size: 0.95rem;
+    padding: 0.85rem;
+  }
+}
+
+
+
+/* =========================
+   LOGIN GOOGLE POPUP
+   ========================= */
+
+.login-overlay {
+  position: fixed;
+  inset: 0; /* top:0 right:0 bottom:0 left:0 */
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.login-overlay.oculto {
+  display: none;
+}
+
+.login-card {
+  background: #F9ECD9; /* manteca */
+  padding: 2rem;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  animation: popupIn 0.25s ease;
+}
+
+.login-card h2 {
+  margin-bottom: 0.5rem;
+  color: #166D20;
+}
+
+.login-card p {
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.login-card .btn-link {
+  margin-top: 1rem;
+}
+
+/* 🎬 Animación */
+@keyframes popupIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
 @keyframes fadeUp {
   from {
     opacity: 0;
