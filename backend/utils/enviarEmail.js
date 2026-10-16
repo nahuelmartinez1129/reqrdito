@@ -1,4 +1,4 @@
-const { sendEmail } = require("../services/emailService");
+const { sendEmail } = require("../services/emailService.js");
 
 /**
  * Envía el email de recuerdo creado

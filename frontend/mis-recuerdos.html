@@ -1,108 +1,276 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Mis recuerdos | ReQRdito</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="css/main.css?v=2026" />
+<meta charset="UTF-8" />
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+
+<link rel="apple-touch-icon" href="/img/favicon-64x64.png">
+
+<link rel="manifest" href="/manifest.json">
+
+<meta name="theme-color" content="#6BAC73">
+<title>Mis recuerdos | ReQRdito</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="stylesheet" href="css/main.css?v=2026.300" />
 </head>
 
 <body class="mis-recuerdos-body">
 
-  <header class="simple-header">
-    <h1>🎧 Mis recuerdos</h1>
-    <button id="logoutBtn" class="btn-link">Cerrar sesión</button>
-  </header>
+<header class="simple-header">
+<h1>
+  <i data-lucide="headphones"></i>
+  Mis recuerdos
+</h1>
+<div id="googleLogin"></div>
+</header>
 
-  <main class="mis-recuerdos-container" id="listaRecuerdos">
-    <p class="loading">Cargando tus recuerdos...</p>
-  </main>
+<div class="tabs-recuerdos">
+
+  <button class="tab-btn active" id="tabRecuerdos">
+    <i data-lucide="gift"></i>
+    Mis recuerdos
+  </button>
+
+  <button class="tab-btn" id="tabEventos">
+    <i data-lucide="mic"></i>
+    Eventos
+  </button>
+
+</div>
+
+<main class="mis-recuerdos-container" id="listaRecuerdos"></main>
+
+<div id="toast"></div>
+
+<script src="https://accounts.google.com/gsi/client"></script>
+<script src="js/auth-init.js?v=2026.1400"></script>
 
 <script>
-const token = localStorage.getItem("authToken");
-const container = document.getElementById("listaRecuerdos");
 
-// 🔐 Protección de ruta
-if (!token) {
-  logout();
+let recuerdoEditar = null;
+let recuerdoEliminar = null;
+
+// 🔥 FIX GLOBAL URL
+const fixUrl = (url) => {
+  if (!url) return "";
+  return url.startsWith("http")
+    ? url
+    : `https://api.reqrdito.com${url}`;
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+
+auth.initHeader("googleLogin");
+
+if(auth.isLogged()){
+cargarRecuerdos();
+}else{
+alert("Iniciá sesión");
 }
 
-// 🚪 Logout centralizado
-function logout(msg) {
-  localStorage.removeItem("authToken");
-  if (msg) alert(msg);
-  window.location.href = "index.html";
-}
+lucide.createIcons();
 
-// 📦 Obtener recuerdos
-fetch("https://api.reqrdito.com/api/mis-recuerdos", {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-})
-.then(res => {
-  if (res.status === 401) {
-    logout("Tu sesión expiró. Volvé a iniciar sesión.");
-    return;
-  }
-  return res.json();
-})
-.then(data => {
-  container.innerHTML = "";
-
-  // 🟡 Sin recuerdos
-  if (!data || !data.length) {
-    container.innerHTML = `
-      <p class="empty">
-        Todavía no tenés recuerdos 🎧<br>
-        Cuando completes un pago, aparecerán acá.
-      </p>
-    `;
-    return;
-  }
-
-  // 🟢 Render recuerdos
-  data.forEach(r => {
-    const card = document.createElement("div");
-    card.className = "recuerdo-item";
-
-    card.innerHTML = `
-      <h3>${r.nombre || "Recuerdo sin nombre"}</h3>
-
-      <audio controls src="https://api.reqrdito.com${r.audioUrl}"></audio>
-
-      <img
-        src="https://api.reqrdito.com${r.qrUrl || r.qrPath}"
-        alt="QR del recuerdo"
-      >
-
-      <a
-        href="https://api.reqrdito.com/api/descargar-qr/${r._id}"
-        class="btn-primary"
-      >
-        Descargar QR
-      </a>
-    `;
-
-    container.appendChild(card);
-  });
-})
-.catch(() => {
-  container.innerHTML = `
-    <p class="error">
-      ❌ Ocurrió un error cargando tus recuerdos.
-    </p>
-  `;
 });
 
-// 🚪 Logout manual
-document.getElementById("logoutBtn").onclick = () => {
-  logout("Cerraste sesión correctamente.");
+function showToast(msg){
+const toast=document.getElementById("toast");
+toast.textContent=msg;
+toast.classList.add("show");
+setTimeout(()=>toast.classList.remove("show"),3000);
+}
+
+function cargarRecuerdos(){
+
+const token=localStorage.getItem("authToken");
+const container=document.getElementById("listaRecuerdos");
+
+fetch("https://api.reqrdito.com/api/mis-recuerdos",{
+headers:{Authorization:`Bearer ${token}`}
+})
+.then(res=>res.json())
+.then(data=>{
+
+const eventos = data.filter(r => r.pack === "evento");
+const normales = data.filter(r => r.pack !== "evento");
+
+function renderLista(lista){
+container.innerHTML="";
+
+lista.forEach(r=>{
+
+const card=document.createElement("article");
+card.className="recuerdo-item fade";
+
+const fecha=r.createdAt
+?new Date(r.createdAt).toLocaleDateString("es-AR")
+:"";
+
+let audiosHtml="";
+
+// 🔥 SOPORTA EVENTOS + NORMALES
+if(Array.isArray(r.audios) && r.audios.length){
+audiosHtml = r.audios.map((audio,i)=>`
+<div class="recuerdo-audio">
+<span class="audio-label">Audio ${i+1}</span>
+<audio controls src="${fixUrl(audio.url)}"></audio>
+</div>
+`).join("");
+}
+
+// 🔥 EVENTOS fallback (por si viene distinto)
+if(!audiosHtml && r.audioUrl){
+audiosHtml = `
+<div class="recuerdo-audio">
+<span class="audio-label">Audio</span>
+<audio controls src="${fixUrl(r.audioUrl)}"></audio>
+</div>
+`;
+}
+
+const linkRecuerdo=`https://www.reqrdito.com/recuerdo.html?id=${r.recuerdoId}`;
+
+card.innerHTML=`
+
+<div class="recuerdo-header">
+<h3>${r.nombre || "Recuerdo sin nombre"}</h3>
+${fecha ? `<span class="recuerdo-fecha">${fecha}</span>` : ""}
+</div>
+
+<div class="recuerdo-audios">
+${audiosHtml}
+</div>
+
+<div class="recuerdo-footer">
+
+<img src="${fixUrl(r.qrUrl)}">
+
+<div class="recuerdo-actions">
+
+<a href="https://api.reqrdito.com/api/descargar-qr/${r.recuerdoId}" class="btn-primary">
+<i data-lucide="download"></i>
+</a>
+
+<button class="action-btn copy" onclick="copiarLink('${linkRecuerdo}')">
+<i data-lucide="link"></i>
+</button>
+
+<button class="action-btn edit" onclick="abrirEditarModal('${r.recuerdoId}','${r.nombre || ""}')">
+<i data-lucide="edit"></i>
+</button>
+
+<button class="action-btn mail" onclick="reenviarCorreo('${r.recuerdoId}')">
+<i data-lucide="mail"></i>
+</button>
+
+<button class="action-btn delete" onclick="abrirEliminarModal('${r.recuerdoId}')">
+<i data-lucide="trash"></i>
+</button>
+
+</div>
+</div>
+`;
+
+container.appendChild(card);
+
+});
+
+lucide.createIcons();
+}
+
+// TABS
+document.getElementById("tabRecuerdos").onclick=()=>{
+renderLista(normales);
+setActive("tabRecuerdos");
 };
+
+document.getElementById("tabEventos").onclick=()=>{
+renderLista(eventos);
+setActive("tabEventos");
+};
+
+function setActive(id){
+document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+// inicial
+renderLista(normales);
+
+});
+}
+
+function copiarLink(link){
+navigator.clipboard.writeText(link);
+showToast("Link copiado ✔");
+}
+
+function abrirEditarModal(id,nombre){
+alert("Editar: " + nombre);
+}
+
+function abrirEliminarModal(id){
+if(confirm("Eliminar recuerdo?")){
+eliminarRecuerdo(id);
+}
+}
+
+async function eliminarRecuerdo(id){
+const token=localStorage.getItem("authToken");
+
+await fetch(`https://api.reqrdito.com/api/recuerdos/${id}`,{
+method:"DELETE",
+headers:{Authorization:`Bearer ${token}`}
+});
+
+showToast("Eliminado");
+cargarRecuerdos();
+}
+
+async function reenviarCorreo(id){
+
+const token = localStorage.getItem("authToken");
+
+try{
+
+const res = await fetch(
+`https://api.reqrdito.com/api/recuerdos/${id}/reenviar-mail`,
+{
+method:"POST",
+headers:{
+Authorization:`Bearer ${token}`
+}
+});
+
+const data = await res.json();
+
+if(!res.ok){
+throw new Error(data.error || "Error reenviando");
+}
+
+showToast("Correo reenviado ✔");
+
+}catch(err){
+
+console.error(err);
+showToast("No se pudo reenviar el correo");
+
+}
+
+}
+
 </script>
 
+<script src="https://unpkg.com/lucide@latest"></script>
 
-<script src="js/auth-utils.js"></script>
-
+<div id="sessionModal" class="session-modal">
+  <div class="session-modal-content">
+    <div class="session-icon">⏱</div>
+    <h2>Sesión expirada</h2>
+    <p>Tu sesión terminó por seguridad.<br>Volvé a iniciar sesión.</p>
+    <button id="sessionBtn">Entendido</button>
+  </div>
+</div>
 </body>
 </html>

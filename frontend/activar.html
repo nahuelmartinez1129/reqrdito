@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Activar llavero | Reqrdito</title>
+
+<link rel="stylesheet" href="css/main.css?v=2026.01">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+
+<link rel="apple-touch-icon" href="/img/favicon-64x64.png">
+
+<link rel="manifest" href="/manifest.json">
+
+<meta name="theme-color" content="#6BAC73">
+<!-- Google Identity -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+</head>
+
+
+<body class="body-activar">
+
+<div class="activar-card">
+
+<div class="logo-reqrdito">
+Reqrdito
+</div>
+
+<h2 class="activar-title">
+Activá tu llavero
+</h2>
+
+<p class="activar-text">
+Escaneaste un llavero Reqrdito.  
+Iniciá sesión para crear el recuerdo que quedará guardado en tu QR.
+</p>
+
+<div id="estado"></div>
+
+<!-- BOTON GOOGLE -->
+<div id="g_id_onload"
+ data-client_id="892308582344-6ms0bnobi61nk5vabum1bf94her4p3gu.apps.googleusercontent.com"
+ data-callback="handleCredentialResponse"
+ data-auto_prompt="false">
+</div>
+
+<div class="g_id_signin"
+ data-type="standard"
+ data-size="large"
+ data-theme="outline"
+ data-text="sign_in_with"
+ data-shape="rectangular">
+</div>
+
+<div class="activar-footer">
+Tus recuerdos siempre estarán disponibles en tu cuenta.
+</div>
+
+</div>
+
+
+<script>
+
+// ===============================
+// 🔥 CAPTURAR CÓDIGO QR
+// ===============================
+const params = new URLSearchParams(window.location.search);
+
+// 👉 soporta QR nuevos y viejos
+const key = params.get("key") || params.get("codigo");
+
+const estado = document.getElementById("estado");
+
+// validación inicial
+if (!key) {
+  estado.innerHTML = "QR inválido";
+  console.error("No hay código en la URL");
+}
+
+// ===============================
+// 🔐 LOGIN GOOGLE + ACTIVACIÓN
+// ===============================
+async function handleCredentialResponse(response) {
+
+try{
+
+// LOGIN
+const login = await fetch("https://api.reqrdito.com/api/auth/google",{
+
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body: JSON.stringify({
+credential: response.credential
+})
+
+});
+
+const loginData = await login.json();
+
+if(!loginData.token){
+estado.innerHTML = "Error iniciando sesión";
+return;
+}
+
+localStorage.setItem("token", loginData.token);
+
+
+// 🔥 ACTIVAR LLAVERO
+const res = await fetch(`https://api.reqrdito.com/api/keychain/activar?key=${key}`);
+const data = await res.json();
+
+if(!data.success){
+estado.innerHTML = "Llavero inválido";
+return;
+}
+
+
+// ===============================
+// 🔁 SI YA ESTÁ USADO
+// ===============================
+if(data.usado && data.recuerdoId){
+
+window.location.href = `/recuerdo.html?id=${data.recuerdoId}`;
+return;
+
+}
+
+
+// ===============================
+// ✍️ CREAR RECUERDO
+// ===============================
+window.location.href =
+`/crear-recuerdo.html?key=${key}&pack=${data.pack}`;
+
+
+}catch(err){
+
+console.error(err);
+estado.innerHTML = "Error iniciando sesión";
+
+}
+
+}
+
+</script>
+</body>
+
+</html>

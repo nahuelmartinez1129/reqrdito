@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+
+<link rel="apple-touch-icon" href="/img/favicon-64x64.png">
+
+<link rel="manifest" href="/manifest.json">
+
+<meta name="theme-color" content="#6BAC73">
+<title>Tu Recuerdo | ReQRdito</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="css/main.css?v=2026.02">
+
+</head>
+
+<body class="audio-body">
+
+<div class="audio-card">
+
+<h1 id="titulo">🎧 Cargando recuerdo...</h1>
+
+<p id="mensaje" class="audio-subtitle">
+Estamos preparando tu audio.
+</p>
+
+<div class="spinner" id="spinner"></div>
+
+<div id="audioContainer" class="audio-container"></div>
+
+</div>
+
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const key = params.get("key");
+
+const titulo = document.getElementById("titulo");
+const mensaje = document.getElementById("mensaje");
+const spinner = document.getElementById("spinner");
+const audioContainer = document.getElementById("audioContainer");
+
+async function cargarAudio(){
+
+if(!key){
+
+titulo.textContent = "❌ Llavero inválido";
+mensaje.textContent = "Este QR no es válido.";
+spinner.style.display = "none";
+return;
+
+}
+
+try{
+
+const res = await fetch(`https://api.reqrdito.com/api/keychain/${key}`);
+const data = await res.json();
+
+if(!data || !data.audioUrl){
+
+titulo.textContent = "🔒 Llavero sin activar";
+mensaje.textContent = "Este llavero aún no tiene audio cargado.";
+spinner.style.display = "none";
+return;
+
+}
+
+spinner.style.display = "none";
+
+titulo.textContent = "💚 Tu recuerdo está listo";
+mensaje.textContent = "Reproducí tu audio cuando quieras";
+
+const audio = document.createElement("audio");
+audio.controls = true;
+audio.src = `https://api.reqrdito.com${data.audioUrl}`;
+audio.className = "audio-player";
+
+audioContainer.appendChild(audio);
+
+}catch(err){
+
+titulo.textContent = "❌ Error";
+mensaje.textContent = "No se pudo cargar el audio.";
+
+}
+
+}
+
+cargarAudio();
+
+</script>
+
+</body>
+</html>

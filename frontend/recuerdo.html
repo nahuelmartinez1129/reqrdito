@@ -2,9 +2,17 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+
+<link rel="apple-touch-icon" href="/img/favicon-64x64.png">
+
+<link rel="manifest" href="/manifest.json">
+
+<meta name="theme-color" content="#6BAC73">
   <title>Mi Recuerdo | ReQRdito</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="css/main.css?v=2026" />
+  <link rel="stylesheet" href="css/main.css?v=2026.01" />
 </head>
 
 <body class="recuerdo-body">
@@ -19,13 +27,10 @@
 
     <div id="spinner" class="spinner"></div>
 
-
     <div id="contenido" class="contenido" style="display:none">
       <img id="qrImg" alt="Código QR del recuerdo" />
 
-      <a id="descargarQr" class="btn-descargar-qr">
-        ⬇ Descargar QR
-      </a>
+      
 
       <div id="audioContainer"></div>
     </div>
@@ -33,13 +38,14 @@
 
 <script>
 const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
+
+const id = params.get("id") || params.get("key");
+const tipo = params.get("tipo"); // 🔥 NUEVO
 
 const titulo = document.getElementById("titulo");
 const mensaje = document.getElementById("mensaje");
 const contenido = document.getElementById("contenido");
 const qrImg = document.getElementById("qrImg");
-const descargarQr = document.getElementById("descargarQr");
 const audioContainer = document.getElementById("audioContainer");
 
 if (!id) {
@@ -49,57 +55,123 @@ if (!id) {
   `;
 } else {
 
-  let intentos = 0;
-  const maxIntentos = 12; // ~36 segundos
+  // 🔥 =========================
+  // 🔥 CASO EVENTO (NUEVO)
+  // 🔥 =========================
 
-  const intervalo = setInterval(async () => {
-    intentos++;
+  if (tipo === "evento") {
 
-    try {
-      const res = await fetch(`https://api.reqrdito.com/api/recuerdo/${id}`);
-      const data = await res.json();
+    cargarEvento();
 
-      if (data.pagado) {
+  } else {
+
+    // 🔵 FLUJO ORIGINAL (NO TOCADO)
+    let intentos = 0;
+    const maxIntentos = 12;
+
+    const intervalo = setInterval(async () => {
+      intentos++;
+
+      try {
+        const res = await fetch(`https://api.reqrdito.com/api/recuerdo/${id}`);
+        const data = await res.json();
+
+        if (data.pagado) {
+          clearInterval(intervalo);
+          mostrarRecuerdo(data);
+          return;
+        }
+
+        if (intentos >= maxIntentos) {
+          clearInterval(intervalo);
+          titulo.textContent = "⏳ Seguimos preparando tu recuerdo";
+          mensaje.innerHTML = `
+            El pago fue recibido, pero la confirmación está demorando un poco.<br>
+            Podés volver más tarde o verlo desde <b>Mis recuerdos</b>.
+          `;
+        }
+
+      } catch (err) {
         clearInterval(intervalo);
-        mostrarRecuerdo(data);
-        return;
+        titulo.textContent = "❌ Error";
+        mensaje.textContent = "No se pudo cargar el recuerdo.";
       }
 
-      // si tarda demasiado
-      if (intentos >= maxIntentos) {
-        clearInterval(intervalo);
-        titulo.textContent = "⏳ Seguimos preparando tu recuerdo";
-        mensaje.innerHTML = `
-          El pago fue recibido, pero la confirmación está demorando un poco.<br>
-          Podés volver más tarde o verlo desde <b>Mis recuerdos</b>.
-        `;
-      }
-
-    } catch (err) {
-      clearInterval(intervalo);
-      titulo.textContent = "❌ Error";
-      mensaje.textContent = "No se pudo cargar el recuerdo.";
-    }
-
-  }, 3000);
+    }, 3000);
+  }
 }
 
+/* =========================
+   🔥 NUEVO: EVENTOS
+========================= */
+async function cargarEvento() {
+
+  try {
+
+    const res = await fetch(`https://api.reqrdito.com/events/audio-data/${id}`);
+    const data = await res.json();
+
+    mostrarEvento(data);
+
+  } catch (err) {
+    console.error(err);
+    titulo.textContent = "❌ Error";
+    mensaje.textContent = "No se pudo cargar el recuerdo.";
+  }
+}
+
+function mostrarEvento(data) {
+
+  titulo.textContent = "🎧 Tu recuerdo está listo";
+  mensaje.textContent = data.eventName
+    ? `Recuerdo del evento: ${data.eventName}`
+    : "Este recuerdo fue creado para vos 💚";
+
+  document.getElementById("spinner").style.display = "none";
+  contenido.style.display = "block";
+
+  // ❌ eventos no tienen QR descargable por ahora
+  qrImg.style.display = "none";
+  descargarQr.style.display = "none";
+
+  const audio = document.createElement("audio");
+  audio.controls = true;
+  audio.src = data.file;
+  audio.className = "recuerdo-audio";
+
+  audioContainer.appendChild(audio);
+}
+
+/* =========================
+   ORIGINAL (NO TOCADO)
+========================= */
 function mostrarRecuerdo(data) {
   titulo.textContent = "🎧 Tu recuerdo está listo";
   mensaje.textContent = "Este recuerdo fue creado especialmente para vos 💚";
 
   document.getElementById("spinner").style.display = "none";
-
-
   contenido.style.display = "block";
 
   qrImg.src = `https://api.reqrdito.com${data.qrUrl}`;
-  descargarQr.href = `https://api.reqrdito.com/api/descargar-qr/${id}`;
+  
+
+  let index = 0;
+  const audios = data.audios?.length
+    ? data.audios.sort((a,b)=>a.orden-b.orden).map(a => a.url)
+    : [data.audioUrl];
 
   const audio = document.createElement("audio");
   audio.controls = true;
-  audio.src = `https://api.reqrdito.com${data.audioUrl}`;
+  audio.src = `https://api.reqrdito.com${audios[0]}`;
   audio.className = "recuerdo-audio";
+
+  audio.onended = () => {
+    index++;
+    if (audios[index]) {
+      audio.src = `https://api.reqrdito.com${audios[index]}`;
+      audio.play();
+    }
+  };
 
   audioContainer.appendChild(audio);
 }

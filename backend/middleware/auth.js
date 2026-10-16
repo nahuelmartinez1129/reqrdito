@@ -1,23 +1,38 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-module.exports = function (req, res, next) {
+module.exports = async function (req, res, next) {
+
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    return res.status(401).json({ error: "Token no enviado" });
-  }
+  if (!authHeader) return next();
 
   const token = authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ error: "Token inválido" });
-  }
+  if (!token) return next();
 
   try {
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { email, name, sub }
+
+    console.log("DECODED:", decoded); // 🔍 DEBUG
+
+    // 🔥 BUSCAR POR EMAIL (más confiable)
+    const user = await User.findOne({ email: decoded.email });
+
+    if (!user) {
+      console.log("❌ Usuario no encontrado");
+      return next();
+    }
+
+    req.user = user;
+
+    // compatibilidad
+    req.user.id = user._id;
+
     next();
+
   } catch (err) {
-    return res.status(401).json({ error: "Token no válido" });
+    console.error("Auth error:", err);
+    return res.status(401).json({ error: "Token inválido o vencido" });
   }
 };

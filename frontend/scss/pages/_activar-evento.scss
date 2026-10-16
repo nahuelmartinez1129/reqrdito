@@ -1,0 +1,182 @@
+@use "sass:color";
+
+// ==========================
+// Variables Reqrdito
+// ==========================
+
+$verde-claro: #6BAC73;
+$verde-fuerte: #166D20;
+$manteca: #F9ECD9;
+$naranja: #EBAF2B;
+
+
+// ==========================
+// Wrapper principal
+// ==========================
+
+.activar-evento-body {
+
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(
+    135deg,
+    $verde-claro,
+    $verde-fuerte
+  );
+
+  padding: 20px;
+
+}
+
+
+// ==========================
+// Card principal
+// ==========================
+
+.activar-evento-card {
+
+  background: white;
+
+  width: 100%;
+  max-width: 420px;
+
+  padding: 40px;
+
+  border-radius: 18px;
+
+  text-align: center;
+
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+
+  animation: activarEventoFade 0.5s ease;
+
+}
+
+
+// ==========================
+// Logo / título marca
+// ==========================
+
+.activar-evento-logo {
+
+  font-size: 28px;
+  font-weight: 700;
+
+  color: $verde-fuerte;
+
+  margin-bottom: 10px;
+
+}
+
+
+// ==========================
+// Título
+// ==========================
+
+.activar-evento-title {
+
+  font-size: 22px;
+  color: #333;
+
+  margin-bottom: 15px;
+
+}
+
+
+// ==========================
+// Texto descriptivo
+// ==========================
+
+.activar-evento-text {
+
+  font-size: 15px;
+  color: #666;
+
+  margin-bottom: 30px;
+
+}
+
+
+// ==========================
+// Botón Google
+// ==========================
+
+.activar-evento-btn {
+
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: $naranja;
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+
+}
+
+.activar-evento-btn:hover {
+
+  background: color.adjust($naranja, $lightness: -10%);
+  transform: translateY(-2px);
+
+}
+
+
+// ==========================
+// Estado cargando
+// ==========================
+
+.activar-evento-loading {
+
+  margin-top: 20px;
+
+  font-size: 14px;
+  color: #777;
+
+}
+
+
+// ==========================
+// Footer
+// ==========================
+
+.activar-evento-footer {
+
+  margin-top: 20px;
+
+  font-size: 13px;
+  color: #888;
+
+}
+
+
+// ===========================
+// Animación
+// ==========================
+
+@keyframes activarEventoFade {
+
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}

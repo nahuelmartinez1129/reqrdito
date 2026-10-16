@@ -1,0 +1,173 @@
+@use "sass:color";
+
+// ==========================
+// Variables de color Reqrdito
+// ==========================
+
+$verde-claro: #6BAC73;
+$verde-fuerte: #166D20;
+$manteca: #F9ECD9;
+$naranja: #EBAF2B;
+
+
+// ==========================
+// Reset básico
+// ==========================
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+
+// ==========================
+// Body
+// ==========================
+
+.body-activar {
+
+  background: linear-gradient(
+    135deg,
+    $verde-claro,
+    $verde-fuerte
+  );
+
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+
+
+// ==========================
+// Card activación
+// ==========================
+
+.activar-card {
+
+  background: white;
+  padding: 40px;
+  border-radius: 18px;
+
+  width: 90%;
+  max-width: 420px;
+
+  text-align: center;
+
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+
+  animation: aparecer 0.5s ease;
+
+}
+
+
+// ==========================
+// Logo
+// ==========================
+
+.logo-reqrdito {
+
+  font-size: 28px;
+  font-weight: 700;
+
+  color: $verde-fuerte;
+
+  margin-bottom: 10px;
+
+}
+
+
+// ==========================
+// Título
+// ==========================
+
+.activar-title {
+
+  font-size: 22px;
+  margin-bottom: 15px;
+  color: #333;
+
+}
+
+
+// ==========================
+// Descripción
+// ==========================
+
+.activar-text {
+
+  font-size: 15px;
+  color: #666;
+
+  margin-bottom: 30px;
+
+}
+
+
+// ==========================
+// Botón Google
+// ==========================
+
+.btn-google {
+
+  width: 100%;
+  padding: 14px;
+
+  background: $naranja;
+  border: none;
+
+  border-radius: 10px;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  color: white;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+
+}
+
+.btn-google:hover {
+
+  background: color.adjust($naranja, $lightness: -10%);
+  transform: translateY(-2px);
+
+}
+
+
+// ==========================
+// Footer
+// ==========================
+
+.activar-footer {
+
+  margin-top: 20px;
+  font-size: 13px;
+
+  color: #888;
+
+}
+
+
+// ==========================
+// Animación
+// ==========================
+
+@keyframes aparecer {
+
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}

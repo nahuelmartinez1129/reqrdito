@@ -1,0 +1,235 @@
+@use "sass:color";
+
+// ==========================
+// Variables
+// ==========================
+
+$verde-claro: #6BAC73;
+$verde-fuerte: #166D20;
+$manteca: #F9ECD9;
+$naranja: #EBAF2B;
+
+
+// ==========================
+// Body
+// ==========================
+
+.body-admin {
+
+  min-height: 100vh;
+
+  background: linear-gradient(
+    135deg,
+    $verde-claro,
+    $verde-fuerte
+  );
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: "Poppins", sans-serif;
+
+}
+
+
+// ==========================
+// Card
+// ==========================
+
+.admin-card {
+
+  background: white;
+
+  padding: 40px;
+
+  border-radius: 18px;
+
+  width: 90%;
+  max-width: 520px;
+
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+
+  animation: aparecer .4s ease;
+
+}
+
+
+// ==========================
+// Título
+// ==========================
+
+.admin-title {
+
+  font-size: 28px;
+
+  font-weight: 700;
+
+  color: $verde-fuerte;
+
+  margin-bottom: 10px;
+
+}
+
+
+// ==========================
+// Texto
+// ==========================
+
+.admin-text {
+
+  font-size: 14px;
+
+  color: #666;
+
+  margin-bottom: 25px;
+
+}
+
+
+// ==========================
+// Formulario
+// ==========================
+
+.admin-form {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 16px;
+
+}
+
+
+// ==========================
+// Inputs
+// ==========================
+
+.admin-input,
+.admin-select {
+
+  padding: 12px;
+
+  border-radius: 8px;
+
+  border: 2px solid #eee;
+
+  font-size: 14px;
+
+  transition: .2s;
+
+}
+
+.admin-input:focus,
+.admin-select:focus {
+
+  outline: none;
+
+  border-color: $verde-claro;
+
+}
+
+
+// ==========================
+// Botón
+// ==========================
+
+.admin-btn {
+
+  padding: 14px;
+
+  background: $naranja;
+
+  border: none;
+
+  border-radius: 10px;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  color: white;
+
+  cursor: pointer;
+
+  transition: .2s;
+
+}
+
+.admin-btn:hover {
+
+  transform: translateY(-2px);
+
+  background: color.adjust($naranja, $lightness: -8%);
+
+}
+
+
+// ==========================
+// Resultado
+// ==========================
+
+.admin-result {
+
+  margin-top: 25px;
+
+  background: $manteca;
+
+  padding: 15px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+
+  max-height: 200px;
+
+  overflow: auto;
+
+}
+
+
+// ==========================
+// Animación
+// ==========================
+
+@keyframes aparecer {
+
+  from {
+
+    opacity: 0;
+
+    transform: translateY(15px);
+
+  }
+
+  to {
+
+    opacity: 1;
+
+    transform: translateY(0);
+
+  }
+
+}
+
+
+// ==========================
+// Responsive
+// ==========================
+
+@media (max-width: 600px){
+
+  .admin-card{
+
+    padding: 25px;
+
+  }
+
+  .admin-title{
+
+    font-size: 22px;
+
+  }
+
+}

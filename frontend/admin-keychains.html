@@ -1,0 +1,193 @@
+ <!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+
+<link rel="apple-touch-icon" href="/img/favicon-64x64.png">
+
+<link rel="manifest" href="/manifest.json">
+
+<meta name="theme-color" content="#6BAC73">
+<title>Generador de llaveros</title>
+<link rel="stylesheet" href="css/main.css?v=2026.500">
+
+<style>
+body{
+  font-family: Arial;
+  padding: 20px;
+  background:#f5f5f5;
+}
+
+h1{
+  margin-bottom:20px;
+}
+
+input, select, button{
+  padding:10px;
+  margin:5px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+button{
+  cursor:pointer;
+  background:#6BAC73;
+  color:white;
+  border:none;
+}
+
+button:hover{
+  background:#166D20;
+}
+
+.btn-pdf{
+  background:#EBAF2B;
+}
+
+.btn-limpiar{
+  background:#c0392b;
+}
+
+pre{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Generar llaveros</h1>
+
+<label>Cantidad</label>
+<input id="cantidad" type="number" value="10">
+
+<label>Pack</label>
+<select id="pack">
+  <option value="individual">Individual</option>
+  <option value="pareja">Pareja</option>
+</select>
+
+<br><br>
+
+<button onclick="generar()">➕ Agregar QR</button>
+
+<button class="btn-pdf" onclick="generarPDF()">📄 Generar PDF</button>
+
+<button class="btn-limpiar" onclick="limpiar()">🧹 Limpiar</button>
+
+<pre id="resultado"></pre>
+
+<script>
+
+const API = "https://api.reqrdito.com/api/keychain-admin";
+
+// ===============================
+// ✅ GENERAR (ACUMULA)
+// ===============================
+async function generar(){
+
+  const cantidad = parseInt(document.getElementById("cantidad").value);
+  const pack = document.getElementById("pack").value;
+
+  if(!cantidad || cantidad <= 0){
+    alert("Ingresá una cantidad válida");
+    return;
+  }
+
+  let endpoint = "";
+
+  if(pack === "individual"){
+    endpoint = "/generar-individuales";
+  } else {
+    endpoint = "/generar-pareja";
+  }
+
+  try{
+
+    const res = await fetch(API + endpoint,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({ cantidad })
+    });
+
+    if(!res.ok){
+      const text = await res.text();
+      throw new Error(text);
+    }
+
+    const data = await res.json();
+
+    document.getElementById("resultado").textContent =
+      JSON.stringify(data,null,2);
+
+  }catch(err){
+    console.error(err);
+    alert("Error generando QR");
+  }
+
+}
+
+
+// ===============================
+// 📄 GENERAR PDF FINAL
+// ===============================
+async function generarPDF(){
+
+  try{
+
+    const res = await fetch(API + "/generar-pdf");
+
+    if(!res.ok){
+      const text = await res.text();
+      throw new Error(text);
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "llaveros-qr.pdf";
+    a.click();
+
+  }catch(err){
+    console.error(err);
+    alert("Error generando PDF");
+  }
+
+}
+
+
+// ===============================
+// 🧹 LIMPIAR LISTA
+// ===============================
+async function limpiar(){
+
+  try{
+
+    await fetch(API + "/limpiar",{
+      method:"POST"
+    });
+
+    document.getElementById("resultado").textContent =
+      "Lista limpiada";
+
+  }catch(err){
+    console.error(err);
+    alert("Error al limpiar");
+  }
+
+}
+
+</script>
+
+</body>
+</html>

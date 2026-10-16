@@ -4,228 +4,104 @@
   <meta charset="UTF-8">
   <title>Crear recuerdo | ReQRdito</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/main.css?v=2026">
-</head>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
 
+<link rel="apple-touch-icon" href="/img/favicon-64x64.png">
+
+<link rel="manifest" href="/manifest.json">
+
+<meta name="theme-color" content="#6BAC73">
+  <link rel="stylesheet" href="css/main.css?v=2026.1000">
+</head>
 <body class="crear-body">
 
 <div class="crear-card">
-
   <h1>Crear tu recuerdo</h1>
-  <p>Subí un audio y transformalo en un QR eterno</p>
+  <p>Elegí el tipo de recuerdo y subí tus audios</p>
 
-  <form id="crearRecuerdoForm">
-
-    <div class="form-group">
-      <label for="nombre">Nombre del recuerdo</label>
-      <input
-        type="text"
-        id="nombre"
-        placeholder="Ingresa el nombre del recuerdo"
-        required
-      >
-    </div>
-
-    <div class="form-group">
-      <label for="audio">Grabar o seleccionar audio</label>
-      <input
-        type="file"
-        id="audio"
-        accept="audio/*"
-        required
-      >
-      <small>
-        🎧 Audios de hasta <b>10 MB</b> (≈ 5 minutos)<br>
-        En celular se abrirá el grabador automáticamente
-      </small>
-    </div>
-
-    <div class="preescucha">
-      <audio id="previewAudio" controls></audio>
-    </div>
-
-    <button type="button" id="btnContinuar">
-      Continuar
+  <div class="pack-selector">
+    <button type="button" class="pack-btn active" data-pack="individual">
+      Individual<br><small>1 audio · 1 QR</small>
     </button>
-  </form>
 
-  <p id="estado"></p>
+    <button type="button" class="pack-btn" data-pack="pareja">
+      Pareja / Amigo<br><small>2 audios · 1 QR</small>
+    </button>
+  </div>
+
+  <form>
+    <div class="form-group">
+      <label>Nombre del recuerdo</label>
+      <input type="text" id="nombre" required>
+    </div>
+
+   <div class="form-group">
+  <label>Audio principal</label>
+
+  <input type="file" id="audio1">
+
+  
+
+  <!-- 👇 UN SOLO AUDIO -->
+  <audio id="preview1" controls></audio>
+
+  <button type="button" onclick="grabarAudio1()">Grabar</button>
+  <div id="recIndicator1" class="rec-indicator hidden">
+  <span class="rec-dot"></span> Grabando...
+</div>
+<button type="button" onclick="detenerAudio1()">Detener</button>
+
+</div>
+    <div class="form-group oculto" id="grupoAudio2">
+  <label>Segundo audio</label>
+
+  <input type="file" id="audio2">
+
+
+  <!-- 👇 UN SOLO AUDIO -->
+  <audio id="preview2" controls></audio>
+
+  <button type="button" onclick="grabarAudio2()">Grabar</button>
+  <div id="recIndicator2" class="rec-indicator hidden">
+  <span class="rec-dot"></span> Grabando...
+</div>
+<button type="button" onclick="detenerAudio2()">Detener</button>
+
 </div>
 
-<!-- 🔐 OVERLAY LOGIN GOOGLE -->
-<div id="loginOverlay" class="login-overlay oculto">
-  <div class="login-card">
+    <button type="button" id="btnContinuar">Continuar</button>
+    <p id="estado"></p>
+  </form>
+</div>
+
+<!-- MODAL LOGIN -->
+<div id="loginModal" class="rq-modal-overlay">
+  <div class="rq-modal-card">
     <h2>Iniciá sesión para continuar</h2>
-    <p>Usá tu cuenta de Google para guardar tu recuerdo</p>
-
-    <div id="googleLogin"></div>
-
-    <button id="cancelLogin" class="btn-link">
-      Cancelar
-    </button>
+    <p>Necesitás iniciar sesión para crear tu recuerdo</p>
+    <div id="googleBtn"></div>
+    <button type="button" id="btnCancelar">Cancelar</button>
   </div>
 </div>
 
-<!-- Google Identity -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-
-<!-- Auth utils -->
-<script src="js/auth-utils.js?v=3"></script>
-
+<script src="https://accounts.google.com/gsi/client"></script>
+<script src="js/auth-init.js?v=2026.1400"></script>
+<script src="js/crear-recuerdo.js?v=2026.1300"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 <script>
-const MAX_MB = 10;
-
-const btn = document.getElementById("btnContinuar");
-const estado = document.getElementById("estado");
-const audioInput = document.getElementById("audio");
-const previewAudio = document.getElementById("previewAudio");
-const loginOverlay = document.getElementById("loginOverlay");
-const cancelLogin = document.getElementById("cancelLogin");
-
-// 🎧 Preescucha + info del audio
-audioInput.addEventListener("change", () => {
-  if (audioInput.files.length > 0) {
-    const audio = audioInput.files[0];
-    const sizeMB = audio.size / 1024 / 1024;
-
-    previewAudio.src = URL.createObjectURL(audio);
-
-    if (sizeMB > MAX_MB) {
-      estado.innerHTML = `
-        ❌ El audio pesa <b>${sizeMB.toFixed(2)} MB</b><br>
-        El máximo permitido es <b>${MAX_MB} MB</b>
-      `;
-      audioInput.value = "";
-      return;
-    }
-
-    estado.innerHTML = `
-      🎧 Audio cargado correctamente<br>
-      <small>
-        Tipo: <b>${audio.type || "desconocido"}</b><br>
-        Tamaño: <b>${sizeMB.toFixed(2)} MB</b> / ${MAX_MB} MB
-      </small>
-    `;
-  }
-});
-
-// 🚀 Click en continuar
-btn.addEventListener("click", () => {
-  const nombre = document.getElementById("nombre").value.trim();
-  const audio = audioInput.files[0];
-
-  if (!nombre || !audio) {
-    estado.textContent = "⚠️ Completá el nombre y grabá un audio";
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = "Procesando...";
-
-  const token = localStorage.getItem("authToken");
-
-  // 🔐 No logueado → pedir Google
-  if (!token) {
-    btn.disabled = false;
-    btn.textContent = "Continuar";
-    mostrarLoginGoogle();
-    return;
-  }
-
-  crearRecuerdo(token, nombre, audio);
-});
-
-// 🔐 Mostrar login Google
-function mostrarLoginGoogle() {
-  loginOverlay.classList.remove("oculto");
-
-  google.accounts.id.initialize({
-    client_id: "892308582344-6ms0bnobi61nk5vabum1bf94her4p3gu.apps.googleusercontent.com",
-    callback: async (response) => {
-      try {
-        const res = await fetch("https://api.reqrdito.com/api/auth/google", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ credential: response.credential })
-        });
-
-        const data = await res.json();
-
-        if (!data.authToken) {
-          throw new Error("No se pudo iniciar sesión");
-        }
-
-        localStorage.setItem("authToken", data.authToken);
-        loginOverlay.classList.add("oculto");
-
-        btn.disabled = false;
-        btn.textContent = "Continuar";
-        btn.click();
-
-      } catch (err) {
-        alert("Error iniciando sesión con Google");
-        btn.disabled = false;
-        btn.textContent = "Continuar";
-      }
-    }
-  });
-
-  google.accounts.id.renderButton(
-    document.getElementById("googleLogin"),
-    { theme: "outline", size: "large" }
-  );
-}
-
-// ❌ Cancelar login
-cancelLogin.onclick = () => {
-  loginOverlay.classList.add("oculto");
-  btn.disabled = false;
-  btn.textContent = "Continuar";
-};
-
-// 📤 Crear recuerdo
-async function crearRecuerdo(token, nombre, audio) {
-  const formData = new FormData();
-  formData.append("nombre", nombre);
-  formData.append("audio", audio);
-
-  estado.textContent = "⏳ Creando recuerdo...";
-
-  try {
-    const res = await fetch("https://api.reqrdito.com/api/upload", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: formData
-    });
-
-    const raw = await res.text();
-
-    let data;
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      throw new Error("Respuesta inválida del servidor");
-    }
-
-    if (!res.ok || !data.id) {
-      throw new Error(data.error || "Error creando recuerdo");
-    }
-
-    window.location.href = `pago.html?id=${data.id}`;
-
-  } catch (err) {
-    console.error(err);
-    estado.innerHTML = `
-      ❌ Error creando el recuerdo<br>
-      <small>${err.message}</small>
-    `;
-    btn.disabled = false;
-    btn.textContent = "Continuar";
-  }
+if (window.lucide) {
+  lucide.createIcons();
 }
 </script>
 
+<div id="sessionModal" class="session-modal">
+  <div class="session-modal-content">
+    <div class="session-icon">⏱</div>
+    <h2>Sesión expirada</h2>
+    <p>Tu sesión terminó por seguridad.<br>Volvé a iniciar sesión.</p>
+    <button id="sessionBtn">Entendido</button>
+  </div>
+</div>
 </body>
 </html>

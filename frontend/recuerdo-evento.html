@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mi Recuerdo | ReQRdito</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #6BAC73, #166D20);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.card {
+  background: #F9ECD9;
+  color: #166D20;
+  padding: 25px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+audio {
+  width: 100%;
+  margin-top: 15px;
+}
+
+.loader {
+  font-size: 18px;
+}
+
+.empty {
+  font-size: 16px;
+  color: #999;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <h1>🎧 Recuerdo</h1>
+
+  <div id="content">
+    <p class="loader">Cargando...</p>
+  </div>
+
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const qrId = params.get("qr");
+
+const content = document.getElementById("content");
+
+async function load() {
+  try {
+    const res = await fetch(`https://api.reqrdito.com/events/qr-data/${qrId}`);
+    const data = await res.json();
+
+    if (!data || data.status === "empty") {
+      content.innerHTML = `
+        <p class="empty">Este recuerdo aún no fue grabado 🎤</p>
+      `;
+      return;
+    }
+
+    content.innerHTML = `
+      <h2>${data.name}</h2>
+      <audio controls autoplay>
+        <source src="${data.file}" type="audio/webm">
+      </audio>
+    `;
+
+  } catch (err) {
+    content.innerHTML = `
+      <p>Error cargando el recuerdo</p>
+    `;
+    console.error(err);
+  }
+}
+
+load();
+
+</script>
+
+</body>
+</html>

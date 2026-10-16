@@ -1,0 +1,20 @@
+{
+  "name": "Reqrdíto",
+  "short_name": "Reqrdíto",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#6BAC73",
+  "theme_color": "#6BAC73",
+  "icons": [
+    {
+      "src": "/img/favicon-64x64.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    }
+  ]
+}
