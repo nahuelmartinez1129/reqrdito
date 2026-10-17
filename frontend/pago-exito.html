@@ -13,6 +13,23 @@
   <title>Pago exitoso | ReQRdito</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/main.css?v=2026.01">
+  <!-- Meta Pixel Code -->
+  <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '1652126326422659');
+  fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1652126326422659&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
 </head>
 
 <body class="pago-exito-body">
@@ -78,10 +95,34 @@
       btn.removeAttribute("href");
     }
 
-    async function estaPagado() {
+    async function consultarRecuerdo() {
       const res = await fetch(`${REQRDITO.API}/api/recuerdo/${encodeURIComponent(recuerdoId)}`, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return (await res.json()).pagado === true;
+      return res.json();
+    }
+
+    // Meta Pixel: Purchase una sola vez por recuerdo (recargar la página no lo repite).
+    // El importe es el precio oficial del pack según GET /api/precios.
+    async function registrarCompra(pack) {
+      const clave = `fbq_purchase_${recuerdoId}`;
+      try { if (localStorage.getItem(clave)) return; } catch {}
+      if (typeof fbq !== "function") return;
+
+      let precio = null;
+      try {
+        const res = await fetch(`${REQRDITO.API}/api/precios`);
+        if (res.ok) precio = (await res.json())[pack] || null;
+      } catch {}
+
+      fbq("track", "Purchase", {
+        value: precio?.monto ?? 0,
+        currency: precio?.moneda || "ARS",
+        content_ids: [pack],
+        content_type: "product",
+        num_items: 1
+      }, { eventID: `purchase_${recuerdoId}` });
+
+      try { localStorage.setItem(clave, "1"); } catch {}
     }
 
     async function confirmar() {
@@ -100,7 +141,9 @@
 
       for (let i = 0; i < INTENTOS; i++) {
         try {
-          if (await estaPagado()) {
+          const recuerdo = await consultarRecuerdo();
+          if (recuerdo.pagado === true) {
+            await registrarCompra(recuerdo.pack || "individual");
             titulo.textContent = "¡Pago confirmado!";
             mensaje.textContent = "Tu recuerdo está listo 💚 Te llevamos a escucharlo…";
             setTimeout(() => { window.location.href = btn.href; }, 1500);
