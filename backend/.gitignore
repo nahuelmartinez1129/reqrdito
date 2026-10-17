@@ -14,3 +14,26 @@ yarn-error.log*
 
 # Uploads (opcional, recomendado)
 uploads/
+
+# PDF temporal del panel de llaveros
+qrs.pdf
+
+# Copias de variables de entorno (solo .env.example se versiona)
+.env.*
+!.env.example
+!.env.local.example
+
+# Volcados de revisión y exportaciones históricas (pueden tener datos personales)
+revision-db.txt
+migracion-historica/
+*.log
+
+# QR de llaveros generados por scripts locales
+qr-llaveros/
+
+# Exportaciones de MongoDB (datos personales): nunca al repositorio
+reqrdito-export-*/
+mongo-export-*/
+
+# Archivos del entorno de pruebas local (npm run dev)
+uploads-dev/

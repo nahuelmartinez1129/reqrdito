@@ -1,76 +1,149 @@
-/* =========================
-   BOTÓN PAGAR RECUERDO
-   ========================= */
-
-.btn-pagar {
-  width: 100%;
-  padding: 1rem 1.2rem;
-  margin-top: 1rem;
-
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-
-  color: #ffffff;
-  background: linear-gradient(135deg, #6BAC73, #166D20);
-
-  border: none;
-  border-radius: 14px;
-
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.25);
-}
-
-/* Hover */
-.btn-pagar:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.35);
-  background: linear-gradient(135deg, #7ecf8b, #1c8a2d);
-}
-
-/* Active (click) */
-.btn-pagar:active {
-  transform: scale(0.97);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
-}
-
-/* Disabled (si lo usás luego) */
-.btn-pagar:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  box-shadow: none;
-}
+@use '../base/variables' as v;
+@use '../base/mixins' as m;
 
 /* =========================
-   MODAL SESIÓN EXPIRADA
-   ========================= */
+   PAGO (usa .crear-body / .crear-card de crear-recuerdo)
+========================= */
 
-.session-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+.pago-card {
+  .subtitle {
+    margin-bottom: 1.75rem;
+  }
+}
+
+/* Resumen del producto */
+.producto-resumen {
+  padding: 1.25rem 1.35rem;
+  border-radius: v.$radius-lg;
+  background: v.$blanco;
+  border: 1px solid v.$crema-borde-suave;
+  box-shadow: v.$sombra-xs;
+
+  h3 {
+    font-size: 1.05rem;
+    color: v.$verde-oscuro;
+    margin-bottom: 0.85rem;
+  }
+
+  ul {
+    list-style: none;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  li {
+    position: relative;
+    padding-left: 1.85rem;
+    font-size: 0.95rem;
+    color: v.$tinta-suave;
+
+    /* Check decorativo */
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.2em;
+      width: 1.2rem;
+      height: 1.2rem;
+      border-radius: 50%;
+      background: v.$verde-suave;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0.43rem;
+      top: calc(0.2em + 0.28rem);
+      width: 0.32rem;
+      height: 0.55rem;
+      border-right: 2px solid v.$verde-oscuro;
+      border-bottom: 2px solid v.$verde-oscuro;
+      transform: rotate(45deg);
+    }
+  }
+}
+
+/* =========================
+   PRECIO
+========================= */
+
+.precio-box {
+  margin: 1.25rem 0 1rem;
+  padding: 1.1rem 1.35rem;
+  border-radius: v.$radius-lg;
+  background: v.$verde-suave;
+  border: 1px solid rgba(v.$verde-oscuro, 0.1);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  text-align: left;
+
+  span {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: v.$verde-oscuro;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  strong {
+    display: block;
+    font-size: clamp(1.6rem, 1.2rem + 2vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: v.$verde-oscuro;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Leyenda de pago seguro */
+.seguridad {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: v.$tinta-tenue;
+  margin-bottom: 0.5rem;
+
+  &::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: v.$verde-claro;
+    box-shadow: 0 0 0 3px rgba(v.$verde-claro, 0.25);
+  }
 }
 
-.session-modal.oculto {
-  display: none;
+/* =========================
+   BOTÓN PAGAR RECUERDO
+========================= */
+
+.btn-pagar {
+  @include m.button-green;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 1rem;
+  font-size: 1.05rem;
 }
+
+/* =========================
+   MODAL SESIÓN EXPIRADA (tarjeta alternativa)
+========================= */
 
 .session-card {
-  background: #F9ECD9;
-  color: #166D20;
+  @include m.panel;
+  color: v.$verde-oscuro;
   padding: 2rem;
-  border-radius: 18px;
   width: 100%;
-  max-width: 360px;
+  max-width: 380px;
   text-align: center;
-  box-shadow: 0 20px 45px rgba(0,0,0,0.25);
-  animation: sessionIn 0.25s ease;
+  animation: sessionIn 0.25s v.$ease;
 }
 
 .session-card h2 {
@@ -79,55 +152,49 @@
 
 .session-card p {
   font-size: 0.95rem;
+  color: v.$tinta-suave;
   margin-bottom: 1.5rem;
 }
-
-.precio-box {
-  margin: 24px 0;
-  padding: 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #F9ECD9, #ffffff);
-  border: 2px solid rgba(22, 109, 32, 0.15);
-  text-align: center;
-
-  span {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #166D20;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-  }
-
-  strong {
-    display: block;
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: #166D20;
-    line-height: 1.1;
-  }
-}
-
-/* Desktop */
-@media (min-width: 768px) {
-  .precio-box {
-    padding: 26px;
-
-    strong {
-      font-size: 2.6rem;
-    }
-  }
-}
-
 
 @keyframes sessionIn {
   from {
     opacity: 0;
-    transform: scale(0.92);
+    transform: scale(0.94);
   }
   to {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* Medios de pago (pago como invitado con tarjeta) */
+.medios-pago {
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background: rgba(107, 172, 115, 0.1);
+  text-align: left;
+}
+.medios-pago__titulo {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+.medios-pago__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+.medios-pago__lista li {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.8rem;
+}
+.medios-pago__ayuda {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.8;
 }

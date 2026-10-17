@@ -1,12 +1,49 @@
 @use '../base/variables' as v;
 @use '../base/mixins' as m;
-.audio-player {
-  @include m.card;
-  padding: 2rem;
-  text-align: center;
 
-  audio {
-    width: 100%;
-    margin-top: 1rem;
+/* =========================
+   REPRODUCTORES DE AUDIO
+   .audio-player (audio.html) y .recuerdo-audio (recuerdo.html) son
+   elementos <audio> creados por JS. Antes .audio-player recibía estilos
+   de tarjeta (padding + fondo) que deformaban el reproductor.
+========================= */
+
+audio.audio-player,
+audio.recuerdo-audio {
+  display: block;
+  width: 100%;
+  margin: 0;
+  border-radius: v.$radius-pill;
+  box-shadow: v.$sombra-xs;
+}
+
+/* Estado "reproduciendo" (mejora progresiva, navegadores con :playing) */
+audio:playing {
+  box-shadow: 0 0 0 3px rgba(v.$naranja, 0.55), v.$sombra-sm;
+}
+
+/* Panel que contiene al reproductor (se oculta mientras está vacío) */
+.audio-container,
+.recuerdo-card #audioContainer {
+  width: 100%;
+  padding: 1rem;
+  border-radius: v.$radius-lg;
+  background: v.$verde-suave;
+  border: 1px solid rgba(v.$verde-oscuro, 0.08);
+  animation: playerIn 0.45s v.$ease;
+
+  &:empty {
+    display: none;
+  }
+}
+
+@keyframes playerIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

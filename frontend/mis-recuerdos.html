@@ -13,251 +13,453 @@
 <title>Mis recuerdos | ReQRdito</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<link rel="stylesheet" href="css/main.css?v=2026.300" />
+<link rel="stylesheet" href="css/main.css?v=2026.1500" />
 </head>
 
 <body class="mis-recuerdos-body">
 
 <header class="simple-header">
-<h1>
-  <i data-lucide="headphones"></i>
-  Mis recuerdos
-</h1>
-<div id="googleLogin"></div>
+  <a href="index.html" class="simple-header__logo" aria-label="ReQRdito, volver al inicio">
+    <img src="img/reqrdito-logo.png" alt="Logo ReQRdito">
+  </a>
+  <div id="googleLogin"></div>
 </header>
 
-<div class="tabs-recuerdos">
+<main class="mis-recuerdos-main">
 
-  <button class="tab-btn active" id="tabRecuerdos">
-    <i data-lucide="gift"></i>
-    Mis recuerdos
-  </button>
+  <section class="mr-intro" aria-labelledby="mrTitulo">
+    <div class="mr-intro__texto">
+      <h1 id="mrTitulo">Mis recuerdos</h1>
+      <p id="mrResumen" class="mr-intro__resumen">Tus recuerdos en audio, listos para escuchar y compartir.</p>
+    </div>
+    <a href="crear-recuerdo.html" class="btn-primary mr-intro__cta">
+      <i data-lucide="plus"></i>
+      Crear recuerdo
+    </a>
+  </section>
 
-  <button class="tab-btn" id="tabEventos">
-    <i data-lucide="mic"></i>
-    Eventos
-  </button>
+  <!-- Eventos: oculto temporalmente (módulo deshabilitado). Para volver a mostrarlo,
+       reponer la pestaña y la lista de QR de eventos (ver historial de Git de este archivo). -->
 
-</div>
+  <div class="mr-toolbar" id="mrToolbar" hidden>
+    <label class="mr-buscar">
+      <span class="visually-hidden">Buscar por nombre</span>
+      <i data-lucide="search" aria-hidden="true"></i>
+      <input type="search" id="mrBuscar" placeholder="Buscar por nombre" autocomplete="off">
+    </label>
+  </div>
 
-<main class="mis-recuerdos-container" id="listaRecuerdos"></main>
+  <div class="mis-recuerdos-container" id="listaRecuerdos" aria-live="polite" aria-busy="true"></div>
 
-<div id="toast"></div>
+</main>
 
+<!-- Renombrar -->
+<dialog class="mr-dialog" id="dlgEditar" aria-labelledby="dlgEditarTitulo">
+  <form method="dialog" id="formEditar">
+    <h2 id="dlgEditarTitulo">Cambiar nombre</h2>
+    <label class="mr-dialog__campo">
+      <span>Nombre del recuerdo</span>
+      <input type="text" id="inputNombre" minlength="2" maxlength="120" required>
+    </label>
+    <p class="mr-dialog__error" id="editarError" role="alert"></p>
+    <div class="mr-dialog__acciones">
+      <button type="button" class="btn-ghost" data-cerrar>Cancelar</button>
+      <button type="submit" class="btn-primary" id="btnGuardarNombre">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Eliminar -->
+<dialog class="mr-dialog" id="dlgEliminar" aria-labelledby="dlgEliminarTitulo">
+  <form method="dialog" id="formEliminar">
+    <h2 id="dlgEliminarTitulo">¿Eliminar este recuerdo?</h2>
+    <p>Vas a eliminar <strong id="eliminarNombre"></strong>. El QR dejará de reproducir el audio y no se puede deshacer.</p>
+    <div class="mr-dialog__acciones">
+      <button type="button" class="btn-ghost" data-cerrar>Cancelar</button>
+      <button type="submit" class="btn-delete" id="btnConfirmarEliminar">Eliminar</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/config.js?v=2026.1600"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
-<script src="js/auth-init.js?v=2026.1400"></script>
+<script src="js/auth-init.js?v=2026.1600"></script>
 
 <script>
 
+const API = REQRDITO.API;
+const SITIO = REQRDITO.SITIO;
+
+// Denominación comercial de cada pack
+const PACKS = { individual: "Individual", pareja: "Dúo" };
+
+let recuerdos = [];
 let recuerdoEditar = null;
 let recuerdoEliminar = null;
 
-// 🔥 FIX GLOBAL URL
+// Escapa texto antes de insertarlo en HTML (nombres de recuerdos, etc.)
+const esc = (valor) => String(valor ?? "")
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+
+// Solo rutas propias o URLs https
 const fixUrl = (url) => {
-  if (!url) return "";
-  return url.startsWith("http")
-    ? url
-    : `https://api.reqrdito.com${url}`;
+  if (!url || typeof url !== "string") return "";
+  if (url.startsWith("/")) return `${API}${url}`;
+  return /^https:\/\//.test(url) ? url : "";
 };
+
+const contenedor = () => document.getElementById("listaRecuerdos");
 
 document.addEventListener("DOMContentLoaded", () => {
 
-auth.initHeader("googleLogin");
+  auth.initHeader("googleLogin");
 
-if(auth.isLogged()){
-cargarRecuerdos();
-}else{
-alert("Iniciá sesión");
-}
+  if (auth.isLogged()) {
+    cargarRecuerdos();
+  } else {
+    mostrarEstado("login");
+  }
 
-lucide.createIcons();
+  // auth-init.js lo dispara al iniciar sesión desde esta página
+  document.addEventListener("recargarRecuerdos", cargarRecuerdos);
 
+  document.getElementById("mrBuscar").addEventListener("input", renderLista);
+
+  document.querySelectorAll("[data-cerrar]").forEach(btn => {
+    btn.addEventListener("click", () => btn.closest("dialog").close());
+  });
+  document.getElementById("formEditar").addEventListener("submit", guardarNombre);
+  document.getElementById("formEliminar").addEventListener("submit", confirmarEliminar);
+
+  lucide.createIcons();
 });
 
 function showToast(msg){
-const toast=document.getElementById("toast");
-toast.textContent=msg;
-toast.classList.add("show");
-setTimeout(()=>toast.classList.remove("show"),3000);
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(showToast.t);
+  showToast.t = setTimeout(() => toast.classList.remove("show"), 3000);
 }
 
-function cargarRecuerdos(){
-
-const token=localStorage.getItem("authToken");
-const container=document.getElementById("listaRecuerdos");
-
-fetch("https://api.reqrdito.com/api/mis-recuerdos",{
-headers:{Authorization:`Bearer ${token}`}
-})
-.then(res=>res.json())
-.then(data=>{
-
-const eventos = data.filter(r => r.pack === "evento");
-const normales = data.filter(r => r.pack !== "evento");
-
-function renderLista(lista){
-container.innerHTML="";
-
-lista.forEach(r=>{
-
-const card=document.createElement("article");
-card.className="recuerdo-item fade";
-
-const fecha=r.createdAt
-?new Date(r.createdAt).toLocaleDateString("es-AR")
-:"";
-
-let audiosHtml="";
-
-// 🔥 SOPORTA EVENTOS + NORMALES
-if(Array.isArray(r.audios) && r.audios.length){
-audiosHtml = r.audios.map((audio,i)=>`
-<div class="recuerdo-audio">
-<span class="audio-label">Audio ${i+1}</span>
-<audio controls src="${fixUrl(audio.url)}"></audio>
-</div>
-`).join("");
+// Sesión vencida o inválida: misma salida que antes (volver al inicio)
+function salirPorSesion(){
+  auth.clearToken();
+  window.location.href = "index.html";
 }
 
-// 🔥 EVENTOS fallback (por si viene distinto)
-if(!audiosHtml && r.audioUrl){
-audiosHtml = `
-<div class="recuerdo-audio">
-<span class="audio-label">Audio</span>
-<audio controls src="${fixUrl(r.audioUrl)}"></audio>
-</div>
-`;
+function apiFetch(ruta, opciones = {}){
+  return fetch(`${API}${ruta}`, {
+    ...opciones,
+    headers: { ...(opciones.headers || {}), Authorization: `Bearer ${auth.getToken()}` }
+  });
 }
 
-const linkRecuerdo=`https://www.reqrdito.com/recuerdo.html?id=${r.recuerdoId}`;
+/* =========================
+   ESTADOS (carga, vacío, error, sin sesión)
+========================= */
 
-card.innerHTML=`
+function mostrarEstado(tipo){
+  const c = contenedor();
+  document.getElementById("mrToolbar").hidden = true;
+  c.setAttribute("aria-busy", tipo === "cargando" ? "true" : "false");
 
-<div class="recuerdo-header">
-<h3>${r.nombre || "Recuerdo sin nombre"}</h3>
-${fecha ? `<span class="recuerdo-fecha">${fecha}</span>` : ""}
-</div>
+  if (tipo === "cargando") {
+    c.innerHTML = Array.from({ length: 3 }, () =>
+      `<div class="skeleton-card" aria-hidden="true"></div>`).join("") +
+      `<span class="visually-hidden">Cargando tus recuerdos…</span>`;
+    return;
+  }
 
-<div class="recuerdo-audios">
-${audiosHtml}
-</div>
+  const estados = {
+    vacio: {
+      icono: "headphones",
+      titulo: "Todavía no tenés recuerdos",
+      texto: "Grabá un mensaje de voz, pagalo y recibí un QR para regalar. Tus recuerdos pagados aparecen acá.",
+      accion: `<a href="crear-recuerdo.html" class="btn-primary"><i data-lucide="plus"></i> Crear mi primer recuerdo</a>`
+    },
+    error: {
+      icono: "wifi-off",
+      titulo: "No pudimos cargar tus recuerdos",
+      texto: "Revisá tu conexión e intentá de nuevo. Tus recuerdos siguen guardados.",
+      accion: `<button type="button" class="btn-primary" id="btnReintentar"><i data-lucide="refresh-cw"></i> Reintentar</button>`
+    },
+    login: {
+      icono: "lock",
+      titulo: "Iniciá sesión para ver tus recuerdos",
+      texto: "Usá el botón de Google de arriba con la misma cuenta con la que creaste tus recuerdos.",
+      accion: `<a href="index.html" class="btn-ghost">Volver al inicio</a>`
+    }
+  };
 
-<div class="recuerdo-footer">
+  const e = estados[tipo];
+  c.innerHTML = `
+    <div class="mr-estado mr-estado--${tipo}">
+      <i data-lucide="${e.icono}" class="mr-estado__icono" aria-hidden="true"></i>
+      <h2>${e.titulo}</h2>
+      <p>${e.texto}</p>
+      ${e.accion}
+    </div>`;
 
-<img src="${fixUrl(r.qrUrl)}">
-
-<div class="recuerdo-actions">
-
-<a href="https://api.reqrdito.com/api/descargar-qr/${r.recuerdoId}" class="btn-primary">
-<i data-lucide="download"></i>
-</a>
-
-<button class="action-btn copy" onclick="copiarLink('${linkRecuerdo}')">
-<i data-lucide="link"></i>
-</button>
-
-<button class="action-btn edit" onclick="abrirEditarModal('${r.recuerdoId}','${r.nombre || ""}')">
-<i data-lucide="edit"></i>
-</button>
-
-<button class="action-btn mail" onclick="reenviarCorreo('${r.recuerdoId}')">
-<i data-lucide="mail"></i>
-</button>
-
-<button class="action-btn delete" onclick="abrirEliminarModal('${r.recuerdoId}')">
-<i data-lucide="trash"></i>
-</button>
-
-</div>
-</div>
-`;
-
-container.appendChild(card);
-
-});
-
-lucide.createIcons();
+  document.getElementById("btnReintentar")?.addEventListener("click", cargarRecuerdos);
+  if (window.lucide) lucide.createIcons();
 }
 
-// TABS
-document.getElementById("tabRecuerdos").onclick=()=>{
-renderLista(normales);
-setActive("tabRecuerdos");
-};
+/* =========================
+   CARGA
+========================= */
 
-document.getElementById("tabEventos").onclick=()=>{
-renderLista(eventos);
-setActive("tabEventos");
-};
+async function cargarRecuerdos(){
+  mostrarEstado("cargando");
 
-function setActive(id){
-document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-document.getElementById(id).classList.add("active");
+  try {
+    const res = await apiFetch("/api/mis-recuerdos");
+    const data = await res.json().catch(() => null);
+
+    if (res.status === 401) return salirPorSesion();
+    if (!res.ok || !Array.isArray(data)) throw new Error("Error obteniendo recuerdos");
+
+    // Eventos ocultos temporalmente: se listan solo los recuerdos propios
+    recuerdos = data.filter(r => r.pack !== "evento");
+
+    actualizarResumen();
+
+    if (!recuerdos.length) return mostrarEstado("vacio");
+
+    document.getElementById("mrToolbar").hidden = recuerdos.length < 4;
+    renderLista();
+
+  } catch (err) {
+    console.error(err);
+    mostrarEstado("error");
+  }
 }
 
-// inicial
-renderLista(normales);
-
-});
+function actualizarResumen(){
+  const n = recuerdos.length;
+  document.getElementById("mrResumen").textContent = n
+    ? `${n} ${n === 1 ? "recuerdo" : "recuerdos"} · listos para escuchar y compartir`
+    : "Tus recuerdos en audio, listos para escuchar y compartir.";
 }
 
-function copiarLink(link){
-navigator.clipboard.writeText(link);
-showToast("Link copiado ✔");
+/* =========================
+   LISTA
+========================= */
+
+function renderLista(){
+  const c = contenedor();
+  const filtro = document.getElementById("mrBuscar").value.trim().toLowerCase();
+  const lista = filtro
+    ? recuerdos.filter(r => (r.nombre || "").toLowerCase().includes(filtro))
+    : recuerdos;
+
+  c.setAttribute("aria-busy", "false");
+  c.innerHTML = "";
+
+  if (!lista.length) {
+    c.innerHTML = `<p class="mr-sin-resultados">No hay recuerdos que coincidan con “${esc(filtro)}”.</p>`;
+    return;
+  }
+
+  lista.forEach(r => c.appendChild(crearTarjeta(r)));
+  lucide.createIcons();
 }
 
-function abrirEditarModal(id,nombre){
-alert("Editar: " + nombre);
+function crearTarjeta(r){
+  const card = document.createElement("article");
+  card.className = "recuerdo-item fade";
+
+  const fechaOrigen = r.creadoEn || r.createdAt;
+  const fecha = fechaOrigen
+    ? new Date(fechaOrigen).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" })
+    : "";
+
+  const audios = Array.isArray(r.audios) && r.audios.length
+    ? r.audios
+    : (r.audioUrl ? [{ url: r.audioUrl }] : []);
+
+  const audiosHtml = audios.map((audio, i) => `
+    <div class="recuerdo-audio">
+      <span class="audio-label">${audios.length > 1 ? `Audio ${i + 1}` : "Audio"}</span>
+      <audio controls preload="none" src="${esc(fixUrl(audio.url))}"></audio>
+    </div>`).join("");
+
+  const idSeguro = encodeURIComponent(r.recuerdoId || "");
+  const linkRecuerdo = `${SITIO}/recuerdo.html?id=${idSeguro}`;
+  const nombre = r.nombre || "Recuerdo sin nombre";
+  const pack = PACKS[r.pack] || "";
+  const qr = fixUrl(r.qrUrl);
+
+  card.innerHTML = `
+    <header class="recuerdo-header">
+      <div class="recuerdo-badges">
+        <!-- /api/mis-recuerdos solo devuelve recuerdos con el pago confirmado -->
+        <span class="badge badge--pagado"><i data-lucide="check-circle"></i> Pago confirmado</span>
+        ${pack ? `<span class="badge badge--pack">${esc(pack)}</span>` : ""}
+      </div>
+      <h2 class="recuerdo-nombre">${esc(nombre)}</h2>
+      <p class="recuerdo-meta">
+        ${fecha ? `<span><i data-lucide="calendar"></i> ${esc(fecha)}</span>` : ""}
+        <span><i data-lucide="mic"></i> ${audios.length} ${audios.length === 1 ? "audio" : "audios"}</span>
+      </p>
+    </header>
+
+    <div class="recuerdo-audios">
+      ${audiosHtml || `<p class="recuerdo-sin-audio">Este recuerdo no tiene audios disponibles.</p>`}
+    </div>
+
+    <div class="recuerdo-footer">
+      ${qr ? `<img src="${esc(qr)}" alt="Código QR de ${esc(nombre)}" width="112" height="112" loading="lazy">` : ""}
+
+      <div class="recuerdo-acciones-principales">
+        <a href="${API}/api/descargar-qr/${idSeguro}" class="btn-primary">
+          <i data-lucide="download"></i> Descargar QR
+        </a>
+        <a href="${esc(linkRecuerdo)}" class="btn-ghost" target="_blank" rel="noopener">
+          <i data-lucide="external-link"></i> Ver recuerdo
+        </a>
+      </div>
+    </div>
+
+    <div class="recuerdo-actions" role="group" aria-label="Acciones de ${esc(nombre)}">
+      <button type="button" class="action-btn copy" data-accion="copiar">
+        <i data-lucide="link"></i><span>Copiar link</span>
+      </button>
+      <button type="button" class="action-btn edit" data-accion="editar">
+        <i data-lucide="pencil"></i><span>Renombrar</span>
+      </button>
+      <button type="button" class="action-btn mail" data-accion="mail">
+        <i data-lucide="mail"></i><span>Reenviar email</span>
+      </button>
+      <button type="button" class="action-btn delete" data-accion="eliminar">
+        <i data-lucide="trash-2"></i><span>Eliminar</span>
+      </button>
+    </div>
+  `;
+
+  // si la imagen del QR no carga, se oculta en vez de mostrar un ícono roto
+  card.querySelector(".recuerdo-footer img")?.addEventListener("error", e => { e.target.hidden = true; });
+
+  // acciones sin onclick inline: los datos nunca pasan por HTML
+  const acciones = {
+    copiar: () => copiarLink(linkRecuerdo),
+    editar: () => abrirEditarModal(r),
+    mail: (btn) => reenviarCorreo(r.recuerdoId, btn),
+    eliminar: () => abrirEliminarModal(r)
+  };
+  card.querySelectorAll("[data-accion]").forEach(btn => {
+    btn.addEventListener("click", () => acciones[btn.dataset.accion](btn));
+  });
+
+  return card;
 }
 
-function abrirEliminarModal(id){
-if(confirm("Eliminar recuerdo?")){
-eliminarRecuerdo(id);
-}
-}
+/* =========================
+   ACCIONES
+========================= */
 
-async function eliminarRecuerdo(id){
-const token=localStorage.getItem("authToken");
-
-await fetch(`https://api.reqrdito.com/api/recuerdos/${id}`,{
-method:"DELETE",
-headers:{Authorization:`Bearer ${token}`}
-});
-
-showToast("Eliminado");
-cargarRecuerdos();
+async function copiarLink(link){
+  try {
+    await navigator.clipboard.writeText(link);
+    showToast("Link copiado ✔");
+  } catch {
+    window.prompt("Copiá el link de tu recuerdo:", link);
+  }
 }
 
-async function reenviarCorreo(id){
-
-const token = localStorage.getItem("authToken");
-
-try{
-
-const res = await fetch(
-`https://api.reqrdito.com/api/recuerdos/${id}/reenviar-mail`,
-{
-method:"POST",
-headers:{
-Authorization:`Bearer ${token}`
-}
-});
-
-const data = await res.json();
-
-if(!res.ok){
-throw new Error(data.error || "Error reenviando");
+function abrirEditarModal(r){
+  recuerdoEditar = r;
+  const input = document.getElementById("inputNombre");
+  input.value = r.nombre || "";
+  document.getElementById("editarError").textContent = "";
+  document.getElementById("dlgEditar").showModal();
+  input.select();
 }
 
-showToast("Correo reenviado ✔");
+async function guardarNombre(e){
+  e.preventDefault();
+  const nombre = document.getElementById("inputNombre").value.trim();
+  const errorEl = document.getElementById("editarError");
+  const btn = document.getElementById("btnGuardarNombre");
 
-}catch(err){
+  if (nombre.length < 2 || nombre.length > 120) {
+    errorEl.textContent = "El nombre debe tener entre 2 y 120 caracteres.";
+    return;
+  }
 
-console.error(err);
-showToast("No se pudo reenviar el correo");
+  btn.disabled = true;
+  try {
+    const res = await apiFetch(`/api/recuerdos/${encodeURIComponent(recuerdoEditar.recuerdoId)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre })
+    });
+    if (res.status === 401) return salirPorSesion();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "No se pudo guardar");
 
+    recuerdoEditar.nombre = data.nombre || nombre;
+    document.getElementById("dlgEditar").close();
+    renderLista();
+    showToast("Nombre actualizado ✔");
+  } catch (err) {
+    console.error(err);
+    errorEl.textContent = "No se pudo guardar el nombre. Intentá de nuevo.";
+  } finally {
+    btn.disabled = false;
+  }
 }
 
+function abrirEliminarModal(r){
+  recuerdoEliminar = r;
+  document.getElementById("eliminarNombre").textContent = r.nombre || "este recuerdo";
+  document.getElementById("dlgEliminar").showModal();
+}
+
+async function confirmarEliminar(e){
+  e.preventDefault();
+  const btn = document.getElementById("btnConfirmarEliminar");
+  btn.disabled = true;
+
+  try {
+    const res = await apiFetch(`/api/recuerdos/${encodeURIComponent(recuerdoEliminar.recuerdoId)}`, {
+      method: "DELETE"
+    });
+    if (res.status === 401) return salirPorSesion();
+
+    document.getElementById("dlgEliminar").close();
+    showToast(res.ok ? "Recuerdo eliminado" : "No se pudo eliminar");
+    if (res.ok) cargarRecuerdos();
+  } catch (err) {
+    console.error(err);
+    showToast("No se pudo eliminar");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function reenviarCorreo(id, btn){
+  btn.disabled = true;
+
+  try {
+    const res = await apiFetch(`/api/recuerdos/${encodeURIComponent(id)}/reenviar-mail`, {
+      method: "POST"
+    });
+    if (res.status === 401) return salirPorSesion();
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Error reenviando");
+
+    showToast("Correo reenviado ✔");
+  } catch (err) {
+    console.error(err);
+    showToast("No se pudo reenviar el correo");
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 </script>

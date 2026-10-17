@@ -1,12 +1,67 @@
+// =========================
+// MARCA (valores reales del proyecto)
+// =========================
 $verde-claro: #6BAC73;
 $verde-oscuro: #166D20;
 $manteca: #F9ECD9;
-$naranja: #EBAF2B;
+$naranja: #EBAF2B; // dorado de marca
 $blanco: #ffffff;
 $negro: #333;
 
-$radius-sm: 8px;
-$radius-md: 16px;
-$radius-lg: 22px;
+// =========================
+// TONOS DERIVADOS
+// =========================
+$verde-profundo: #0E4715;   // fondos oscuros y texto sobre dorado
+$verde-hover: #1B7D27;
+$verde-suave: #E8F2E9;      // superficies tintadas
+$verde-tenue: #F3F8F3;
 
-$sombra-card: 0 20px 40px rgba(0,0,0,0.25);
+$dorado-hover: #DCA01E;
+$dorado-texto: #8A6100;     // dorado legible sobre fondos claros
+$dorado-suave: #FCF1D8;
+
+$crema-claro: #FDF8F1;      // fondo general
+$papel: #FFFDF9;            // tarjetas sobre fondos oscuros
+$crema-borde: #EADCC6;
+$crema-borde-fuerte: #D8C6A8;
+$crema-borde-suave: #F1E7D7;
+
+$tinta: #1E2B21;            // texto principal
+$tinta-suave: #4A584D;      // texto secundario
+$tinta-tenue: #5F6B62;      // texto auxiliar (AA sobre crema)
+
+$error: #B3261E;
+$error-suave: #FDECEA;
+$exito: $verde-oscuro;
+$exito-suave: #E3F2E5;
+
+// =========================
+// TIPOGRAFÍA
+// =========================
+$font-base: "Poppins", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+
+// =========================
+// RADIOS
+// =========================
+$radius-xs: 8px;
+$radius-sm: 12px;
+$radius-md: 16px;
+$radius-lg: 24px;
+$radius-xl: 28px;
+$radius-pill: 999px;
+
+// =========================
+// SOMBRAS
+// =========================
+$sombra-xs: 0 1px 2px rgba(30, 43, 33, 0.06);
+$sombra-sm: 0 1px 2px rgba(30, 43, 33, 0.05), 0 4px 14px -6px rgba(30, 43, 33, 0.10);
+$sombra-md: 0 2px 4px rgba(30, 43, 33, 0.04), 0 14px 32px -14px rgba(30, 43, 33, 0.18);
+$sombra-lg: 0 30px 60px -24px rgba(6, 38, 11, 0.55), 0 12px 24px -12px rgba(6, 38, 11, 0.30);
+$sombra-card: $sombra-md;
+
+// =========================
+// MOVIMIENTO
+// =========================
+$ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+$dur-fast: 0.15s;
+$dur: 0.25s;

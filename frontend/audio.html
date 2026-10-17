@@ -35,6 +35,7 @@ Estamos preparando tu audio.
 </div>
 
 
+<script src="js/config.js?v=2026.1600"></script>
 <script>
 
 const params = new URLSearchParams(window.location.search);
@@ -58,7 +59,7 @@ return;
 
 try{
 
-const res = await fetch(`https://api.reqrdito.com/api/keychain/${key}`);
+const res = await fetch(`${REQRDITO.API}/api/keychain/${encodeURIComponent(key || "")}`);
 const data = await res.json();
 
 if(!data || !data.audioUrl){
@@ -77,7 +78,7 @@ mensaje.textContent = "Reproducí tu audio cuando quieras";
 
 const audio = document.createElement("audio");
 audio.controls = true;
-audio.src = `https://api.reqrdito.com${data.audioUrl}`;
+audio.src = `${REQRDITO.API}${data.audioUrl}`;
 audio.className = "audio-player";
 
 audioContainer.appendChild(audio);

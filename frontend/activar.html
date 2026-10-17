@@ -21,6 +21,7 @@
 
 <meta name="theme-color" content="#6BAC73">
 <!-- Google Identity -->
+<script src="js/config.js?v=2026.1600"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 </head>
@@ -93,7 +94,7 @@ async function handleCredentialResponse(response) {
 try{
 
 // LOGIN
-const login = await fetch("https://api.reqrdito.com/api/auth/google",{
+const login = await fetch(`${REQRDITO.API}/api/auth/google`,{
 
 method:"POST",
 headers:{ "Content-Type":"application/json" },
@@ -110,11 +111,14 @@ estado.innerHTML = "Error iniciando sesión";
 return;
 }
 
-localStorage.setItem("token", loginData.token);
+// misma clave de sesión que el resto del sitio (js/auth-init.js)
+localStorage.setItem("authToken", loginData.token);
+localStorage.setItem("loginTime", Date.now());
+localStorage.removeItem("token");
 
 
 // 🔥 ACTIVAR LLAVERO
-const res = await fetch(`https://api.reqrdito.com/api/keychain/activar?key=${key}`);
+const res = await fetch(`${REQRDITO.API}/api/keychain/activar?key=${encodeURIComponent(key)}`);
 const data = await res.json();
 
 if(!data.success){
@@ -128,7 +132,7 @@ return;
 // ===============================
 if(data.usado && data.recuerdoId){
 
-window.location.href = `/recuerdo.html?id=${data.recuerdoId}`;
+window.location.href = `/recuerdo.html?id=${encodeURIComponent(data.recuerdoId)}`;
 return;
 
 }
@@ -138,7 +142,7 @@ return;
 // ✍️ CREAR RECUERDO
 // ===============================
 window.location.href =
-`/crear-recuerdo.html?key=${key}&pack=${data.pack}`;
+`/crear-recuerdo.html?key=${encodeURIComponent(key)}&pack=${encodeURIComponent(data.pack)}`;
 
 
 }catch(err){

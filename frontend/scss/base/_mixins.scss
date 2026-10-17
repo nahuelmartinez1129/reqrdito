@@ -6,30 +6,186 @@
   justify-content: center;
 }
 
-@mixin button-primary {
-  background: $naranja;
-  color: $verde-oscuro;
-  border: none;
-  border-radius: 30px;
-  padding: 0.9rem 1.6rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-
-  &:hover {
-    transform: scale(1.03);
-    opacity: 0.95;
-  }
-}
-
-@mixin card {
-  background: $manteca;
-  border-radius: $radius-lg;
-  box-shadow: $sombra-card;
-}
-
 @mixin flex-between {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+// Anillo de foco accesible
+@mixin focus-ring($color: $verde-oscuro) {
+  outline: 3px solid $color;
+  outline-offset: 3px;
+}
+
+// =========================
+// BOTONES
+// =========================
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 48px;
+  padding: 0.8rem 1.6rem;
+  border: 1px solid transparent;
+  border-radius: $radius-pill;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color $dur $ease,
+    border-color $dur $ease,
+    color $dur $ease,
+    box-shadow $dur $ease,
+    transform $dur-fast $ease;
+
+  [data-lucide] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    flex-shrink: 0;
+    color: currentColor;
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &:disabled,
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+// Dorado: acción principal de marketing
+@mixin button-primary {
+  @include button-base;
+  background: $naranja;
+  color: $verde-profundo;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 8px 20px -10px rgba(138, 97, 0, 0.65);
+
+  &:hover:not(:disabled):not(.disabled) {
+    background: $dorado-hover;
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 12px 26px -12px rgba(138, 97, 0, 0.75);
+  }
+}
+
+// Verde: acción principal de formularios / flujo de compra
+@mixin button-green {
+  @include button-base;
+  background: $verde-oscuro;
+  color: $manteca;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 10px 24px -12px rgba(22, 109, 32, 0.7);
+
+  &:hover:not(:disabled) {
+    background: $verde-hover;
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 14px 28px -12px rgba(22, 109, 32, 0.75);
+  }
+}
+
+// Contorno: acción secundaria
+@mixin button-ghost {
+  @include button-base;
+  background: transparent;
+  color: $verde-oscuro;
+  border-color: rgba(22, 109, 32, 0.28);
+
+  &:hover:not(:disabled) {
+    background: $verde-suave;
+    border-color: rgba(22, 109, 32, 0.45);
+  }
+}
+
+// =========================
+// SUPERFICIES
+// =========================
+@mixin card {
+  background: $blanco;
+  border: 1px solid $crema-borde-suave;
+  border-radius: $radius-lg;
+  box-shadow: $sombra-sm;
+}
+
+// Tarjeta principal sobre fondo verde (páginas de una sola tarjeta)
+@mixin panel {
+  background: $papel;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: $radius-xl;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), $sombra-lg;
+}
+
+// Fondo de marca para pantallas de flujo (crear, pago, recuerdo...)
+@mixin brand-backdrop {
+  background-color: $verde-oscuro;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgba($verde-claro, 0.5), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 0% 100%, rgba($naranja, 0.14), transparent 65%),
+    linear-gradient(160deg, $verde-oscuro 0%, $verde-profundo 100%);
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+// Insignia para iconos de Lucide
+@mixin icon-badge($size: 56px, $pad: 15px, $bg: $verde-suave, $color: $verde-oscuro, $radius: $radius-md) {
+  width: $size;
+  height: $size;
+  padding: $pad;
+  border-radius: $radius;
+  background: $bg;
+  color: $color;
+  stroke-width: 1.8;
+  flex-shrink: 0;
+}
+
+// Campo de formulario
+@mixin field {
+  width: 100%;
+  min-height: 50px;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid $crema-borde;
+  border-radius: $radius-md;
+  background-color: $blanco;
+  color: $tinta;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color $dur $ease, box-shadow $dur $ease, background-color $dur $ease;
+
+  &::placeholder {
+    color: $tinta-tenue;
+  }
+
+  &:hover {
+    border-color: $crema-borde-fuerte;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+    border-color: $verde-claro;
+    box-shadow: 0 0 0 4px rgba($verde-claro, 0.25);
+  }
 }

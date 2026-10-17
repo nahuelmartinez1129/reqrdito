@@ -23,11 +23,12 @@
       <i data-lucide="check-circle"></i>
     </div>
 
-    <h1>Pago confirmado</h1>
+    <!-- El estado lo confirma el backend (consultando a Mercado Pago), no esta página -->
+    <h1 id="titulo">Confirmando tu pago…</h1>
 
-    <p class="mensaje-principal">
-      Tu recuerdo ya empezó a tomar forma 💚<br>
-      En segundos vas a poder escucharlo y compartirlo.
+    <p class="mensaje-principal" id="mensaje" role="status" aria-live="polite">
+      Estamos verificando el pago con Mercado Pago.<br>
+      En unos segundos te llevamos a tu recuerdo.
     </p>
 
     <div class="acciones">
@@ -50,23 +51,78 @@
   </main>
 
   <!-- LUCIDE -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="js/config.js?v=2026.1600"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 
   <script>
     lucide.createIcons();
 
     const params = new URLSearchParams(window.location.search);
-    const externalRef = params.get("external_reference");
+    const externalRef = params.get("external_reference") || "";
+    const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const recuerdoId = externalRef.startsWith("REQRDITO_") ? externalRef.slice("REQRDITO_".length) : "";
 
     const btn = document.getElementById("verRecuerdo");
+    const titulo = document.getElementById("titulo");
+    const mensaje = document.getElementById("mensaje");
 
-    if (externalRef && externalRef.startsWith("REQRDITO_")) {
-      const id = externalRef.replace("REQRDITO_", "");
-      btn.href = `recuerdo.html?id=${id}`;
-    } else {
+    // Consulta cada 2,5 s durante 1 minuto
+    const INTERVALO_MS = 2500;
+    const INTENTOS = 24;
+
+    function sinRecuerdo() {
+      titulo.textContent = "No encontramos el recuerdo";
+      mensaje.textContent = "Si pagaste, tu recuerdo va a aparecer en Mis recuerdos cuando se confirme el pago.";
       btn.classList.add("disabled");
-      btn.innerHTML = "Recuerdo no disponible";
+      btn.textContent = "Recuerdo no disponible";
       btn.removeAttribute("href");
+    }
+
+    async function estaPagado() {
+      const res = await fetch(`${REQRDITO.API}/api/recuerdo/${encodeURIComponent(recuerdoId)}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return (await res.json()).pagado === true;
+    }
+
+    async function confirmar() {
+      // Solo en pruebas locales: Mercado Pago no puede notificar a localhost, así que se
+      // avisa al webhook local con el payment_id de la vuelta. El backend consulta el pago
+      // en Mercado Pago y valida estado, importe y moneda antes de activar el recuerdo.
+      const paymentId = params.get("payment_id") || params.get("collection_id");
+      if (REQRDITO.local && /^\d+$/.test(paymentId || "")) {
+        try {
+          const r = await fetch(`${REQRDITO.API}/api/webhook?type=payment&data.id=${paymentId}`, { method: "POST" });
+          console.log("Webhook local:", r.status);
+        } catch (err) {
+          console.warn("Webhook local no disponible:", err.message);
+        }
+      }
+
+      for (let i = 0; i < INTENTOS; i++) {
+        try {
+          if (await estaPagado()) {
+            titulo.textContent = "¡Pago confirmado!";
+            mensaje.textContent = "Tu recuerdo está listo 💚 Te llevamos a escucharlo…";
+            setTimeout(() => { window.location.href = btn.href; }, 1500);
+            return;
+          }
+        } catch (err) {
+          console.warn("No se pudo consultar el recuerdo:", err.message);
+        }
+        await new Promise(r => setTimeout(r, INTERVALO_MS));
+      }
+
+      // Sin confirmación del backend: no se afirma que el pago esté aprobado
+      titulo.textContent = "Seguimos confirmando tu pago";
+      mensaje.textContent = "La confirmación de Mercado Pago está demorando. Tu recuerdo se activa apenas llegue: " +
+        "podés esperar acá o volver a verlo desde Mis recuerdos.";
+    }
+
+    if (UUID.test(recuerdoId) && window.REQRDITO) {
+      btn.href = `recuerdo.html?id=${recuerdoId}`;
+      confirmar();
+    } else {
+      sinRecuerdo();
     }
   </script>
 

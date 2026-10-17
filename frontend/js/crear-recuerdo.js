@@ -36,6 +36,26 @@ console.log("Formato usado:", mimeType);
   const estado = document.getElementById("estado");
   const loginModal = document.getElementById("loginModal");
   const btnCancelar = document.getElementById("btnCancelar");
+  const loginEstado = document.getElementById("loginEstado");
+
+  // Login con Google dentro de la página: el botón se renderiza en el modal y el
+  // inicio de sesión es por ventana emergente, así que lo cargado (nombre, pack,
+  // archivos y grabaciones) sigue en memoria. Al iniciar sesión se continúa solo.
+  let continuarTrasLogin = false;
+  auth.initLoginModal("loginModal", "googleBtn");
+
+  document.addEventListener("loginSuccess", () => {
+    if (!continuarTrasLogin) return;
+    continuarTrasLogin = false;
+    estado.textContent = "✅ Sesión iniciada. Guardando tu recuerdo...";
+    btnContinuar.click();
+  });
+
+  function pedirLogin(mensaje){
+    continuarTrasLogin = true;
+    loginEstado.textContent = mensaje || "";
+    loginModal.classList.add("is-active");
+  }
   
 
   let pack = "individual";
@@ -134,6 +154,24 @@ audio2.addEventListener("change", () => {
 
     estado.textContent = "";
 
+    const nombre = document.getElementById("nombre").value.trim();
+
+    if(!nombre){
+
+      estado.textContent = "⚠️ Escribí un nombre para tu recuerdo";
+
+      return;
+
+    }
+
+    if(nombre.length > 120){
+
+      estado.textContent = "⚠️ El nombre es demasiado largo (máximo 120 caracteres)";
+
+      return;
+
+    }
+
     if(!audio1.files[0] && !audioBlob1){
 
       estado.textContent = "⚠️ Falta el audio principal";
@@ -150,19 +188,16 @@ audio2.addEventListener("change", () => {
 
     }
 
-    if(!auth.isLogged() && !keychainKey){
+    // el backend exige sesión también para activar llaveros
+    if(!auth.isLogged()){
 
-      loginModal.classList.add("is-active");
-
-      document.addEventListener("loginSuccess", () => {
-
-        btnContinuar.click();
-
-      }, { once:true });
+      pedirLogin();
 
       return;
 
     }
+
+    btnContinuar.disabled = true;
 
     try{
 
@@ -170,7 +205,7 @@ audio2.addEventListener("change", () => {
 
       const formData = new FormData();
 
-      formData.append("nombre", document.getElementById("nombre").value);
+      formData.append("nombre", nombre);
       formData.append("pack", pack);
       if(audio1.files[0]){
   formData.append("audio1", audio1.files[0]);
@@ -191,8 +226,8 @@ audio2.addEventListener("change", () => {
 }
 
       const url = keychainKey
-        ? `https://api.reqrdito.com/api/upload?key=${keychainKey}`
-        : `https://api.reqrdito.com/api/upload`;
+        ? `${REQRDITO.API}/api/upload?key=${encodeURIComponent(keychainKey)}`
+        : `${REQRDITO.API}/api/upload`;
 
       const token = auth.getToken() || localStorage.getItem("token");
 
@@ -204,16 +239,20 @@ audio2.addEventListener("change", () => {
           body:formData
         });
 
+        // sesión vencida: se vuelve a pedir el login sin salir de la página
         if (res.status === 401) {
-          localStorage.removeItem("authToken");
-          window.location.href = "index.html";
+          auth.clearToken();
+          estado.textContent = "";
+          btnContinuar.disabled = false;
+          pedirLogin("Tu sesión venció. Iniciá sesión de nuevo: lo que cargaste no se pierde.");
           return;
         }
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if(!res.ok || !data.id){
-        throw new Error("Error creando recuerdo");
+        // mensajes del backend (archivo inválido, demasiado grande, llavero usado...)
+        throw new Error(data.error || "Error creando recuerdo");
       }
 
       if(keychainKey){
@@ -230,7 +269,9 @@ audio2.addEventListener("change", () => {
 
       console.error(err);
 
-      estado.textContent = "❌ Error creando recuerdo";
+      estado.textContent = `❌ ${err.message || "Error creando recuerdo"}`;
+
+      btnContinuar.disabled = false;
 
     }
 
@@ -238,7 +279,11 @@ audio2.addEventListener("change", () => {
 
   btnCancelar.addEventListener("click", () => {
 
+    continuarTrasLogin = false;
+
     loginModal.classList.remove("is-active");
+
+    estado.textContent = "Iniciá sesión cuando quieras continuar: lo que cargaste sigue acá.";
 
   });
 

@@ -1,30 +1,55 @@
-const mongoose = require("mongoose");
-const Keychain = require("../models/Keychain");
+// Crea llaveros nuevos en la base configurada en DATABASE_URL.
+// Uso: node scripts/generarKeychains.js --cantidad 100 [--pack individual|pareja] --si
+// Sin --si solo muestra lo que haría (evita altas accidentales en producción).
+require("dotenv").config({ quiet: true });
 
-require("dotenv").config();
+const prisma = require("../db/prisma");
+const { generarCodigoLlavero } = require("../utils/codigos");
+const { enteroEnRango, PACKS } = require("../utils/validacion");
+
+function arg(nombre) {
+  const i = process.argv.indexOf(`--${nombre}`);
+  return i === -1 ? undefined : process.argv[i + 1];
+}
 
 async function generarKeychains() {
 
-  await mongoose.connect(process.env.MONGO_URI);
+  const cantidad = enteroEnRango(arg("cantidad") ?? 100, 1, 1000);
+  const pack = arg("pack") ?? "individual";
 
-  const cantidad = 100;
+  if (cantidad === null || !PACKS.includes(pack)) {
+    throw new Error("Uso: --cantidad 1..1000 --pack individual|pareja --si");
+  }
 
-  for (let i = 0; i < cantidad; i++) {
+  if (!process.argv.includes("--si")) {
+    console.log(`Simulación: se crearían ${cantidad} llaveros "${pack}". Agregá --si para crearlos.`);
+    return;
+  }
 
-    const qrId = "KEY" + Math.random().toString(36).substring(2, 8).toUpperCase();
+  let creados = 0;
 
-    await Keychain.create({
-      qrId
-    });
+  while (creados < cantidad) {
 
-    console.log("Creado:", qrId);
+    const qrId = generarCodigoLlavero("KEY", 6);
+
+    try {
+      await prisma.keychain.create({ data: { qrId, pack } });
+      creados++;
+      console.log("Creado:", qrId);
+    } catch (err) {
+      if (err.code !== "P2002") throw err;
+      console.log("Código repetido, se reintenta:", qrId);
+    }
 
   }
 
-  console.log("Llaveros generados");
-
-  process.exit();
+  console.log(`Llaveros generados: ${creados}`);
 
 }
 
-generarKeychains();
+generarKeychains()
+  .catch((err) => {
+    console.error(err.message);
+    process.exitCode = 1;
+  })
+  .finally(() => prisma.$disconnect());

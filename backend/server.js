@@ -1,93 +1,46 @@
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const path = require("path");
+const { validarEntorno } = require("./config/env");
 
-// ROUTES
-const keychainRoutes = require("./routes/keychainRoutes");
-const uploadRoutes = require("./routes/upload");
-const pagoRoutes = require("./routes/pago");
-const recuerdoRoutes = require("./routes/recuerdo");
-const webhookRoutes = require("./routes/webhook");
-const descargaRoutes = require("./routes/descarga");
-const misRecuerdosRoutes = require("./routes/misRecuerdos");
-const authGoogleRoutes = require("./routes/authGoogle");
-const keychainAdminRoutes = require("./routes/keychainAdminRoutes");
-const authMiddleware = require("./middleware/auth");
+const { errores, avisos } = validarEntorno();
 
-// EVENTS
-const eventsRoutes = require("./events/routes/eventsRoutes");
+for (const aviso of avisos) console.warn("⚠️", aviso);
 
-const app = express();
+if (errores.length) {
+  for (const error of errores) console.error("🔴", error);
+  process.exit(1);
+}
 
-/* =========================
-   CORS (FIX DEFINITIVO)
-========================= */
+const prisma = require("./db/prisma");
+const app = require("./app");
 
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
+const PORT = Number(process.env.PORT) || 5000;
 
-/* =========================
-   MIDDLEWARES
-========================= */
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-/* =========================
-   ARCHIVOS ESTÁTICOS
-========================= */
-
-// audios y QR de llaveros
-app.use("/audio", express.static(path.join(__dirname, "uploads/audio")));
-app.use("/qr", express.static(path.join(__dirname, "uploads/qr")));
-
-// eventos
-app.use("/events-admin", express.static(path.join(__dirname, "events/admin-panel")));
-app.use("/events-public", express.static(path.join(__dirname, "events/public")));
-
-/* =========================
-   DB + ROUTES
-========================= */
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-
-    console.log("🟢 MongoDB conectado");
-
-    // API GENERAL
-    app.use("/api", uploadRoutes);
-    app.use("/api", pagoRoutes);
-    app.use("/api", recuerdoRoutes);
-    app.use("/api", webhookRoutes);
-    app.use("/api", descargaRoutes);
-    app.use("/api", misRecuerdosRoutes);
-
-    // KEYCHAINS
-    app.use("/api/keychain", keychainRoutes);
-    app.use("/api/keychain-admin", keychainAdminRoutes);
-
-    // GOOGLE AUTH
-    app.use("/api", authGoogleRoutes);
-
-    // EVENTS
-    app.use("/events", authMiddleware, eventsRoutes);
-    /* =========================
-       SERVER
-    ========================= */
-
-    const PORT = 5000;
-
-    app.listen(PORT, () => {
-      console.log("🚀 Backend escuchando en puerto", PORT);
-    });
-
-  })
-  .catch((err) => {
-    console.error("🔴 Error conectando a MongoDB:", err);
+async function iniciar() {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    console.log("🟢 PostgreSQL conectado");
+  } catch (err) {
+    console.error("🔴 Error conectando a PostgreSQL:", err.message);
     process.exit(1);
+  }
+
+  const server = app.listen(PORT, () => {
+    console.log("🚀 Backend escuchando en puerto", PORT);
   });
+
+  // PM2 envía SIGINT al reiniciar: cerrar HTTP y la conexión a la base
+  const cerrar = (signal) => {
+    console.log(`Recibido ${signal}, cerrando...`);
+    server.close(async () => {
+      await prisma.$disconnect();
+      process.exit(0);
+    });
+    setTimeout(() => process.exit(1), 10000).unref();
+  };
+
+  process.on("SIGINT", cerrar);
+  process.on("SIGTERM", cerrar);
+}
+
+iniciar();

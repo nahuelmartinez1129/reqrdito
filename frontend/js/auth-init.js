@@ -6,9 +6,11 @@ let googleReady = false;
 /* =========================
    TOKEN
 ========================= */
+// Clave única de sesión: "authToken". "token" es la clave vieja de activar.html.
 function setToken(token) {
   localStorage.setItem("authToken", token);
-  localStorage.setItem("loginTime", Date.now()); 
+  localStorage.setItem("loginTime", Date.now());
+  localStorage.removeItem("token");
 }
 
 function getToken() {
@@ -17,6 +19,8 @@ function getToken() {
 
 function clearToken() {
   localStorage.removeItem("authToken");
+  localStorage.removeItem("token");
+  localStorage.removeItem("loginTime");
 }
 
 function isLogged() {
@@ -25,7 +29,8 @@ function isLogged() {
 
 function parseJwt(token) {
   try {
-    return JSON.parse(atob(token.split('.')[1]));
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(decodeURIComponent(escape(atob(base64))));
   } catch {
     return null;
   }
@@ -125,7 +130,7 @@ function renderGoogleButton(container) {
 function handleGoogleLogin(response) {
   if (!response.credential) return;
 
-  fetch("https://api.reqrdito.com/api/auth/google", {
+  fetch(`${(window.REQRDITO && REQRDITO.API) || "https://api.reqrdito.com"}/api/auth/google`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -138,7 +143,7 @@ function handleGoogleLogin(response) {
   .then(data => {
 
     if (!data.token) {
-  alert("Error al iniciar sesión");
+  alert(data.error || "Error al iniciar sesión");
   return;
 }
 
@@ -179,7 +184,7 @@ function updateHeaderUI(containerId = "googleLogin") {
 
   container.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;color:white;font-weight:600;">
-      Hola, ${nombre}
+      <span class="saludo-usuario"></span>
       <button id="logoutBtn" style="
         background:#EBAF2B;
         border:none;
@@ -191,6 +196,9 @@ function updateHeaderUI(containerId = "googleLogin") {
       </button>
     </div>
   `;
+
+  // el nombre viene de Google: se inserta como texto, nunca como HTML
+  container.querySelector(".saludo-usuario").textContent = `Hola, ${nombre}`;
 
   document.getElementById("logoutBtn").onclick = () => {
     clearToken();
@@ -227,6 +235,7 @@ function initLoginModal(modalId, containerId) {
 window.auth = {
   isLogged,
   getToken,
+  clearToken,
   initHeader,
   initLoginModal,
   updateHeaderUI

@@ -1,0 +1,74 @@
+body.qr-page {
+  background: #0f172a;
+  color: #F9ECD9;
+  font-family: Inter, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.qr-card {
+  background: #111827;
+  border: 2px solid #166D20;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 420px;
+}
+
+.qr-card h2 {
+  color: #EBAF2B;
+}
+
+audio {
+  width: 100%;
+  margin: 15px 0;
+}
+
+.buttons a {
+  display: inline-block;
+  background: #6BAC73;
+  color: black;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  text-decoration: none;
+}
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+
+  body.qr-page {
+    padding: 12px;
+    align-items: flex-start; /* evita zoom raro */
+  }
+
+  .qr-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 18px;
+    border-radius: 14px;
+    margin-top: 10px;
+  }
+
+  .qr-card h2 {
+    font-size: 20px;
+  }
+
+  audio {
+    width: 100%;
+    margin: 12px 0;
+  }
+
+  .qr-card img {
+    width: 220px; /* QR más grande en celular */
+    max-width: 100%;
+    padding: 8px;
+  }
+
+  .buttons a {
+    width: 100%;
+    font-size: 16px;
+    padding: 14px;
+  }
+}

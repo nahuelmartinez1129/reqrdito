@@ -1,40 +1,218 @@
-@use 'variables' as *;
-@use '../base/variables' as v;
+@use 'variables' as v;
+@use 'mixins' as m;
+
+/* =========================
+   BASE
+========================= */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* El color base se mantiene en verde oscuro (identidad original y panel
+   admin); las páginas públicas definen texto de lectura con v.$tinta. */
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: $manteca;
-  color: $verde-oscuro;
+  font-family: v.$font-base;
+  background: v.$crema-claro;
+  color: v.$verde-oscuro;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.18;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+a {
+  color: v.$verde-oscuro;
+  text-underline-offset: 0.2em;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* Botón base (antes vivía en _crear-recuerdo y afectaba a todo el sitio) */
+button {
+  padding: 10px 16px;
+  border-radius: v.$radius-sm;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+::selection {
+  background: rgba(v.$naranja, 0.35);
+  color: v.$verde-profundo;
+}
+
+/* Foco visible para navegación por teclado */
+:focus-visible {
+  @include m.focus-ring;
 }
 
 /* =========================
-   ICONOS (GLOBAL)
+   ICONOS (GLOBAL · Lucide)
+   Lucide reemplaza <i data-lucide> por <svg data-lucide class="lucide">,
+   por eso se apunta al atributo y no a la etiqueta.
 ========================= */
 
-i[data-lucide] {
-  width: 36px;
-  height: 36px;
-  stroke-width: 1.8;
-  color: v.$verde-oscuro;
+[data-lucide] {
   display: inline-block;
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.8;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
-/* Iconos dentro de cards */
-.use i,
-.step i {
-  margin-bottom: 1rem;
+/* =========================
+   UTILIDADES DE ESTADO (usadas por JS)
+========================= */
+
+.oculto,
+.hidden {
+  display: none !important;
 }
 
-/* Hover premium */
-.use,
-.step {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+/* Oculto a la vista, legible por lectores de pantalla */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
 
-  &:hover {
-    transform: translateY(-4px);
+/* =========================
+   BOTÓN PRINCIPAL COMPARTIDO
+========================= */
 
-    i {
-      color: v.$naranja;
-    }
+.btn-primary {
+  @include m.button-primary;
+}
+
+.btn-ghost {
+  @include m.button-ghost;
+}
+
+.btn-lg {
+  min-height: 56px;
+  padding: 1rem 1.9rem;
+  font-size: 1.05rem;
+}
+
+/* Enlace "saltar al contenido" (visible solo con teclado) */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  z-index: 100000;
+  padding: 0.75rem 1.25rem;
+  border-radius: v.$radius-pill;
+  background: v.$verde-oscuro;
+  color: v.$manteca;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:focus {
+    top: 1rem;
+  }
+}
+
+/* =========================
+   AUDIO NATIVO
+========================= */
+
+audio {
+  display: block;
+  width: 100%;
+  height: 48px;
+  border-radius: v.$radius-pill;
+
+  &:focus-visible {
+    outline-offset: 2px;
+  }
+}
+
+audio::-webkit-media-controls-panel {
+  background-color: v.$verde-suave;
+}
+
+/* =========================
+   SPINNER DE CARGA COMPARTIDO
+========================= */
+
+.spinner {
+  width: 56px;
+  height: 56px;
+  margin: 1.75rem auto;
+  border-radius: 50%;
+  border: 5px solid rgba(v.$verde-oscuro, 0.14);
+  border-top-color: v.$verde-oscuro;
+  border-right-color: v.$naranja;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   MOVIMIENTO REDUCIDO
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* El spinner comunica carga: se mantiene, más lento */
+  .spinner {
+    animation-duration: 1.8s !important;
+    animation-iteration-count: infinite !important;
   }
 }

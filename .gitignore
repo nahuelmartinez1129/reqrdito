@@ -1,0 +1,35 @@
+# Variables de entorno (en cualquier carpeta): solo se versionan las plantillas
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# Credenciales, claves privadas y certificados
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+credentials*.json
+service-account*.json
+
+# Dumps y respaldos de bases de datos (datos personales)
+# Ojo: no ignorar *.sql, las migraciones de Prisma y scripts/sql/ se versionan
+backups-migracion/
+*.dump
+*.backup
+*.bak
+*.sql.gz
+
+# Dependencias y builds
+node_modules/
+dist/
+build/
+
+# Logs y temporales
+*.log
+npm-debug.log*
+*.tmp
+.DS_Store
+Thumbs.db

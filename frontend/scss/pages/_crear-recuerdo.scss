@@ -1,78 +1,235 @@
-@use 'sass:color';
 @use '../base/variables' as v;
 @use '../base/mixins' as m;
 
+/* =========================
+   LAYOUT (crear-recuerdo y pago comparten .crear-body / .crear-card)
+========================= */
+
 .crear-body {
-  min-height: 100vh;
-  background: linear-gradient(
-    135deg,
-    v.$verde-claro,
-    v.$verde-oscuro
-  );
+  @include m.brand-backdrop;
   @include m.flex-center;
-  padding: 2rem;
+  padding: clamp(1rem, 4vw, 2.5rem);
 }
 
 .crear-card {
-  @include m.card;
+  @include m.panel;
   width: 100%;
-  max-width: 460px;
-  padding: 2.5rem 2.2rem;
-  animation: fadeUp 0.6s ease;
+  max-width: 500px;
+  padding: clamp(1.75rem, 5vw, 2.75rem) clamp(1.25rem, 5vw, 2.5rem);
+  animation: fadeUp 0.6s v.$ease;
 
   h1 {
     text-align: center;
+    font-size: clamp(1.6rem, 1.25rem + 1.5vw, 2.1rem);
+    letter-spacing: -0.03em;
     margin-bottom: 0.5rem;
     color: v.$verde-oscuro;
   }
 
   p {
     text-align: center;
-    font-size: 0.95rem;
-    color: color.adjust(v.$verde-oscuro, $lightness: -10%);
+    font-size: 0.97rem;
+    color: v.$tinta-suave;
     margin-bottom: 2rem;
+  }
+
+  /* Mensajes de estado escritos por JS */
+  #estado {
+    margin: 1rem 0 0;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: v.$verde-oscuro;
+
+    &:empty {
+      display: none;
+    }
   }
 }
 
+/* =========================
+   SELECTOR DE PACK
+========================= */
+
+.pack-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 2rem;
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pack-btn {
+  position: relative;
+  margin: 0;
+  background: v.$blanco;
+  border: 1.5px solid v.$crema-borde;
+  border-radius: v.$radius-md + 2;
+  padding: 1.1rem 2.25rem 1.1rem 1.1rem;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.35;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+
+  color: v.$verde-oscuro;
+  font-weight: 600;
+  font-size: 1rem;
+
+  transition:
+    transform v.$dur v.$ease,
+    box-shadow v.$dur v.$ease,
+    background-color v.$dur v.$ease,
+    border-color v.$dur v.$ease;
+
+  box-shadow: v.$sombra-xs;
+
+  /* Indicador tipo radio (decorativo) */
+  &::after {
+    content: "";
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid v.$crema-borde-fuerte;
+    background: v.$blanco;
+    transition: border-color v.$dur v.$ease, box-shadow v.$dur v.$ease, background-color v.$dur v.$ease;
+  }
+
+  small {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: v.$tinta-tenue;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: v.$verde-claro;
+    box-shadow: v.$sombra-sm;
+  }
+
+  &.active {
+    background: v.$verde-suave;
+    color: v.$verde-oscuro;
+    border-color: v.$verde-oscuro;
+    box-shadow: 0 0 0 3px rgba(v.$verde-oscuro, 0.1), v.$sombra-sm;
+
+    &::after {
+      border-color: v.$verde-oscuro;
+      background: v.$verde-oscuro;
+      box-shadow: inset 0 0 0 3px v.$verde-suave;
+    }
+
+    small {
+      color: v.$tinta-suave;
+    }
+  }
+}
+
+/* =========================
+   FORMULARIO
+========================= */
+
 .form-group {
-  margin-bottom: 1.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+
+  > label,
+  > input,
+  > audio,
+  > small,
+  > .rec-indicator {
+    flex: 1 1 100%;
+  }
+
+  > button {
+    flex: 1 1 0;
+    margin: 0;
+  }
+
+  /* El indicador de grabación se muestra debajo de los botones */
+  > .rec-indicator {
+    order: 1;
+  }
 
   label {
     display: block;
-    font-size: 0.85rem;
-    margin-bottom: 0.4rem;
+    font-size: 0.875rem;
+    margin-bottom: 0;
     color: v.$verde-oscuro;
     font-weight: 600;
   }
 
   input[type="text"],
   input[type="file"] {
-    width: 100%;
-    padding: 0.85rem 0.9rem;
-    border-radius: v.$radius-sm;
-    border: 1px solid color.adjust(v.$verde-oscuro, $lightness: 35%);
-    font-size: 0.95rem;
-    transition: all 0.25s ease;
-    background-color: v.$blanco;
+    @include m.field;
+  }
 
-    &:focus {
-      outline: none;
-      border-color: v.$verde-claro;
-      box-shadow: 0 0 0 3px rgba(107, 172, 115, 0.25);
-    }
+  input[type="text"]:user-invalid {
+    border-color: v.$error;
+    box-shadow: 0 0 0 4px rgba(v.$error, 0.12);
   }
 
   input[type="file"] {
-    padding: 0.65rem;
-    background-color: color.adjust(v.$manteca, $lightness: 4%);
+    padding: 0.55rem;
+    min-height: 56px;
+    border-style: dashed;
+    background-color: v.$crema-claro;
+    color: v.$tinta-suave;
+    font-size: 0.9rem;
     cursor: pointer;
+
+    &::file-selector-button {
+      margin-right: 0.85rem;
+      padding: 0.55rem 1.1rem;
+      border: none;
+      border-radius: v.$radius-pill;
+      background: v.$verde-oscuro;
+      color: v.$manteca;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background-color v.$dur v.$ease;
+    }
+
+    &::-webkit-file-upload-button {
+      margin-right: 0.85rem;
+      padding: 0.55rem 1.1rem;
+      border: none;
+      border-radius: v.$radius-pill;
+      background: v.$verde-oscuro;
+      color: v.$manteca;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+    }
+
+    &:hover::file-selector-button {
+      background: v.$verde-hover;
+    }
   }
 
   small {
     display: block;
-    margin-top: 0.35rem;
-    font-size: 0.75rem;
-    color: #777;
+    margin-top: 0;
+    font-size: 0.78rem;
+    color: v.$tinta-tenue;
+  }
+
+  audio {
+    margin-top: 0.15rem;
   }
 }
 
@@ -83,9 +240,7 @@
 
 .preescucha audio {
   width: 100%;
-  
 }
-
 
 .form-submit {
   margin-top: 2rem;
@@ -93,79 +248,126 @@
   button {
     @include m.button-primary;
     width: 100%;
-    font-size: 1rem;
-    padding: 0.9rem;
-    letter-spacing: 0.5px;
   }
 }
 
 .form-note {
   margin-top: 1.2rem;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   text-align: center;
-  color: #777;
+  color: v.$tinta-tenue;
+}
+
+/* =========================
+   GRABAR / DETENER (botones inline del formulario)
+========================= */
+
+button[onclick*="grabar"],
+button[onclick*="detener"] {
+  @include m.button-base;
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  font-size: 0.92rem;
+
+  /* Símbolo decorativo de grabar / detener */
+  &::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+  }
+}
+
+button[onclick*="grabar"] {
+  background: v.$verde-oscuro;
+  color: v.$manteca;
+
+  &::before {
+    border-radius: 50%;
+    background: #FF6B5E;
+    box-shadow: 0 0 0 3px rgba(255, 107, 94, 0.25);
+  }
+
+  &:hover {
+    background: v.$verde-hover;
+    transform: translateY(-1px);
+  }
+}
+
+button[onclick*="detener"] {
+  background: v.$blanco;
+  color: v.$error;
+  border-color: rgba(v.$error, 0.35);
+
+  &::before {
+    border-radius: 2px;
+    background: currentColor;
+  }
+
+  &:hover {
+    background: v.$error-suave;
+    border-color: rgba(v.$error, 0.55);
+  }
+}
+
+/* Indicador "Grabando..." (JS alterna .hidden) */
+.rec-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 0;
+  padding: 0.5rem 0.9rem;
+  border-radius: v.$radius-pill;
+  background: v.$error-suave;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: v.$error;
+}
+
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  background: v.$error;
+  border-radius: 50%;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 /* =========================
    Botón CONTINUAR
-   ========================= */
+========================= */
+
 #btnContinuar {
+  @include m.button-green;
   width: 100%;
-  margin-top: 1.5rem;
-  padding: 0.9rem 1.2rem;
-  background: #166D20;          /* verde fuerte */
-  color: #F9ECD9;               /* manteca */
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 14px;
-  cursor: pointer;
-  transition: 
-    background 0.2s ease,
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
-  box-shadow: 0 10px 25px rgba(22, 109, 32, 0.25);
+  min-height: 54px;
+  margin: 0.5rem 0 0;
+  font-size: 1.02rem;
 }
 
-/* Hover */
-#btnContinuar:hover {
-  background: #1f8a2f;
-  transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(22, 109, 32, 0.35);
-}
-
-/* Click */
-#btnContinuar:active {
-  transform: translateY(0);
-  box-shadow: 0 8px 18px rgba(22, 109, 32, 0.3);
-}
-
-/* Disabled */
-#btnContinuar:disabled {
-  background: #9bbfa5;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-/* Mobile */
 @media (max-width: 480px) {
   #btnContinuar {
-    font-size: 0.95rem;
-    padding: 0.85rem;
+    font-size: 0.98rem;
   }
 }
 
-
-
 /* =========================
    LOGIN GOOGLE POPUP
-   ========================= */
+========================= */
 
 .login-overlay {
   position: fixed;
-  inset: 0; /* top:0 right:0 bottom:0 left:0 */
-  background: rgba(0, 0, 0, 0.55);
+  inset: 0;
+  padding: 1rem;
+  background: rgba(8, 34, 12, 0.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -177,23 +379,22 @@
 }
 
 .login-card {
-  background: #F9ECD9; /* manteca */
+  @include m.panel;
   padding: 2rem;
-  border-radius: 16px;
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   text-align: center;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-  animation: popupIn 0.25s ease;
+  animation: popupIn 0.25s v.$ease;
 }
 
 .login-card h2 {
   margin-bottom: 0.5rem;
-  color: #166D20;
+  color: v.$verde-oscuro;
 }
 
 .login-card p {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+  color: v.$tinta-suave;
   margin-bottom: 1.5rem;
 }
 
@@ -201,18 +402,16 @@
   margin-top: 1rem;
 }
 
-/* 🎬 Animación */
 @keyframes popupIn {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.94);
   }
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
-
 
 @keyframes fadeUp {
   from {
@@ -225,81 +424,16 @@
   }
 }
 
-@media (max-width: 480px) {
-  .crear-card {
-    padding: 2rem 1.6rem;
-  }
-}
-
-
-.pack-selector {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 2rem;
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.pack-btn {
-  background: #ffffff;
-  border: 2px solid rgba(22, 109, 32, 0.15);
-  border-radius: 18px;
-  padding: 18px 14px;
-  cursor: pointer;
-  text-align: center;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-
-  color: #166D20;
-  font-weight: 600;
-  font-size: 1rem;
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    background 0.25s ease,
-    border-color 0.25s ease;
-
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-
-  small {
-    font-size: 0.75rem;
-    font-weight: 500;
-    opacity: 0.7;
-  }
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
-  }
-
-  &.active {
-    background: linear-gradient(135deg, #6BAC73, #166D20);
-    color: #F9ECD9;
-    border-color: transparent;
-    box-shadow: 0 18px 38px rgba(22, 109, 32, 0.35);
-
-    small {
-      opacity: 0.9;
-    }
-  }
-}
-
 .btn-google {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  min-height: 44px;
   padding: 0.7rem 1rem;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid #ddd;
+  border-radius: v.$radius-pill;
+  background: v.$blanco;
+  border: 1px solid v.$crema-borde;
   cursor: pointer;
   font-weight: 600;
 
@@ -310,68 +444,30 @@
   }
 }
 
-// ========================
-// BOTONES CANCELAR
-// ========================
+/* =========================
+   BOTONES CANCELAR (modales de login)
+========================= */
 
 #rqCloseModal,
 #btnCancelar {
-
-  background: transparent;
-  border: 2px solid #6BAC73;
-  color: #166D20;
-
-  padding: 10px 22px;
-  border-radius: 10px;
-
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-
-  cursor: pointer;
-
-  transition: all 0.25s ease;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-}
-
-
-// hover
-#rqCloseModal:hover,
-#btnCancelar:hover {
-
-  background: #6BAC73;
-  color: white;
-
-  transform: translateY(-1px);
-
-}
-
-
-// active click
-#rqCloseModal:active,
-#btnCancelar:active {
-
-  transform: scale(0.97);
-
-}
-
-
-// responsive
-@media (max-width: 600px){
-
-#rqCloseModal,
-#btnCancelar{
-
+  @include m.button-ghost;
   width: 100%;
-  padding: 12px;
-
+  max-width: 240px;
+  min-height: 44px;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.95rem;
 }
 
+@media (max-width: 600px) {
+  #rqCloseModal,
+  #btnCancelar {
+    max-width: none;
+  }
 }
+
+/* =========================
+   ANIMACIÓN DE GRABACIÓN (legacy)
+========================= */
 
 .animacion-grabando {
   display: flex;
@@ -382,8 +478,8 @@
 }
 
 .texto-grabando {
-  color: red;
-  font-weight: bold;
+  color: v.$error;
+  font-weight: 600;
   font-size: 14px;
 }
 
@@ -395,7 +491,8 @@
 .ondas span {
   width: 4px;
   height: 10px;
-  background: #6BAC73;
+  border-radius: 2px;
+  background: v.$verde-claro;
   animation: onda 1s infinite ease-in-out;
 }
 
@@ -408,134 +505,26 @@
   50% { height: 20px; }
 }
 
-.oculto {
-  display: none;
-}
-
-.grabador {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-#btnGrabar1, #btnGrabar2 {
-  background: #EBAF2B;
-  color: #166D20;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-#btnGrabar1:hover, #btnGrabar2:hover {
-  background: #f5c94a;
-  transform: scale(1.05);
-}
-
-#btnDetener1, #btnDetener2 {
-  background: #d9534f;
-  color: white;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-#btnDetener1:disabled,
-#btnDetener2:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-#btnDetener1:hover:not(:disabled),
-#btnDetener2:hover:not(:disabled) {
-  background: #c9302c;
-  transform: scale(1.05);
-}
-.form-group {
-  margin-bottom: 25px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.form-group input[type="file"] {
-  margin-bottom: 10px;
-}
-
-/* Contenedor de botones */
-#btnGrabar1, #btnDetener1,
-#btnGrabar2, #btnDetener2 {
-  margin-top: 5px;
-}
-
-/* Agrupar botones */
 .grabador {
   display: flex;
   gap: 10px;
   margin: 10px 0;
 }
 
-/* Separación del audio */
-audio {
-  margin-top: 12px;
-  width: 100%;
+#btnGrabar1, #btnGrabar2 {
+  @include m.button-primary;
+  min-height: 44px;
+  padding: 0.6rem 1rem;
 }
 
-.rec-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: 14px;
-  color: #e74c3c;
-}
+#btnDetener1, #btnDetener2 {
+  @include m.button-base;
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  background: v.$error;
+  color: v.$blanco;
 
-.hidden {
-  display: none;
-}
-
-.rec-dot {
-  width: 10px;
-  height: 10px;
-  background: red;
-  border-radius: 50%;
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.5); opacity: 0.5; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* botones */
-button {
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  margin: 5px;
-  font-weight: bold;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-button[onclick*="grabar"] {
-  background: #6BAC73;
-  color: white;
-}
-
-button[onclick*="detener"] {
-  background: #E74C3C;
-  color: white;
+  &:hover:not(:disabled) {
+    background: #93201A;
+  }
 }

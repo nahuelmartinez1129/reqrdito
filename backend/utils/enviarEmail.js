@@ -1,32 +1,23 @@
-const { sendEmail } = require("../services/emailService.js");
+const emailService = require("../services/emailService.js");
+const { config } = require("../config/env");
 
 /**
- * Envía el email de recuerdo creado
+ * Envía el email de recuerdo creado / pago confirmado
  * @param {string} email - email del usuario
- * @param {string} codigoRecuerdo - recuerdoId (ej: REQRDITO-9A7KQ2)
+ * @param {string} codigoRecuerdo - recuerdoId (UUID)
+ * @returns {Promise<{enviado: boolean, simulado?: boolean}>}
  */
 module.exports = async function enviarEmail(email, codigoRecuerdo) {
-  try {
-    const linkRecuerdo = `https://reqrdito.com/recuerdo.html?id=${codigoRecuerdo}`;
+  const linkRecuerdo = `${config.frontendUrl}/recuerdo.html?id=${encodeURIComponent(codigoRecuerdo)}`;
 
-
-    console.log("📧 Enviando email a:", email);
-    console.log("🔗 Link del recuerdo:", linkRecuerdo);
-
-    await sendEmail(
-      email,
-      "🎁 Tu recuerdo ReQRdito está listo",
-      "recuerdo-creado.html",
-      {
-        CODIGO: codigoRecuerdo,
-        LINK_RECUERDO: linkRecuerdo,
-      }
-    );
-
-    console.log("✅ Email enviado correctamente");
-
-  } catch (error) {
-    console.error("❌ Error enviando email:", error);
-    throw error; // importante para que el webhook lo registre
-  }
+  // Los errores se propagan: el webhook deja el email pendiente para reintentarlo
+  return emailService.sendEmail(
+    email,
+    "🎁 Tu recuerdo ReQRdito está listo",
+    "recuerdo-creado.html",
+    {
+      CODIGO: codigoRecuerdo,
+      LINK_RECUERDO: linkRecuerdo,
+    }
+  );
 };

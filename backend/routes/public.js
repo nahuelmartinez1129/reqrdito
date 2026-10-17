@@ -1,3 +1,8 @@
+// LEGACY — NO MONTADO en app.js. Se conserva para no perder la referencia a
+// data/recuerdos.json (4 registros históricos impagos, documentados en
+// docs/DATOS_HISTORICOS.md). Los recuerdos se sirven desde PostgreSQL en
+// routes/recuerdo.js. No montar este archivo.
+
 const express = require("express");
 const fs = require("fs");
 const path = require("path");

@@ -12,169 +12,409 @@
 <meta name="theme-color" content="#6BAC73">
   <title>ReQRdito | Tu Historia en un audio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/main.css?v=2026.200">
+  <meta name="description" content="Guardá una voz, una dedicatoria o un mensaje en un QR personalizado. Quien lo escanee lo escucha al instante desde su celular.">
+  <link rel="stylesheet" href="css/main.css?v=2026.300">
 </head>
 
-<body>
+<body class="landing">
 
-<header class="main-header">
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-  <div class="header-top">
+<!-- QR ilustrativo (NO funcional): patrón decorativo reutilizado en la página -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="demo-qr" viewBox="0 0 100 100">
+    <g fill="currentColor">
+      <path fill-rule="evenodd" d="M0 6a6 6 0 0 1 6-6h16a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H6a6 6 0 0 1-6-6zm5 2a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"/>
+      <rect x="8" y="8" width="12" height="12" rx="3"/>
+      <path fill-rule="evenodd" d="M72 6a6 6 0 0 1 6-6h16a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H78a6 6 0 0 1-6-6zm5 2a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H80a3 3 0 0 1-3-3z"/>
+      <rect x="80" y="8" width="12" height="12" rx="3"/>
+      <path fill-rule="evenodd" d="M0 78a6 6 0 0 1 6-6h16a6 6 0 0 1 6 6v16a6 6 0 0 1-6 6H6a6 6 0 0 1-6-6zm5 2a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"/>
+      <rect x="8" y="80" width="12" height="12" rx="3"/>
+      <rect x="32" y="0" width="3.4" height="3.4" rx="1"/><rect x="44" y="0" width="3.4" height="3.4" rx="1"/><rect x="48" y="0" width="3.4" height="3.4" rx="1"/><rect x="52" y="0" width="3.4" height="3.4" rx="1"/><rect x="40" y="4" width="3.4" height="3.4" rx="1"/><rect x="48" y="4" width="3.4" height="3.4" rx="1"/><rect x="52" y="4" width="3.4" height="3.4" rx="1"/><rect x="64" y="4" width="3.4" height="3.4" rx="1"/><rect x="36" y="8" width="3.4" height="3.4" rx="1"/><rect x="44" y="8" width="3.4" height="3.4" rx="1"/><rect x="56" y="8" width="3.4" height="3.4" rx="1"/><rect x="60" y="8" width="3.4" height="3.4" rx="1"/><rect x="36" y="12" width="3.4" height="3.4" rx="1"/><rect x="44" y="12" width="3.4" height="3.4" rx="1"/><rect x="52" y="12" width="3.4" height="3.4" rx="1"/><rect x="60" y="12" width="3.4" height="3.4" rx="1"/><rect x="40" y="16" width="3.4" height="3.4" rx="1"/><rect x="48" y="16" width="3.4" height="3.4" rx="1"/><rect x="52" y="16" width="3.4" height="3.4" rx="1"/><rect x="56" y="16" width="3.4" height="3.4" rx="1"/><rect x="60" y="16" width="3.4" height="3.4" rx="1"/><rect x="64" y="16" width="3.4" height="3.4" rx="1"/><rect x="40" y="20" width="3.4" height="3.4" rx="1"/><rect x="52" y="20" width="3.4" height="3.4" rx="1"/><rect x="56" y="20" width="3.4" height="3.4" rx="1"/><rect x="60" y="20" width="3.4" height="3.4" rx="1"/><rect x="36" y="24" width="3.4" height="3.4" rx="1"/><rect x="40" y="24" width="3.4" height="3.4" rx="1"/><rect x="44" y="24" width="3.4" height="3.4" rx="1"/><rect x="48" y="24" width="3.4" height="3.4" rx="1"/><rect x="56" y="24" width="3.4" height="3.4" rx="1"/><rect x="64" y="24" width="3.4" height="3.4" rx="1"/><rect x="40" y="28" width="3.4" height="3.4" rx="1"/><rect x="44" y="28" width="3.4" height="3.4" rx="1"/><rect x="48" y="28" width="3.4" height="3.4" rx="1"/><rect x="52" y="28" width="3.4" height="3.4" rx="1"/><rect x="60" y="28" width="3.4" height="3.4" rx="1"/><rect x="64" y="28" width="3.4" height="3.4" rx="1"/><rect x="0" y="32" width="3.4" height="3.4" rx="1"/><rect x="12" y="32" width="3.4" height="3.4" rx="1"/><rect x="16" y="32" width="3.4" height="3.4" rx="1"/><rect x="20" y="32" width="3.4" height="3.4" rx="1"/><rect x="24" y="32" width="3.4" height="3.4" rx="1"/><rect x="28" y="32" width="3.4" height="3.4" rx="1"/><rect x="32" y="32" width="3.4" height="3.4" rx="1"/><rect x="36" y="32" width="3.4" height="3.4" rx="1"/><rect x="40" y="32" width="3.4" height="3.4" rx="1"/><rect x="48" y="32" width="3.4" height="3.4" rx="1"/><rect x="52" y="32" width="3.4" height="3.4" rx="1"/><rect x="60" y="32" width="3.4" height="3.4" rx="1"/><rect x="72" y="32" width="3.4" height="3.4" rx="1"/><rect x="76" y="32" width="3.4" height="3.4" rx="1"/><rect x="80" y="32" width="3.4" height="3.4" rx="1"/><rect x="4" y="36" width="3.4" height="3.4" rx="1"/><rect x="8" y="36" width="3.4" height="3.4" rx="1"/><rect x="24" y="36" width="3.4" height="3.4" rx="1"/><rect x="28" y="36" width="3.4" height="3.4" rx="1"/><rect x="32" y="36" width="3.4" height="3.4" rx="1"/><rect x="64" y="36" width="3.4" height="3.4" rx="1"/><rect x="72" y="36" width="3.4" height="3.4" rx="1"/><rect x="76" y="36" width="3.4" height="3.4" rx="1"/><rect x="80" y="36" width="3.4" height="3.4" rx="1"/><rect x="84" y="36" width="3.4" height="3.4" rx="1"/><rect x="88" y="36" width="3.4" height="3.4" rx="1"/><rect x="92" y="36" width="3.4" height="3.4" rx="1"/><rect x="0" y="40" width="3.4" height="3.4" rx="1"/><rect x="4" y="40" width="3.4" height="3.4" rx="1"/><rect x="16" y="40" width="3.4" height="3.4" rx="1"/><rect x="20" y="40" width="3.4" height="3.4" rx="1"/><rect x="24" y="40" width="3.4" height="3.4" rx="1"/><rect x="64" y="40" width="3.4" height="3.4" rx="1"/><rect x="72" y="40" width="3.4" height="3.4" rx="1"/><rect x="80" y="40" width="3.4" height="3.4" rx="1"/><rect x="84" y="40" width="3.4" height="3.4" rx="1"/><rect x="92" y="40" width="3.4" height="3.4" rx="1"/><rect x="96" y="40" width="3.4" height="3.4" rx="1"/><rect x="8" y="44" width="3.4" height="3.4" rx="1"/><rect x="12" y="44" width="3.4" height="3.4" rx="1"/><rect x="68" y="44" width="3.4" height="3.4" rx="1"/><rect x="80" y="44" width="3.4" height="3.4" rx="1"/><rect x="88" y="44" width="3.4" height="3.4" rx="1"/><rect x="0" y="48" width="3.4" height="3.4" rx="1"/><rect x="16" y="48" width="3.4" height="3.4" rx="1"/><rect x="20" y="48" width="3.4" height="3.4" rx="1"/><rect x="32" y="48" width="3.4" height="3.4" rx="1"/><rect x="64" y="48" width="3.4" height="3.4" rx="1"/><rect x="72" y="48" width="3.4" height="3.4" rx="1"/><rect x="84" y="48" width="3.4" height="3.4" rx="1"/><rect x="96" y="48" width="3.4" height="3.4" rx="1"/><rect x="4" y="52" width="3.4" height="3.4" rx="1"/><rect x="8" y="52" width="3.4" height="3.4" rx="1"/><rect x="12" y="52" width="3.4" height="3.4" rx="1"/><rect x="16" y="52" width="3.4" height="3.4" rx="1"/><rect x="20" y="52" width="3.4" height="3.4" rx="1"/><rect x="24" y="52" width="3.4" height="3.4" rx="1"/><rect x="80" y="52" width="3.4" height="3.4" rx="1"/><rect x="96" y="52" width="3.4" height="3.4" rx="1"/><rect x="0" y="56" width="3.4" height="3.4" rx="1"/><rect x="12" y="56" width="3.4" height="3.4" rx="1"/><rect x="20" y="56" width="3.4" height="3.4" rx="1"/><rect x="72" y="56" width="3.4" height="3.4" rx="1"/><rect x="76" y="56" width="3.4" height="3.4" rx="1"/><rect x="96" y="56" width="3.4" height="3.4" rx="1"/><rect x="0" y="60" width="3.4" height="3.4" rx="1"/><rect x="12" y="60" width="3.4" height="3.4" rx="1"/><rect x="20" y="60" width="3.4" height="3.4" rx="1"/><rect x="24" y="60" width="3.4" height="3.4" rx="1"/><rect x="28" y="60" width="3.4" height="3.4" rx="1"/><rect x="32" y="60" width="3.4" height="3.4" rx="1"/><rect x="68" y="60" width="3.4" height="3.4" rx="1"/><rect x="72" y="60" width="3.4" height="3.4" rx="1"/><rect x="76" y="60" width="3.4" height="3.4" rx="1"/><rect x="80" y="60" width="3.4" height="3.4" rx="1"/><rect x="84" y="60" width="3.4" height="3.4" rx="1"/><rect x="96" y="60" width="3.4" height="3.4" rx="1"/><rect x="4" y="64" width="3.4" height="3.4" rx="1"/><rect x="20" y="64" width="3.4" height="3.4" rx="1"/><rect x="36" y="64" width="3.4" height="3.4" rx="1"/><rect x="44" y="64" width="3.4" height="3.4" rx="1"/><rect x="56" y="64" width="3.4" height="3.4" rx="1"/><rect x="68" y="64" width="3.4" height="3.4" rx="1"/><rect x="72" y="64" width="3.4" height="3.4" rx="1"/><rect x="76" y="64" width="3.4" height="3.4" rx="1"/><rect x="84" y="64" width="3.4" height="3.4" rx="1"/><rect x="92" y="64" width="3.4" height="3.4" rx="1"/><rect x="96" y="64" width="3.4" height="3.4" rx="1"/><rect x="32" y="68" width="3.4" height="3.4" rx="1"/><rect x="40" y="68" width="3.4" height="3.4" rx="1"/><rect x="64" y="68" width="3.4" height="3.4" rx="1"/><rect x="92" y="68" width="3.4" height="3.4" rx="1"/><rect x="48" y="72" width="3.4" height="3.4" rx="1"/><rect x="52" y="72" width="3.4" height="3.4" rx="1"/><rect x="60" y="72" width="3.4" height="3.4" rx="1"/><rect x="76" y="72" width="3.4" height="3.4" rx="1"/><rect x="84" y="72" width="3.4" height="3.4" rx="1"/><rect x="88" y="72" width="3.4" height="3.4" rx="1"/><rect x="92" y="72" width="3.4" height="3.4" rx="1"/><rect x="36" y="76" width="3.4" height="3.4" rx="1"/><rect x="56" y="76" width="3.4" height="3.4" rx="1"/><rect x="64" y="76" width="3.4" height="3.4" rx="1"/><rect x="72" y="76" width="3.4" height="3.4" rx="1"/><rect x="84" y="76" width="3.4" height="3.4" rx="1"/><rect x="88" y="76" width="3.4" height="3.4" rx="1"/><rect x="96" y="76" width="3.4" height="3.4" rx="1"/><rect x="36" y="80" width="3.4" height="3.4" rx="1"/><rect x="44" y="80" width="3.4" height="3.4" rx="1"/><rect x="48" y="80" width="3.4" height="3.4" rx="1"/><rect x="52" y="80" width="3.4" height="3.4" rx="1"/><rect x="56" y="80" width="3.4" height="3.4" rx="1"/><rect x="60" y="80" width="3.4" height="3.4" rx="1"/><rect x="32" y="84" width="3.4" height="3.4" rx="1"/><rect x="40" y="84" width="3.4" height="3.4" rx="1"/><rect x="60" y="84" width="3.4" height="3.4" rx="1"/><rect x="64" y="84" width="3.4" height="3.4" rx="1"/><rect x="36" y="88" width="3.4" height="3.4" rx="1"/><rect x="40" y="88" width="3.4" height="3.4" rx="1"/><rect x="44" y="88" width="3.4" height="3.4" rx="1"/><rect x="56" y="88" width="3.4" height="3.4" rx="1"/><rect x="60" y="88" width="3.4" height="3.4" rx="1"/><rect x="64" y="88" width="3.4" height="3.4" rx="1"/><rect x="72" y="88" width="3.4" height="3.4" rx="1"/><rect x="84" y="88" width="3.4" height="3.4" rx="1"/><rect x="88" y="88" width="3.4" height="3.4" rx="1"/><rect x="36" y="92" width="3.4" height="3.4" rx="1"/><rect x="40" y="92" width="3.4" height="3.4" rx="1"/><rect x="48" y="92" width="3.4" height="3.4" rx="1"/><rect x="52" y="92" width="3.4" height="3.4" rx="1"/><rect x="56" y="92" width="3.4" height="3.4" rx="1"/><rect x="80" y="92" width="3.4" height="3.4" rx="1"/><rect x="88" y="92" width="3.4" height="3.4" rx="1"/><rect x="96" y="92" width="3.4" height="3.4" rx="1"/><rect x="32" y="96" width="3.4" height="3.4" rx="1"/><rect x="36" y="96" width="3.4" height="3.4" rx="1"/><rect x="52" y="96" width="3.4" height="3.4" rx="1"/><rect x="60" y="96" width="3.4" height="3.4" rx="1"/><rect x="64" y="96" width="3.4" height="3.4" rx="1"/><rect x="68" y="96" width="3.4" height="3.4" rx="1"/><rect x="72" y="96" width="3.4" height="3.4" rx="1"/><rect x="80" y="96" width="3.4" height="3.4" rx="1"/><rect x="84" y="96" width="3.4" height="3.4" rx="1"/><rect x="88" y="96" width="3.4" height="3.4" rx="1"/>
+    </g>
+    <rect x="37" y="37" width="26" height="26" rx="7" fill="#F9ECD9"/>
+    <path d="M44 56V44h6.5a4 4 0 0 1 0 8H44m6-0.5 5 4.5" fill="none" stroke="#166D20" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
 
-    <div class="header-logo">
+<!-- =========================
+     NAVEGACIÓN
+========================= -->
+<header class="site-nav">
+  <div class="site-nav__inner">
+
+    <a href="index.html" class="site-nav__logo" aria-label="ReQRdito, inicio">
       <img src="img/reqrdito-logo.png" alt="Logo ReQRdito">
-    </div>
-
-    <div class="header-actions">
-      <!-- Google Login Header -->
-      <div id="googleLogin"></div>
-      <button id="btnMisRecuerdos" class="btn-recuerdos">
-        Mis recuerdos
-      </button>
-    </div>
-
-  </div>
-
-  <div class="header-left">
-    <h1>¿Qué querés que recuerden de vos?</h1>
-    <p>
-      Guardá una frase, una enseñanza o un mensaje significativo en un QR personalizado que mantenga vivo aquello que te representa.
-    </p>
-    <a href="crear-recuerdo.html" class="btn-primary">
-      Crear mi recuerdo <i data-lucide="headphones"></i>
     </a>
-  </div>
 
+    <div class="site-nav__menu" id="navMenu">
+      <nav class="site-nav__links" aria-label="Secciones">
+        <a href="#ocasiones">Ocasiones</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#preguntas">Preguntas</a>
+      </nav>
+
+      <div class="site-nav__account">
+        <!-- Google Login Header -->
+        <div id="googleLogin"></div>
+        <button id="btnMisRecuerdos" class="btn-recuerdos">
+          <i data-lucide="folder-heart"></i>
+          Mis recuerdos
+        </button>
+      </div>
+    </div>
+
+    <a href="crear-recuerdo.html" class="btn-primary site-nav__cta">Crear recuerdo</a>
+
+    <button class="site-nav__toggle" id="navToggle" type="button"
+            aria-expanded="false" aria-controls="navMenu" aria-label="Abrir menú">
+      <span></span><span></span><span></span>
+    </button>
+
+  </div>
 </header>
 
-<section>
-  <h2 class="section-title">¿Cómo funciona?</h2>
+<main id="contenido">
 
-  <div class="steps">
-    <div class="step">
-      <i data-lucide="mic"></i>
-      <h3>Subí tu audio</h3>
-      <p>Una dedicatoria, una voz querida o un mensaje especial.</p>
+  <!-- =========================
+       HERO
+  ========================= -->
+  <section class="hero">
+    <div class="hero__inner">
+
+      <div class="hero__copy">
+        <p class="eyebrow">Recuerdos en audio · QR personalizado</p>
+        <h1>Hay palabras que merecen <em>quedarse</em>.</h1>
+        <p class="hero__lead">
+          Guardá una voz, una dedicatoria o un mensaje significativo en un QR personalizado.
+          Quien lo escanee lo escucha al instante, desde su celular.
+        </p>
+
+        <div class="hero__actions">
+          <a href="crear-recuerdo.html" class="btn-primary btn-lg">
+            Crear mi recuerdo <i data-lucide="headphones"></i>
+          </a>
+          <a href="#como-funciona" class="btn-ghost btn-lg">Ver cómo funciona</a>
+        </div>
+
+        <ul class="hero__facts">
+          <li><i data-lucide="smartphone"></i> Sin instalar apps</li>
+          <li><i data-lucide="mic"></i> Subí o grabá tu audio</li>
+          <li><i data-lucide="mail"></i> Te llega por correo</li>
+        </ul>
+      </div>
+
+      <div class="hero__visual" role="img"
+           aria-label="Ilustración: una tarjeta con un QR de ejemplo y un celular reproduciendo un recuerdo en audio">
+
+        <div class="qr-card" aria-hidden="true">
+          <svg class="qr-card__code"><use href="#demo-qr"></use></svg>
+          <span class="qr-card__label">Escaneá y escuchá</span>
+          <span class="demo-tag">QR de ejemplo</span>
+        </div>
+
+        <div class="phone" aria-hidden="true">
+          <div class="phone__screen">
+            <div class="phone__card">
+              <p class="phone__title">🎧 Tu recuerdo está listo</p>
+              <p class="phone__text">Este recuerdo fue creado especialmente para vos 💚</p>
+
+              <div class="player">
+                <span class="player__btn"></span>
+                <span class="player__wave">
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </span>
+                <span class="player__time">0:42</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================
+       OCASIONES
+  ========================= -->
+  <section class="occasions" id="ocasiones" aria-labelledby="ocasiones-title">
+    <div class="section-head">
+      <p class="eyebrow">Para quién es ReQRdito</p>
+      <h2 id="ocasiones-title">Un mensaje para cada historia</h2>
+      <p>Una voz conocida cambia todo. Estas son algunas ideas de qué grabar.</p>
     </div>
 
-    <div class="step">
-      <i data-lucide="credit-card"></i>
-      <h3>Pagá de forma segura</h3>
-      <p>Habilitamos tu recuerdo una vez confirmado el pago.</p>
+    <div class="bento">
+      <article class="bento__item bento__item--feature">
+        <i data-lucide="heart"></i>
+        <h3>Guardá momentos especiales</h3>
+        <p>Una voz, una frase o un momento que quieras conservar.</p>
+        <p class="bento__idea"><strong>Ideas:</strong> una risa inolvidable, unas palabras que te hicieron bien, un momento que quieras volver a escuchar.</p>
+      </article>
+
+      <article class="bento__item bento__item--family">
+        <i data-lucide="users"></i>
+        <h3>Familia</h3>
+        <p>Un mensaje de ese ser querido que siempre ha estado.</p>
+        <p class="bento__idea"><strong>Ideas:</strong> una receta contada por la abuela, un consejo, un saludo para el futuro.</p>
+      </article>
+
+      <article class="bento__item bento__item--friends">
+        <i data-lucide="users-2"></i>
+        <h3>Amigos</h3>
+        <p>Un audio con anécdotas, risas o palabras que solo ustedes entienden.</p>
+        <p class="bento__idea"><strong>Pack Dúo:</strong> dos audios en un mismo QR, uno después del otro.</p>
+      </article>
+
+      <article class="bento__item bento__item--pets">
+        <i data-lucide="paw-print"></i>
+        <h3>Mascotas</h3>
+        <p>Su historia, sus apodos, el día que llegó a casa: un audio para quien siempre está.</p>
+      </article>
+
+      <article class="bento__item bento__item--gifts">
+        <i data-lucide="gift"></i>
+        <h3>Regalos y homenajes</h3>
+        <p>Un detalle diferente, moderno y emocional. Descargá el QR e imprimilo en una tarjeta, un cuadro o el envoltorio.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- =========================
+       CÓMO FUNCIONA
+  ========================= -->
+  <section class="how" id="como-funciona" aria-labelledby="como-title">
+    <div class="section-head">
+      <p class="eyebrow">Cómo funciona</p>
+      <h2 id="como-title">Tu recuerdo, en tres pasos</h2>
     </div>
 
-    <div class="step">
-      <i data-lucide="qr-code"></i>
-      <h3>Generamos tu QR</h3>
-      <p>Un código único que lleva directo a tu audio.</p>
+    <ol class="how__steps">
+      <li class="how__step">
+        <span class="how__num" aria-hidden="true">01</span>
+        <h3>Cargá tu audio</h3>
+        <p>Elegí <strong>Individual</strong> (1 audio) o <strong>Dúo</strong> (2 audios), ponele un nombre y subí un archivo o grabalo desde el navegador. Para continuar, iniciás sesión con Google.</p>
+        <div class="how__ui" aria-hidden="true">
+          <span class="chip chip--active">Individual · 1 audio</span>
+          <span class="chip">Dúo · 2 audios</span>
+          <span class="chip chip--rec">Grabar</span>
+        </div>
+      </li>
+
+      <li class="how__step">
+        <span class="how__num" aria-hidden="true">02</span>
+        <h3>Pagá de forma segura</h3>
+        <p>Pagá con tarjeta de crédito o débito, sin necesidad de tener cuenta de Mercado Pago. Habilitamos tu recuerdo una vez confirmado el pago.</p>
+        <div class="how__ui" aria-hidden="true">
+          <span class="chip chip--solid"><i data-lucide="lock"></i> Pago con Mercado Pago</span>
+        </div>
+      </li>
+
+      <li class="how__step">
+        <span class="how__num" aria-hidden="true">03</span>
+        <h3>Recibí tu QR</h3>
+        <p>Lo ves al instante con tu audio, te enviamos el enlace por correo y podés descargar el QR desde Mis recuerdos.</p>
+        <div class="how__ui" aria-hidden="true">
+          <svg class="how__qr"><use href="#demo-qr"></use></svg>
+          <span class="chip"><i data-lucide="download"></i> Descargar QR</span>
+        </div>
+      </li>
+    </ol>
+
+    <div class="how__cta">
+      <a href="crear-recuerdo.html" class="btn-primary btn-lg">Empezar ahora <i data-lucide="arrow-right"></i></a>
+    </div>
+  </section>
+
+  <!-- =========================
+       EXPERIENCIA
+  ========================= -->
+  <section class="experience" aria-labelledby="experiencia-title">
+    <div class="section-head section-head--light">
+      <p class="eyebrow">La experiencia</p>
+      <h2 id="experiencia-title">Qué pasa cuando alguien escanea tu QR</h2>
     </div>
 
-    <div class="step">
-      <i data-lucide="infinity"></i>
-      <h3>Para siempre</h3>
-      <p>Ideal para llaveros, regalos y recuerdos eternos.</p>
+    <ol class="story">
+      <li class="story__frame">
+        <div class="story__visual story__visual--scan" aria-hidden="true">
+          <span class="viewfinder">
+            <svg><use href="#demo-qr"></use></svg>
+          </span>
+        </div>
+        <h3><span>1</span> Apunta la cámara</h3>
+        <p>Con la cámara del celular alcanza: no hace falta instalar nada.</p>
+      </li>
+
+      <li class="story__frame">
+        <div class="story__visual" aria-hidden="true">
+          <span class="browser">
+            <span class="browser__bar">reqrdito.com/recuerdo</span>
+            <span class="browser__body">
+              <span class="browser__title">🎧 Tu recuerdo está listo</span>
+              <span class="browser__line"></span>
+              <span class="browser__line browser__line--short"></span>
+            </span>
+          </span>
+        </div>
+        <h3><span>2</span> Se abre tu recuerdo</h3>
+        <p>La página del recuerdo se abre en el navegador, sin cuentas ni contraseñas para quien lo escucha.</p>
+      </li>
+
+      <li class="story__frame">
+        <div class="story__visual" aria-hidden="true">
+          <span class="player player--light">
+            <span class="player__btn"></span>
+            <span class="player__wave">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </span>
+          </span>
+        </div>
+        <h3><span>3</span> Escucha tu voz</h3>
+        <p>El audio se reproduce ahí mismo. Con el pack Dúo, los dos audios suenan uno después del otro.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- =========================
+       CONFIANZA
+  ========================= -->
+  <section class="trust" aria-labelledby="confianza-title">
+    <div class="trust__inner">
+      <div class="trust__intro">
+        <p class="eyebrow">Claro desde el principio</p>
+        <h2 id="confianza-title">Cómo cuidamos tu recuerdo</h2>
+        <p>Sin letra chica: así funciona el acceso a tus audios.</p>
+      </div>
+
+      <ul class="trust__list">
+        <li>
+          <i data-lucide="link"></i>
+          <div>
+            <h3>Un enlace único por recuerdo</h3>
+            <p>Cada recuerdo tiene su propio QR y enlace. Lo escucha quien lo tenga: compartilo solo con quien quieras.</p>
+          </div>
+        </li>
+        <li>
+          <i data-lucide="user-check"></i>
+          <div>
+            <h3>Tus recuerdos, en tu cuenta</h3>
+            <p>Iniciás sesión con Google y en Mis recuerdos podés escucharlos, descargar el QR, copiar el enlace o eliminarlos.</p>
+          </div>
+        </li>
+        <li>
+          <i data-lucide="mail"></i>
+          <div>
+            <h3>Accedés desde tu correo</h3>
+            <p>Cuando se confirma el pago te enviamos el enlace por email, y podés reenviarlo desde Mis recuerdos.</p>
+          </div>
+        </li>
+        <li>
+          <i data-lucide="shield-check"></i>
+          <div>
+            <h3>Pago con Mercado Pago</h3>
+            <p>El cobro se procesa en Mercado Pago: podés pagar con tarjeta como invitado, sin crear una cuenta. El recuerdo se habilita cuando se confirma.</p>
+          </div>
+        </li>
+      </ul>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="section for-who">
-  <h2 class="section-title">¿Para quién es ReQRdito?</h2>
+  <!-- =========================
+       FAQ
+  ========================= -->
+  <section class="faq" id="preguntas" aria-labelledby="faq-title">
+    <div class="faq__inner">
+      <div class="faq__intro">
+        <p class="eyebrow">Preguntas frecuentes</p>
+        <h2 id="faq-title">Lo que más nos preguntan</h2>
+        <p>¿Te queda alguna duda? Escribinos a <a href="mailto:reqrdito@gmail.com">reqrdito@gmail.com</a>.</p>
+      </div>
 
-  <div class="use-cases">
-    <div class="use">
-      <i data-lucide="heart"></i>
-      <h3>Parejas</h3>
-      <p>Dedicatorias, aniversarios, propuestas.</p>
+      <div class="faq-box">
+        <details name="faq">
+          <summary>¿El QR vence?</summary>
+          <p>No, el QR no tiene fecha de vencimiento. Si alguna vez querés, podés eliminar el recuerdo desde Mis recuerdos.</p>
+        </details>
+
+        <details name="faq">
+          <summary>¿Puedo volver a escuchar mi audio?</summary>
+          <p>Sí, accedés siempre desde tu correo o desde Mis recuerdos, iniciando sesión con Google.</p>
+        </details>
+
+        <details name="faq">
+          <summary>¿Necesito instalar algo?</summary>
+          <p>No, funciona desde el navegador del celular: alcanza con escanear el QR con la cámara.</p>
+        </details>
+
+        <details name="faq">
+          <summary>¿Puedo regalarlo?</summary>
+          <p>Sí, es ideal para regalos físicos o digitales: podés descargar el QR para imprimirlo o compartir su enlace.</p>
+        </details>
+
+        <details name="faq">
+          <summary>¿Qué diferencia hay entre Individual y Dúo?</summary>
+          <p>Individual incluye 1 audio y 1 QR. Dúo incluye 2 audios en un mismo QR, que se reproducen uno después del otro.</p>
+        </details>
+
+        <details name="faq">
+          <summary>¿Puedo grabar el audio desde la web?</summary>
+          <p>Sí. Al crear tu recuerdo podés subir un archivo de audio o grabarlo directamente desde el navegador.</p>
+        </details>
+      </div>
     </div>
+  </section>
 
-    <div class="use">
-      <i data-lucide="users"></i>
-      <h3>Familia</h3>
-      <p>Un mensaje de ese ser querido que siempre ha estado.</p>
-    </div>
-
-    <div class="use">
-      <i data-lucide="users-2"></i>
-      <h3>Amigos</h3>
-      <p>
-        Un audio con anécdotas, risas o palabras que
-        solo ustedes entienden.
-      </p>
-    </div>
-
-    <div class="use">
-      <i data-lucide="paw-print"></i>
-      <h3>Mascotas</h3>
-      <p>Un audio eterno para quien siempre está.</p>
-    </div>
-
-    <div class="use">
-      <i data-lucide="gift"></i>
-      <h3>Regalos únicos</h3>
-      <p>Un detalle diferente, moderno y emocional.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section trust">
-  <h2 class="section-title">Seguro, privado y único</h2>
-
-  <ul class="trust-list">
-    <li><i data-lucide="lock"></i> Acceso privado y único</li>
-    <li><i data-lucide="shield-check"></i> El audio solo se reproduce desde tu QR</li>
-    <li><i data-lucide="mail"></i> Accedés siempre desde tu correo</li>
-    <li><i data-lucide="cloud"></i> Guardado de forma segura</li>
-  </ul>
-</section>
-
-<section class="section faq">
-  <h2 class="section-title">Preguntas frecuentes</h2>
-
-  <div class="faq-box">
-    <details>
-      <summary>¿El QR vence?</summary>
-      <p>No, el recuerdo queda disponible de forma permanente.</p>
-    </details>
-
-    <details>
-      <summary>¿Puedo volver a escuchar mi audio?</summary>
-      <p>Sí, accedés siempre desde tu correo.</p>
-    </details>
-
-    <details>
-      <summary>¿Necesito instalar algo?</summary>
-      <p>No, funciona desde cualquier celular.</p>
-    </details>
-
-    <details>
-      <summary>¿Puedo regalarlo?</summary>
-      <p>Sí, es ideal para regalos físicos o digitales.</p>
-    </details>
-  </div>
-</section>
-
-<section class="cta">
-  <h2>Un audio que se escucha para siempre</h2>
-  <p>Crealo hoy y regalá algo que no se pierde.</p>
-  <a href="crear-recuerdo.html" class="btn-primary">
-    Crear mi recuerdo <i data-lucide="headphones"></i>
-  </a>
-</section>
-
-<footer class="footer">
-  <div class="footer-content">
-    <span>¿Dudas o consultas?</span>
-    <div class="footer-contact">
-      <a href="https://www.instagram.com/reqrdito/" target="_blank">
-        <i data-lucide="instagram"></i> Instagram
+  <!-- =========================
+       CTA FINAL
+  ========================= -->
+  <section class="final-cta" aria-labelledby="cta-title">
+    <div class="final-cta__panel">
+      <h2 id="cta-title">¿Qué querés que recuerden de vos?</h2>
+      <p>Crealo hoy y regalá una voz que se puede volver a escuchar.</p>
+      <a href="crear-recuerdo.html" class="btn-primary btn-lg">
+        Crear mi recuerdo <i data-lucide="headphones"></i>
       </a>
-      <a href="https://www.facebook.com/profile.php?id=61578841971549&locale=es_LA" target="_blank">
-        <i data-lucide="facebook"></i> Facebook
-      </a>
-      <a href="mailto:reqrdito@gmail.com">
-        <i data-lucide="mail"></i> reqrdito@gmail.com
-      </a>
     </div>
+  </section>
+
+</main>
+
+<!-- =========================
+     FOOTER
+========================= -->
+<footer class="site-footer">
+  <div class="site-footer__inner">
+
+    <div class="site-footer__brand">
+      <img src="img/reqrdito-logo.png" alt="Logo ReQRdito">
+      <p>Tu historia en un audio.</p>
+    </div>
+
+    <nav class="site-footer__nav" aria-label="Enlaces del pie">
+      <a href="#ocasiones">Ocasiones</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#preguntas">Preguntas</a>
+      <a href="crear-recuerdo.html">Crear recuerdo</a>
+    </nav>
+
+    <div class="site-footer__contact">
+      <span>¿Dudas o consultas?</span>
+      <div class="footer-contact">
+        <a href="https://www.instagram.com/reqrdito/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          Instagram
+        </a>
+        <a href="https://www.facebook.com/profile.php?id=61578841971549&locale=es_LA" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          Facebook
+        </a>
+        <a href="mailto:reqrdito@gmail.com">
+          <i data-lucide="mail"></i> reqrdito@gmail.com
+        </a>
+      </div>
+    </div>
+
   </div>
   <p class="footer-text">© 2026 ReQRdito · Todos los derechos reservados</p>
 </footer>
@@ -189,8 +429,9 @@
   </div>
 </div>
 
+<script src="js/config.js?v=2026.1600"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
-<script src="js/auth-init.js?v=2026.1400"></script>
+<script src="js/auth-init.js?v=2026.1600"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -212,6 +453,25 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.classList.remove("is-active");
   };
 });
+</script>
+
+<!-- Menú móvil (solo presentación) -->
+<script>
+(() => {
+  const toggle = document.getElementById("navToggle");
+  const menu = document.getElementById("navMenu");
+  if (!toggle || !menu) return;
+
+  const setOpen = (open) => {
+    menu.classList.toggle("is-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
+  };
+
+  toggle.addEventListener("click", () => setOpen(!menu.classList.contains("is-open")));
+  menu.querySelectorAll("a, #btnMisRecuerdos").forEach(el => el.addEventListener("click", () => setOpen(false)));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
+})();
 </script>
 
 <script src="https://unpkg.com/lucide@latest"></script>

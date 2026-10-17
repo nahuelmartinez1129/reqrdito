@@ -64,13 +64,16 @@ pre{
 
 <h1>Generar llaveros</h1>
 
+<!-- Solo emails incluidos en ADMIN_EMAILS (backend) pueden usar este panel -->
+<div id="googleLogin"></div>
+
 <label>Cantidad</label>
 <input id="cantidad" type="number" value="10">
 
 <label>Pack</label>
 <select id="pack">
   <option value="individual">Individual</option>
-  <option value="pareja">Pareja</option>
+  <option value="pareja">Dúo</option>
 </select>
 
 <br><br>
@@ -83,9 +86,53 @@ pre{
 
 <pre id="resultado"></pre>
 
+<script src="js/config.js?v=2026.1600"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="js/auth-init.js?v=2026.1600"></script>
+
 <script>
 
-const API = "https://api.reqrdito.com/api/keychain-admin";
+const API = `${REQRDITO.API}/api/keychain-admin`;
+
+// Todas las llamadas llevan la sesión; 401/403 se informan sin reintentar
+async function llamar(endpoint, opciones = {}) {
+  const token = auth.getToken();
+  if (!token) throw new Error("Iniciá sesión con una cuenta administradora");
+
+  const res = await fetch(API + endpoint, {
+    ...opciones,
+    headers: { ...(opciones.headers || {}), Authorization: `Bearer ${token}` }
+  });
+
+  if (res.status === 401) {
+    auth.clearToken();
+    auth.updateHeaderUI("googleLogin");
+    throw new Error("Sesión vencida: volvé a iniciar sesión");
+  }
+  if (res.status === 403) throw new Error("Tu cuenta no tiene permisos de administración");
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Error del servidor");
+  }
+
+  return res;
+}
+
+async function mostrarTanda() {
+  try {
+    const data = await (await llamar("/tanda")).json();
+    document.getElementById("resultado").textContent = `Llaveros en la tanda: ${data.total}`;
+  } catch (err) {
+    document.getElementById("resultado").textContent = err.message;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  auth.initHeader("googleLogin");
+  if (auth.isLogged()) mostrarTanda();
+});
+document.addEventListener("loginSuccess", mostrarTanda);
 
 // ===============================
 // ✅ GENERAR (ACUMULA)
@@ -110,18 +157,13 @@ async function generar(){
 
   try{
 
-    const res = await fetch(API + endpoint,{
+    const res = await llamar(endpoint,{
       method:"POST",
       headers:{
         "Content-Type":"application/json"
       },
       body:JSON.stringify({ cantidad })
     });
-
-    if(!res.ok){
-      const text = await res.text();
-      throw new Error(text);
-    }
 
     const data = await res.json();
 
@@ -130,7 +172,7 @@ async function generar(){
 
   }catch(err){
     console.error(err);
-    alert("Error generando QR");
+    alert(err.message || "Error generando QR");
   }
 
 }
@@ -143,12 +185,7 @@ async function generarPDF(){
 
   try{
 
-    const res = await fetch(API + "/generar-pdf");
-
-    if(!res.ok){
-      const text = await res.text();
-      throw new Error(text);
-    }
+    const res = await llamar("/generar-pdf");
 
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
@@ -157,10 +194,11 @@ async function generarPDF(){
     a.href = url;
     a.download = "llaveros-qr.pdf";
     a.click();
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
 
   }catch(err){
     console.error(err);
-    alert("Error generando PDF");
+    alert(err.message || "Error generando PDF");
   }
 
 }
@@ -173,7 +211,7 @@ async function limpiar(){
 
   try{
 
-    await fetch(API + "/limpiar",{
+    await llamar("/limpiar",{
       method:"POST"
     });
 
@@ -182,7 +220,7 @@ async function limpiar(){
 
   }catch(err){
     console.error(err);
-    alert("Error al limpiar");
+    alert(err.message || "Error al limpiar");
   }
 
 }

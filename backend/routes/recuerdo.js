@@ -1,70 +1,23 @@
 const express = require("express");
-const Recuerdo = require("../models/Recuerdo");
-const Keychain = require("../models/Keychain");
-const QR = require("../events/models/QR");
+const prisma = require("../db/prisma");
 const auth = require("../middleware/auth");
+const requireAuth = require("../middleware/requireAuth");
 const { sendEmail } = require("../services/emailService.js");
+const { isUuid } = require("../utils/validacion");
+const { serializarRecuerdo, ordenarAudios } = require("../utils/serializers");
+const { config } = require("../config/env");
+const { rutaLocal, apartarArchivos } = require("../utils/archivos");
 
 const router = express.Router();
 
-
-router.post("/recuerdo", auth, async (req, res) => {
-
-  try {
-    console.log("BODY RECIBIDO:", req.body);
-
-    const { nombre, qrUrl, audioUrl, recuerdoId, key } = req.body;
-    const userEmail = req.user.email;
-
-    if (!recuerdoId || !audioUrl) {
-      return res.status(400).json({ error: "Datos incompletos" });
-    }
-
-    const nuevoRecuerdo = new Recuerdo({
-      nombre,
-      qrUrl,
-      audioUrl,
-      recuerdoId,
-      userEmail,
-      pagado: true,
-      creadoEn: new Date()
-    });
-
-    await nuevoRecuerdo.save();
-
-    // 🔑 ACTUALIZAR LLAVERO
-    if (key) {
-
-      const keychain = await Keychain.findOne({ qrId: key });
-
-      if (keychain) {
-
-        keychain.usado = true;
-        keychain.audioUrl = audioUrl;
-        keychain.recuerdoId = recuerdoId;
-        keychain.nombreRecuerdo = nombre;
-        keychain.activadoEn = new Date();
-
-        await keychain.save();
-      }
-    }
-
-    sendEmail(
-      userEmail,
-      "Este recuerdo ya existe",
-      "recuerdo-creado.html",
-      { CODIGO: recuerdoId }
-    );
-
-    res.json({ ok: true });
-
-  } catch (err) {
-
-    console.error("❌ ERROR CREANDO RECUERDO:", err);
-    res.status(500).json({ error: "Error creando recuerdo" });
-
-  }
-
+/* =========================
+   POST /api/recuerdo (flujo heredado) — DESHABILITADO
+   Creaba recuerdos con pagado=true sin verificar ningún pago y con un audioUrl
+   arbitrario. Ninguna pantalla lo usa: el flujo vigente es POST /api/upload.
+   Se responde 410 para que un cliente viejo falle de forma explícita.
+========================= */
+router.post("/recuerdo", (req, res) => {
+  res.status(410).json({ error: "Este endpoint ya no está disponible" });
 });
 
 
@@ -73,7 +26,12 @@ router.post("/recuerdo", auth, async (req, res) => {
 ========================= */
 router.get("/recuerdo/:id", async (req, res) => {
   try {
-    const recuerdo = await Recuerdo.findOne({ recuerdoId: req.params.id });
+    const recuerdo = isUuid(req.params.id)
+      ? await prisma.recuerdo.findUnique({
+          where: { id: req.params.id },
+          include: { audios: true }
+        })
+      : null;
 
     if (!recuerdo) {
       return res.status(404).json({ error: "Recuerdo no encontrado" });
@@ -88,17 +46,16 @@ router.get("/recuerdo/:id", async (req, res) => {
 
     res.json({
       pagado: true,
-      recuerdoId: recuerdo.recuerdoId,
+      recuerdoId: recuerdo.id,
       nombre: recuerdo.nombre,
       pack: recuerdo.pack || "individual",
-      audios: recuerdo.audios || [],
-      audioUrl: recuerdo.audioUrl,
+      audios: ordenarAudios(recuerdo.audios),
       qrUrl: recuerdo.qrUrl,
-      creadoEn: recuerdo.creadoEn
+      creadoEn: recuerdo.createdAt
     });
 
   } catch (err) {
-    console.error("❌ ERROR OBTENIENDO RECUERDO:", err);
+    console.error("❌ ERROR OBTENIENDO RECUERDO:", err.message);
     res.status(500).json({ error: "Error interno" });
   }
 });
@@ -106,63 +63,52 @@ router.get("/recuerdo/:id", async (req, res) => {
 
 /* =========================
    GET /api/mis-recuerdos
-   🔥 MODIFICADO (INCLUYE EVENTOS)
+   🔥 INCLUYE EVENTOS
 ========================= */
-router.get("/mis-recuerdos", auth, async (req, res) => {
+router.get("/mis-recuerdos", auth, requireAuth, async (req, res) => {
   try {
-    const userEmail = req.user.email;
 
     // 🔵 recuerdos normales
-    const recuerdos = await Recuerdo.find({
-      userEmail,
-      pagado: true
-    })
-      .sort({ creadoEn: -1 })
-      .select("nombre qrUrl audioUrl audios pack creadoEn recuerdoId");
+    const recuerdos = await prisma.recuerdo.findMany({
+      where: { userId: req.user.id, pagado: true },
+      orderBy: { createdAt: "desc" },
+      include: { audios: true }
+    });
 
-    // 🔍 obtener usuario
-    const User = require("../models/User");
-    const user = await User.findOne({ email: userEmail });
+    // 🟢 QRs de eventos del usuario con audio grabado (solo con el módulo habilitado)
+    const qrs = !req.app.locals.eventsEnabled ? [] : await prisma.eventQr.findMany({
+      where: {
+        status: "completed",
+        event: { userId: req.user.id }
+      },
+      orderBy: { createdAt: "asc" }
+    });
 
-    let eventosTransformados = [];
+    // 🔥 adaptar formato
+    const eventosTransformados = qrs.map(q => ({
+      _id: q.qrId,
+      recuerdoId: q.qrId,
+      nombre: q.name,
+      creadoEn: q.createdAt,
 
-    if (user) {
-
-      // 🟢 QRs de eventos
-      const qrs = await QR.find({
-        userId: user._id,
-        status: "completed"
-      });
-
-      // 🔥 adaptar formato
-        eventosTransformados = qrs.map(q => ({
-  _id: q._id,
-  recuerdoId: q.qrId,
-  nombre: q.name,
-  creadoEn: q.createdAt,
-
-  audios: [
-    {
-      url: q.audioUrl,
-      orden: 1
-    }
-  ],
-  qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://api.reqrdito.com/events/r/${q.qrId}`,
-  pack: "evento"
-}));
-
-    }
+      audios: [
+        {
+          url: q.audioUrl,
+          orden: 1
+        }
+      ],
+      qrUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://api.reqrdito.com/events/r/${q.qrId}`,
+      pack: "evento"
+    }));
 
     // 🔥 unir todo
-    const resultado = [
-      ...recuerdos,
+    res.json([
+      ...recuerdos.map(serializarRecuerdo),
       ...eventosTransformados
-    ];
-
-    res.json(resultado);
+    ]);
 
   } catch (err) {
-    console.error("❌ ERROR MIS RECUERDOS:", err);
+    console.error("❌ ERROR MIS RECUERDOS:", err.message);
     res.status(500).json({ error: "Error obteniendo recuerdos" });
   }
 });
@@ -171,31 +117,35 @@ router.get("/mis-recuerdos", auth, async (req, res) => {
 /* =========================
    PUT /api/recuerdos/:id
 ========================= */
-router.put("/recuerdos/:id", auth, async (req, res) => {
+router.put("/recuerdos/:id", auth, requireAuth, async (req, res) => {
   try {
-    const { nombre } = req.body;
+    const nombre = typeof req.body.nombre === "string" ? req.body.nombre.trim() : "";
 
-    if (!nombre || nombre.trim().length < 2) {
+    if (nombre.length < 2 || nombre.length > 120) {
       return res.status(400).json({ error: "Nombre inválido" });
     }
 
-    const recuerdo = await Recuerdo.findById(req.params.id);
+    const recuerdo = isUuid(req.params.id)
+      ? await prisma.recuerdo.findUnique({ where: { id: req.params.id } })
+      : null;
 
     if (!recuerdo) {
       return res.status(404).json({ error: "Recuerdo no encontrado" });
     }
 
-    if (recuerdo.userEmail !== req.user.email) {
+    if (recuerdo.userId !== req.user.id) {
       return res.status(403).json({ error: "No autorizado" });
     }
 
-    recuerdo.nombre = nombre.trim();
-    await recuerdo.save();
+    const actualizado = await prisma.recuerdo.update({
+      where: { id: recuerdo.id },
+      data: { nombre }
+    });
 
-    res.json({ ok: true, nombre: recuerdo.nombre });
+    res.json({ ok: true, nombre: actualizado.nombre });
 
   } catch (err) {
-    console.error("❌ ERROR EDITANDO NOMBRE:", err);
+    console.error("❌ ERROR EDITANDO NOMBRE:", err.message);
     res.status(500).json({ error: "Error editando recuerdo" });
   }
 });
@@ -204,13 +154,13 @@ router.put("/recuerdos/:id", auth, async (req, res) => {
 /* =========================
    POST /api/recuerdos/:id/reenviar-mail
 ========================= */
-router.post("/recuerdos/:id/reenviar-mail", auth, async (req, res) => {
+router.post("/recuerdos/:id/reenviar-mail", auth, requireAuth, async (req, res) => {
 
   try {
 
-    const recuerdo = await Recuerdo.findOne({
-      recuerdoId: req.params.id
-    });
+    const recuerdo = isUuid(req.params.id)
+      ? await prisma.recuerdo.findUnique({ where: { id: req.params.id } })
+      : null;
 
     if (!recuerdo) {
       return res.status(404).json({
@@ -218,32 +168,34 @@ router.post("/recuerdos/:id/reenviar-mail", auth, async (req, res) => {
       });
     }
 
-    if (recuerdo.userEmail !== req.user.email) {
+    if (recuerdo.userId !== req.user.id) {
       return res.status(403).json({
         error: "No autorizado"
       });
     }
 
+    if (!recuerdo.pagado) {
+      return res.status(409).json({ error: "El recuerdo todavía no está pago" });
+    }
+
     const linkRecuerdo =
-      `https://www.reqrdito.com/recuerdo.html?id=${recuerdo.recuerdoId}`;
+      `${config.frontendUrl}/recuerdo.html?id=${recuerdo.id}`;
 
     await sendEmail(
       req.user.email,
       "Tu recuerdo ReQRdito 🎧",
       "recuerdo-creado.html",
       {
-        CODIGO: recuerdo.recuerdoId,
+        CODIGO: recuerdo.id,
         LINK_RECUERDO: linkRecuerdo
       }
     );
-
-    console.log("✅ MAIL REENVIADO A:", req.user.email);
 
     res.json({ ok: true });
 
   } catch (err) {
 
-    console.error("❌ ERROR REENVIANDO MAIL:", err);
+    console.error("❌ ERROR REENVIANDO MAIL:", err.message);
 
     res.status(500).json({
       error: "Error reenviando mail"
@@ -254,47 +206,77 @@ router.post("/recuerdos/:id/reenviar-mail", auth, async (req, res) => {
 });
 
 /* =========================
-   DELETE /api/recuerdos/:id (FIX FINAL 🔥)
+   DELETE /api/recuerdos/:id
+   Recuerdo propio o QR de un evento propio
 ========================= */
-router.delete("/recuerdos/:id", auth, async (req, res) => {
+router.delete("/recuerdos/:id", auth, requireAuth, async (req, res) => {
   try {
 
     const id = req.params.id;
 
-    console.log("🧪 ID RECIBIDO:", id);
+    if (!isUuid(id)) {
+      return res.status(404).json({ error: "No encontrado" });
+    }
 
-    // 🔥 1. intentar borrar recuerdo normal (por recuerdoId)
-    const recuerdo = await Recuerdo.findOne({ recuerdoId: id });
+    // 🔥 1. recuerdo normal
+    const recuerdo = await prisma.recuerdo.findUnique({ where: { id } });
 
     if (recuerdo) {
 
-      if (recuerdo.userEmail !== req.user.email) {
+      if (recuerdo.userId !== req.user.id) {
         return res.status(403).json({ error: "No autorizado" });
       }
 
-      await Recuerdo.deleteOne({ recuerdoId: id });
+      const audios = await prisma.recuerdoAudio.findMany({ where: { recuerdoId: id } });
 
-      console.log("✅ Recuerdo eliminado");
+      // audios en cascada; el llavero vinculado queda con recuerdo_id NULL (y usado)
+      await prisma.recuerdo.delete({ where: { id } });
+
+      // Después de confirmar el borrado, apartar SOLO archivos que ningún otro
+      // registro use (uploads/eliminados/<id>/; no se eliminan del disco)
+      const candidatos = [...audios.map(a => a.url), recuerdo.qrUrl].filter(Boolean);
+      const enUso = await prisma.recuerdoAudio.findMany({
+        where: { url: { in: candidatos } },
+        select: { url: true }
+      });
+      const qrEnUso = recuerdo.qrUrl
+        ? await prisma.recuerdo.count({ where: { qrUrl: recuerdo.qrUrl } })
+        : 0;
+      const usados = new Set(enUso.map(a => a.url));
+      if (qrEnUso) usados.add(recuerdo.qrUrl);
+
+      apartarArchivos(
+        candidatos.filter(u => !usados.has(u)).map(rutaLocal),
+        id
+      );
 
       return res.json({ ok: true });
     }
 
-    // 🔥 2. si no existe → buscar QR (evento)
-    const qr = await QR.findOne({ qrId: id });
-
-    if (!qr) {
-      console.log("❌ No encontrado en QR");
+    // 🔥 2. si no existe → QR de evento (solo con el módulo habilitado)
+    if (!req.app.locals.eventsEnabled) {
       return res.status(404).json({ error: "No encontrado" });
     }
 
-    await QR.deleteOne({ qrId: id });
+    const qr = await prisma.eventQr.findUnique({
+      where: { qrId: id },
+      include: { event: true }
+    });
 
-    console.log("✅ QR eliminado");
+    if (!qr) {
+      return res.status(404).json({ error: "No encontrado" });
+    }
+
+    if (qr.event.userId !== req.user.id) {
+      return res.status(403).json({ error: "No autorizado" });
+    }
+
+    await prisma.eventQr.delete({ where: { qrId: id } });
 
     return res.json({ ok: true });
 
   } catch (err) {
-    console.error("❌ ERROR ELIMINANDO:", err);
+    console.error("❌ ERROR ELIMINANDO:", err.message);
     res.status(500).json({ error: "Error eliminando" });
   }
 });

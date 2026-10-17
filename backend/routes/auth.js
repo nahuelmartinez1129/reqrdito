@@ -1,3 +1,8 @@
+// LEGACY — NO MONTADO en app.js. Se conserva solo como referencia histórica.
+// Emitía un token sin usuario en PostgreSQL y mandaba el mail de bienvenida en
+// cada login. El flujo vigente es routes/authGoogle.js (POST /api/auth/google).
+// No montar este archivo.
+
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");

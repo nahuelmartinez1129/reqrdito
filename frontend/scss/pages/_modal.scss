@@ -1,11 +1,17 @@
+@use '../base/variables' as v;
+@use '../base/mixins' as m;
+
 /* =========================
    MODAL LOGIN
 ========================= */
-@use '../base/variables' as v;
+
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  padding: 1rem;
+  background: rgba(8, 34, 12, 0.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,30 +23,104 @@
 }
 
 .modal-card {
-  background: v.$manteca;
+  @include m.panel;
   padding: 2rem;
-  border-radius: 14px;
   width: 100%;
-  max-width: 380px;
+  max-width: 400px;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,.2);
 
   h2 {
     color: v.$verde-oscuro;
-    margin-bottom: .5rem;
+    margin-bottom: 0.5rem;
   }
 
   p {
-    font-size: .95rem;
+    font-size: 0.95rem;
+    color: v.$tinta-suave;
     margin-bottom: 1.5rem;
   }
 
   input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+    @include m.field;
     margin-bottom: 1.2rem;
-    font-size: 1rem;
   }
+}
+
+/* =========================
+   MODAL SESIÓN EXPIRADA
+   (unificado: antes repartido entre _index y _pago)
+   Oculto por opacidad; auth-init.js agrega .active.
+   auth-utils.js quita .oculto como alternativa.
+========================= */
+
+.session-modal {
+  position: fixed;
+  inset: 0;
+  padding: 1rem;
+  background: rgba(8, 34, 12, 0.55);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+
+  opacity: 0;
+  visibility: hidden; /* evita que el botón oculto reciba foco con Tab */
+  pointer-events: none;
+  transition: opacity 0.3s v.$ease, visibility 0.3s v.$ease;
+}
+
+.session-modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+.session-modal.oculto {
+  display: none;
+}
+
+.session-modal-content {
+  @include m.panel;
+  padding: 2rem 1.75rem;
+  text-align: center;
+  width: 100%;
+  max-width: 360px;
+  transform: translateY(8px) scale(0.96);
+  transition: transform 0.3s v.$ease;
+}
+
+.session-modal.active .session-modal-content {
+  transform: none;
+}
+
+.session-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: v.$dorado-suave;
+  box-shadow: 0 0 0 8px rgba(v.$naranja, 0.1);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.session-modal-content h2 {
+  color: v.$verde-oscuro;
+  font-size: 1.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.session-modal-content p {
+  color: v.$tinta-suave;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.session-modal-content button {
+  @include m.button-primary;
+  width: 100%;
 }

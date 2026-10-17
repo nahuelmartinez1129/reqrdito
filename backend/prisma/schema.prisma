@@ -1,0 +1,160 @@
+// Esquema PostgreSQL de ReQRdito.
+// La URL de conexión NO vive acá: se lee de DATABASE_URL en prisma.config.ts
+// (CLI) y en db/prisma.js (runtime, vía @prisma/adapter-pg).
+
+generator client {
+  // prisma-client-js genera JavaScript en node_modules y funciona con el
+  // backend CommonJS sin paso de compilación TypeScript.
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Pack {
+  individual
+  pareja
+}
+
+enum EventQrStatus {
+  empty
+  completed
+}
+
+/// Usuarios identificados por email (Google Sign-In o alta desde el panel de eventos).
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique @db.VarChar(320)
+  googleId  String?  @unique @map("google_id") @db.VarChar(255)
+  name      String?  @db.VarChar(255)
+  picture   String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  recuerdos Recuerdo[]
+  events    Event[]
+
+  @@map("users")
+}
+
+/// Recuerdo de audio. `id` es el recuerdoId público (UUID) usado en URLs y QR.
+model Recuerdo {
+  id         String    @id @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  nombre     String    @db.VarChar(120)
+  pack       Pack      @default(individual)
+  qrUrl      String?   @map("qr_url")
+  pagado     Boolean   @default(false)
+  paymentId  String?   @unique @map("payment_id") @db.VarChar(64)
+  payerEmail String?   @map("payer_email") @db.VarChar(320)
+  pagadoEn   DateTime? @map("pagado_en") @db.Timestamptz(6)
+
+  // Importe fijado al crear la preferencia (fuente: config/precios.js).
+  // NULL en recuerdos históricos o preferencias anteriores a este campo.
+  montoEsperado       Int?      @map("monto_esperado")
+  moneda              String?   @db.VarChar(3)
+  preferenciaId       String?   @map("preferencia_id") @db.VarChar(64)
+  preferenciaCreadaEn DateTime? @map("preferencia_creada_en") @db.Timestamptz(6)
+  montoPagado         Decimal?  @map("monto_pagado") @db.Decimal(12, 2)
+
+  // Envío durable del email de pago confirmado (reintentable)
+  emailPagoEnviadoEn DateTime? @map("email_pago_enviado_en") @db.Timestamptz(6)
+  emailPagoIntentoEn DateTime? @map("email_pago_intento_en") @db.Timestamptz(6)
+  emailPagoIntentos  Int       @default(0) @map("email_pago_intentos")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  audios          RecuerdoAudio[]
+  keychain        Keychain?
+  pagosEnRevision PagoRevision[]
+
+  @@index([userId, pagado, createdAt(sort: Desc)])
+  @@map("recuerdos")
+}
+
+/// Archivos de audio de un recuerdo (1 en pack individual, 2 en pareja).
+/// El archivo vive en disco (uploads/audio); acá solo se guarda su ruta pública.
+model RecuerdoAudio {
+  id         String   @id @default(uuid()) @db.Uuid
+  recuerdoId String   @map("recuerdo_id") @db.Uuid
+  url        String
+  orden      Int      @db.SmallInt
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  recuerdo Recuerdo @relation(fields: [recuerdoId], references: [id], onDelete: Cascade)
+
+  @@unique([recuerdoId, orden])
+  @@map("recuerdo_audios")
+}
+
+/// Llavero físico con QR impreso. Se vincula a un único recuerdo al activarse.
+model Keychain {
+  qrId       String    @id @map("qr_id") @db.VarChar(32)
+  pack       Pack      @default(individual)
+  usado      Boolean   @default(false)
+  recuerdoId String?   @unique @map("recuerdo_id") @db.Uuid
+  escaneos   Int       @default(0)
+  activadoEn DateTime? @map("activado_en") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Generado desde el panel y todavía incluido en la tanda a imprimir (PDF)
+  pendienteImpresion Boolean @default(false) @map("pendiente_impresion")
+
+  recuerdo Recuerdo? @relation(fields: [recuerdoId], references: [id], onDelete: SetNull)
+
+  @@map("keychains")
+}
+
+/// Pagos aprobados que no se pudieron aplicar (importe, moneda, duplicado...).
+/// Se registran para revisión manual; nunca marcan un recuerdo como pagado.
+model PagoRevision {
+  id                String   @id @default(uuid()) @db.Uuid
+  paymentId         String   @map("payment_id") @db.VarChar(64)
+  recuerdoId        String?  @map("recuerdo_id") @db.Uuid
+  motivo            String   @db.VarChar(40)
+  status            String?  @db.VarChar(40)
+  monto             Decimal? @db.Decimal(12, 2)
+  moneda            String?  @db.VarChar(3)
+  montoEsperado     Int?     @map("monto_esperado")
+  externalReference String?  @map("external_reference") @db.VarChar(128)
+  resuelto          Boolean  @default(false)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  recuerdo Recuerdo? @relation(fields: [recuerdoId], references: [id], onDelete: SetNull)
+
+  @@unique([paymentId, motivo])
+  @@index([resuelto, createdAt])
+  @@map("pagos_revision")
+}
+
+/// Evento (casamiento, cumpleaños…) creado desde el panel de eventos para un cliente.
+model Event {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  name      String   @db.VarChar(200)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+  qrs  EventQr[]
+
+  @@index([userId])
+  @@map("events")
+}
+
+/// QR individual de un evento; cada invitado graba un audio en uno.
+model EventQr {
+  qrId      String        @id @map("qr_id") @db.Uuid
+  eventId   String        @map("event_id") @db.Uuid
+  name      String        @default("Invitado") @db.VarChar(120)
+  audioUrl  String        @default("") @map("audio_url")
+  status    EventQrStatus @default(empty)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([status])
+  @@map("event_qrs")
+}

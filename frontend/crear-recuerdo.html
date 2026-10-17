@@ -12,7 +12,7 @@
 <link rel="manifest" href="/manifest.json">
 
 <meta name="theme-color" content="#6BAC73">
-  <link rel="stylesheet" href="css/main.css?v=2026.1000">
+  <link rel="stylesheet" href="css/main.css?v=2026.1500">
 </head>
 <body class="crear-body">
 
@@ -26,7 +26,7 @@
     </button>
 
     <button type="button" class="pack-btn" data-pack="pareja">
-      Pareja / Amigo<br><small>2 audios · 1 QR</small>
+      Dúo<br><small>2 audios · 1 QR</small>
     </button>
   </div>
 
@@ -79,15 +79,17 @@
 <div id="loginModal" class="rq-modal-overlay">
   <div class="rq-modal-card">
     <h2>Iniciá sesión para continuar</h2>
-    <p>Necesitás iniciar sesión para crear tu recuerdo</p>
-    <div id="googleBtn"></div>
+    <p>Iniciá sesión con Google para guardar tu recuerdo. Lo que cargaste no se pierde: al ingresar te llevamos directo al pago.</p>
+    <p id="loginEstado" class="rq-modal-aviso" role="status"></p>
+    <div id="googleBtn" class="rq-google-btn"></div>
     <button type="button" id="btnCancelar">Cancelar</button>
   </div>
 </div>
 
+<script src="js/config.js?v=2026.1600"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
-<script src="js/auth-init.js?v=2026.1400"></script>
-<script src="js/crear-recuerdo.js?v=2026.1300"></script>
+<script src="js/auth-init.js?v=2026.1600"></script>
+<script src="js/crear-recuerdo.js?v=2026.1600"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
 if (window.lucide) {
@@ -95,13 +97,7 @@ if (window.lucide) {
 }
 </script>
 
-<div id="sessionModal" class="session-modal">
-  <div class="session-modal-content">
-    <div class="session-icon">⏱</div>
-    <h2>Sesión expirada</h2>
-    <p>Tu sesión terminó por seguridad.<br>Volvé a iniciar sesión.</p>
-    <button id="sessionBtn">Entendido</button>
-  </div>
-</div>
+<!-- Sin #sessionModal a propósito: su botón lleva a index.html y se perdería lo cargado.
+     Si la sesión vence, al tocar "Continuar" se pide el login acá mismo. -->
 </body>
 </html>

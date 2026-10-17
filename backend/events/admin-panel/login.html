@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Login</title>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body style="display:flex;justify-content:center;align-items:center;">
+
+<div class="card">
+  <h2>Login ReQRdito Events</h2>
+  <input id="user" placeholder="Usuario"><br>
+  <input id="pass" type="password" placeholder="Contraseña"><br>
+  <button onclick="login()">Entrar</button>
+</div>
+
+<script>
+async function login() {
+  const res = await fetch("/events/login", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      user: user.value,
+      pass: pass.value
+    })
+  });
+
+  if(res.ok) location.href="dashboard.html";
+  else alert("Error login");
+}
+</script>
+
+</body>
+</html>

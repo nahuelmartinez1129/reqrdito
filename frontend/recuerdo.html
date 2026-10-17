@@ -36,6 +36,7 @@
     </div>
   </div>
 
+<script src="js/config.js?v=2026.1600"></script>
 <script>
 const params = new URLSearchParams(window.location.search);
 
@@ -73,7 +74,7 @@ if (!id) {
       intentos++;
 
       try {
-        const res = await fetch(`https://api.reqrdito.com/api/recuerdo/${id}`);
+        const res = await fetch(`${REQRDITO.API}/api/recuerdo/${encodeURIComponent(id)}`);
         const data = await res.json();
 
         if (data.pagado) {
@@ -108,8 +109,19 @@ async function cargarEvento() {
 
   try {
 
-    const res = await fetch(`https://api.reqrdito.com/events/audio-data/${id}`);
+    // /events/audio-data no existe: el backend expone /events/qr-data (módulo hoy deshabilitado)
+    const res = await fetch(`${REQRDITO.API}/events/qr-data/${encodeURIComponent(id)}`);
+
+    // Eventos deshabilitado temporalmente (el backend responde 503): aviso claro
+    if (res.status === 503) {
+      document.getElementById("spinner").style.display = "none";
+      titulo.textContent = "Recuerdo no disponible por ahora";
+      mensaje.textContent = "Los recuerdos de eventos no están disponibles por el momento. Volvé a intentarlo más adelante.";
+      return;
+    }
+
     const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Evento no disponible");
 
     mostrarEvento(data);
 
@@ -152,7 +164,7 @@ function mostrarRecuerdo(data) {
   document.getElementById("spinner").style.display = "none";
   contenido.style.display = "block";
 
-  qrImg.src = `https://api.reqrdito.com${data.qrUrl}`;
+  qrImg.src = `${REQRDITO.API}${data.qrUrl}`;
   
 
   let index = 0;
@@ -162,13 +174,13 @@ function mostrarRecuerdo(data) {
 
   const audio = document.createElement("audio");
   audio.controls = true;
-  audio.src = `https://api.reqrdito.com${audios[0]}`;
+  audio.src = `${REQRDITO.API}${audios[0]}`;
   audio.className = "recuerdo-audio";
 
   audio.onended = () => {
     index++;
     if (audios[index]) {
-      audio.src = `https://api.reqrdito.com${audios[index]}`;
+      audio.src = `${REQRDITO.API}${audios[index]}`;
       audio.play();
     }
   };

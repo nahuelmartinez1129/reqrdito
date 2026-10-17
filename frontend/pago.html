@@ -30,7 +30,7 @@
       <li>Audio privado</li>
       <li>Código QR único</li>
       <li>Acceso permanente</li>
-      <li>Ideal para regalos y llaveros</li>
+      <li>Ideal para regalos</li>
     </ul>
   </div>
 
@@ -39,20 +39,33 @@
     <strong id="precioTotal">Cargando...</strong>
   </div>
 
+  <div class="medios-pago">
+    <p class="medios-pago__titulo">Pagá con tarjeta de crédito o débito, <strong>sin cuenta de Mercado Pago</strong></p>
+    <ul class="medios-pago__lista">
+      <li>Tarjeta de crédito</li>
+      <li>Tarjeta de débito</li>
+      <li>Cuenta de Mercado Pago (opcional)</li>
+    </ul>
+    <p class="medios-pago__ayuda">
+      En la pantalla de Mercado Pago elegí la tarjeta y continuá como invitado: no hace falta crear una cuenta ni iniciar sesión.
+    </p>
+  </div>
+
   <div class="seguridad">
-    Pago seguro procesado por Mercado Pago
+    Pago seguro procesado por Mercado Pago. Los datos de tu tarjeta se cargan en Mercado Pago y nunca pasan por ReQRdito.
   </div>
 
   <button id="pagarBtn" class="btn-pagar" disabled>
-    Pagar recuerdo
+    Pagar con tarjeta o Mercado Pago
   </button>
 
   <p id="estado" style="margin-top:15px;"></p>
 
 </div>
 
+<script src="js/config.js?v=2026.1600"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
-<script src="js/auth-init.js?v=2026.1400"></script>
+<script src="js/auth-init.js?v=2026.1600"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
@@ -68,10 +81,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   const precioBox = document.getElementById("precioTotal");
   const tituloPack = document.getElementById("tituloPack");
 
-  const PRECIOS = {
-    individual: 6900,
-    pareja: 10900
+  // Solo para mostrar: el importe que se cobra lo fija el backend (config/precios.js).
+  // Se consulta GET /api/precios; estos valores son el respaldo si la consulta falla
+  // y deben coincidir con el backend (lo verifica test/precios.test.js).
+  const PRECIOS_RESPALDO = {
+    individual: 11990,
+    pareja: 21990
   };
+
+  async function obtenerPrecios() {
+    try {
+      const res = await fetch(`${REQRDITO.API}/api/precios`);
+      if (!res.ok) throw new Error("precios no disponibles");
+      const data = await res.json();
+      return {
+        individual: data.individual?.monto ?? PRECIOS_RESPALDO.individual,
+        pareja: data.pareja?.monto ?? PRECIOS_RESPALDO.pareja
+      };
+    } catch {
+      return PRECIOS_RESPALDO;
+    }
+  }
 
   // 🔥 Leer ID de la URL
   const params = new URLSearchParams(window.location.search);
@@ -85,7 +115,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
 
     // 🔎 Buscar recuerdo real en backend
-    const res = await fetch(`https://api.reqrdito.com/api/recuerdo/${recuerdoId}`);
+    const [res, PRECIOS] = await Promise.all([
+      fetch(`${REQRDITO.API}/api/recuerdo/${encodeURIComponent(recuerdoId)}`),
+      obtenerPrecios()
+    ]);
     const data = await res.json();
 
     if (!res.ok) {
@@ -101,10 +134,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // UI
     if (pack === "pareja") {
-      tituloPack.textContent = "Recuerdo Pareja / Amigo";
+      tituloPack.textContent = "Recuerdo Dúo";
     }
 
-    precioBox.textContent = `$${precio.toLocaleString("es-AR")} ARS`;
+    precioBox.textContent = `${precio.toLocaleString("es-AR")} ARS`;
+
+    if (data.pagado) {
+      estado.textContent = "Este recuerdo ya está pago";
+      pagarBtn.disabled = true;
+      return;
+    }
     pagarBtn.disabled = false;
 
   } catch (error) {
@@ -121,7 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     try {
 
-      const resPago = await fetch("https://api.reqrdito.com/api/crear-preferencia", {
+      const resPago = await fetch(`${REQRDITO.API}/api/crear-preferencia`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -131,6 +170,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       const pagoData = await resPago.json();
+
+      if (resPago.status === 401) {
+        auth.clearToken();
+        window.location.href = "index.html";
+        return;
+      }
+
+      if (resPago.status === 503) {
+        estado.textContent = "❌ " + (pagoData.error || "Pagos no disponibles por el momento");
+        return;
+      }
 
       if (!resPago.ok || !pagoData.init_point) {
         throw new Error("Error creando preferencia");

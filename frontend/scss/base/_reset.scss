@@ -1,4 +1,10 @@
-* {
+// Poppins ya es la fuente de marca del proyecto (activar.html la carga y
+// varias páginas la declaran); se importa acá para que todas la usen.
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;

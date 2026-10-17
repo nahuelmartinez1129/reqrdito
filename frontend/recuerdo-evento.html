@@ -59,6 +59,7 @@ audio {
 
 </div>
 
+<script src="js/config.js?v=2026.1600"></script>
 <script>
 
 const params = new URLSearchParams(window.location.search);
@@ -68,7 +69,17 @@ const content = document.getElementById("content");
 
 async function load() {
   try {
-    const res = await fetch(`https://api.reqrdito.com/events/qr-data/${qrId}`);
+    const res = await fetch(`${REQRDITO.API}/events/qr-data/${encodeURIComponent(qrId || "")}`);
+
+    // Eventos deshabilitado temporalmente (el backend responde 503): aviso claro
+    if (res.status === 503) {
+      content.innerHTML = `
+        <p class="empty">Los recuerdos de eventos no están disponibles por el momento. Volvé a intentarlo más adelante.</p>
+        <p><a href="${REQRDITO.SITIO}/">Ir a ReQRdito</a></p>
+      `;
+      return;
+    }
+
     const data = await res.json();
 
     if (!data || data.status === "empty") {
@@ -78,12 +89,17 @@ async function load() {
       return;
     }
 
-    content.innerHTML = `
-      <h2>${data.name}</h2>
-      <audio controls autoplay>
-        <source src="${data.file}" type="audio/webm">
-      </audio>
-    `;
+    // nombre y archivo vienen del servidor: se insertan como texto/atributo, nunca como HTML
+    const titulo = document.createElement("h2");
+    titulo.textContent = data.name || "";
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.autoplay = true;
+    const source = document.createElement("source");
+    source.src = data.file || "";
+    source.type = "audio/webm";
+    audio.appendChild(source);
+    content.replaceChildren(titulo, audio);
 
   } catch (err) {
     content.innerHTML = `

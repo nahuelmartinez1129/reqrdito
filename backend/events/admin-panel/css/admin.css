@@ -1,0 +1,235 @@
+:root {
+  --verde-claro: #6BAC73;
+  --manteca: #F9ECD9;
+  --naranja: #EBAF2B;
+  --verde-fuerte: #166D20;
+  --bg: #0f172a;
+  --panel: #111827;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: Inter, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--manteca);
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background: var(--panel);
+  padding: 20px;
+  border-right: 2px solid var(--verde-fuerte);
+}
+
+.sidebar h2 {
+  color: var(--naranja);
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--verde-claro);
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Main */
+.main {
+  flex: 1;
+  padding: 30px;
+}
+
+/* Cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--panel);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--verde-fuerte);
+  box-shadow: 0 0 15px rgba(0,0,0,.4);
+}
+
+.card button {
+  margin-top: 10px;
+  background: var(--naranja);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Inputs */
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin: 6px 0;
+  width: 250px;
+}
+
+/* Audio list */
+.audio-item {
+  background: #020617;
+  padding: 22px 24px; /* 👈 MAS ESPACIO */
+  margin: 12px 0;
+  border-radius: 14px;
+  border: 1px solid var(--verde-fuerte);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+.audio-item audio {
+  width: 320px;
+}
+
+.audio-item img {
+  width: 120px;
+  border-radius: 12px;
+  background: white;
+  padding: 6px;
+}
+
+
+.audio-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Inputs PRO */
+input {
+  background: #020617;
+  color: var(--manteca);
+  border: 2px solid var(--verde-fuerte);
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  transition: .2s;
+}
+
+input:focus {
+  border-color: var(--naranja);
+  box-shadow: 0 0 0 3px rgba(235,175,43,0.2);
+  outline: none;
+}
+
+/* Botones PRO */
+button {
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .2s;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(0,0,0,.4);
+}
+
+.btn-primary {
+  background: var(--verde-claro);
+  color: black;
+}
+
+.btn-warning {
+  background: var(--naranja);
+  color: black;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
+.record-status {
+  margin-top: 10px;
+  font-weight: bold;
+  color: red;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+/* puntito rojo parpadeando */
+.rec-dot {
+  width: 12px;
+  height: 12px;
+  background: red;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.2; }
+  100% { opacity: 1; }
+}
+
+.hidden {
+  display: none;
+}
+
+/* estados botones */
+button.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* =========================
+   QR SELECCIÓN PRO
+========================= */
+
+.audio-item {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.audio-item:hover {
+  transform: scale(1.02);
+  border-color: var(--verde-claro);
+}
+
+/* 🔥 seleccionado */
+.audio-item.active {
+  border: 2px solid var(--verde-claro);
+  box-shadow: 0 0 15px rgba(107,172,115,0.6);
+  transform: scale(1.03);
+  animation: pulse 0.6s ease;
+}
+
+/* animación */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1.03); }
+}
+
+/* botón eliminar pro */
+.btn-delete {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #b91c1c;
+}

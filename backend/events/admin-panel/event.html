@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Evento - ReQRdito Events</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>🎉 ReQRdito Events</h2>
+    <h3 id="eventName">Evento</h3>
+    <hr style="border:1px solid #166D20;">
+    <p>Panel de grabación</p>
+
+    <p id="contador" style="margin-top:10px; font-weight:bold;"></p>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    
+    <h1>🎙️ Grabar recuerdo de voz</h1>
+
+    <!-- INPUT NOMBRE -->
+    <div class="form-group">
+      <label>Nombre del invitado</label><br>
+      <input id="guestName" placeholder="Ej: Tía Marta, Juan, Amigos del trabajo">
+    </div>
+
+    <!-- BOTONES GRABAR -->
+    <div class="controls">
+      <button onclick="elegirMicrofono()">🎤 Elegir micrófono</button>
+      <button id="start" class="btn-primary">▶️ Grabar</button>
+      <button id="stop" class="btn-warning">⏹️ Stop</button>
+    </div>
+
+<!-- SUBIR AUDIO -->
+<div class="controls">
+<input type="file" id="fileInput" accept="*/*">
+  <button onclick="document.getElementById('fileInput').click()" class="btn-primary">
+    📁 Subir audio
+  </button>
+</div>
+
+	<!-- INDICADOR -->
+<div id="recordStatus" class="record-status hidden">
+  <span class="rec-dot"></span> Grabando...
+</div>
+    <!-- LISTA DE AUDIOS -->
+    <h2>🎧 Audios del evento</h2>
+    <div id="audios"></div>
+    
+
+     <button onclick="generateQRs()" class="btn-primary">
+  ⚡ 	Generar QRs
+     </button>
+
+    <!-- EXPORT -->
+    <div style="margin-top:20px;">
+      <button onclick="exportEvent()" class="btn-primary">⬇ Descargar todos los audios (ZIP)</button>
+    </div>
+
+  </div>
+
+  <script src="js/event.js"></script>
+</body>
+</html>

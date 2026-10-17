@@ -1,75 +1,64 @@
+@use '../base/variables' as v;
+@use '../base/mixins' as m;
+
 .pago-exito-body {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #6BAC73, #166D20);
+  @include m.brand-backdrop;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  font-family: 'Poppins', sans-serif;
+  padding: clamp(1rem, 4vw, 2.5rem);
 }
 
 .pago-exito-card {
-  background: #F9ECD9;
+  @include m.panel;
   width: 100%;
-  max-width: 420px;
-  padding: 2.2rem;
-  border-radius: 22px;
+  max-width: 440px;
+  padding: clamp(2rem, 6vw, 2.75rem) clamp(1.25rem, 5vw, 2.5rem);
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-  animation: fadeInUp 0.6s ease;
+  animation: fadeInUp 0.6s v.$ease;
 
   .icon-success {
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
 
-    i {
-      width: 56px;
-      height: 56px;
-      color: #166D20;
+    [data-lucide] {
+      @include m.icon-badge(76px, 18px, v.$verde-suave, v.$verde-oscuro, 50%);
+      display: block;
+      margin: 0 auto;
+      box-shadow: 0 0 0 10px rgba(v.$verde-claro, 0.12);
+      animation: successPop 0.6s v.$ease 0.15s both;
     }
   }
 
   h1 {
-    color: #166D20;
-    font-size: clamp(1.5rem, 5vw, 1.9rem);
-    margin-bottom: 0.8rem;
+    color: v.$verde-oscuro;
+    font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2rem);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
   }
 
   .mensaje-principal {
-    color: #1D3557;
+    color: v.$tinta-suave;
     font-size: 1rem;
     margin-bottom: 2rem;
-    line-height: 1.5;
+    line-height: 1.6;
   }
 
   .acciones {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    margin-bottom: 1.6rem;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
   }
 
   .btn-ver-recuerdo {
+    @include m.button-primary;
     width: 100%;
-    background: #EBAF2B;
-    color: #166D20;
-    padding: 0.9rem 1.4rem;
-    border-radius: 999px;
-    font-weight: 600;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(235,175,43,0.45);
-    }
+    min-height: 52px;
 
     &.disabled {
-      background: #ccc;
-      color: #666;
+      background: #E6E1D8;
+      color: v.$tinta-tenue;
+      opacity: 1;
       cursor: not-allowed;
       box-shadow: none;
       transform: none;
@@ -77,29 +66,21 @@
   }
 
   .btn-secundario {
+    @include m.button-ghost;
     width: 100%;
-    background: transparent;
-    color: #166D20;
-    padding: 0.8rem 1.4rem;
-    border-radius: 999px;
-    border: 2px solid rgba(22, 109, 32, 0.25);
-    font-weight: 600;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: rgba(22, 109, 32, 0.08);
-    }
+    min-height: 52px;
   }
 
   .nota {
     font-size: 0.85rem;
-    opacity: 0.7;
-    line-height: 1.4;
+    color: v.$tinta-tenue;
+    line-height: 1.55;
+    padding-top: 1.25rem;
+    border-top: 1px solid v.$crema-borde-suave;
+
+    strong {
+      color: v.$verde-oscuro;
+    }
   }
 }
 
@@ -111,5 +92,16 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes successPop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
