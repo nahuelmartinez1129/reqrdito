@@ -82,7 +82,7 @@ function validarEntorno() {
   // Precio temporal de prueba: se informa siempre que esté configurado (activo o no)
   const prueba = estadoPrecioPrueba();
   if (prueba.activo) {
-    avisos.push(`PRECIO DE PRUEBA ACTIVO: Individual ${prueba.monto} ARS hasta ${prueba.hasta.toISOString()}`);
+    avisos.push(`PRECIO DE PRUEBA ACTIVO: Individual ${prueba.monto} ARS hasta ${prueba.hasta.toISOString()} para ${prueba.emails.length} cuenta(s) habilitada(s)`);
   } else if (prueba.motivo !== "sin_configurar") {
     avisos.push(`PRECIO_PRUEBA_* configurado pero NO aplicado (${prueba.motivo}): se cobra el precio oficial`);
   }

@@ -509,7 +509,7 @@ describe("Confirmación del pago sin webhook de Mercado Pago (entorno local) y d
 
 describe("Precio temporal de prueba (Individual, solo producción)", () => {
   const ORIGINAL = {};
-  const VARIABLES = ["NODE_ENV", "PRECIO_PRUEBA_INDIVIDUAL_ARS", "PRECIO_PRUEBA_HASTA"];
+  const VARIABLES = ["NODE_ENV", "PRECIO_PRUEBA_INDIVIDUAL_ARS", "PRECIO_PRUEBA_HASTA", "PRECIO_PRUEBA_EMAILS"];
   const enHoras = (h) => new Date(Date.now() + h * 3600 * 1000).toISOString();
 
   beforeEach(() => {
@@ -518,6 +518,7 @@ describe("Precio temporal de prueba (Individual, solo producción)", () => {
     process.env.NODE_ENV = "production";
     process.env.PRECIO_PRUEBA_INDIVIDUAL_ARS = "100";
     process.env.PRECIO_PRUEBA_HASTA = enHoras(2);
+    process.env.PRECIO_PRUEBA_EMAILS = "ana@example.com";   // dueña por defecto de conPreferencia
   });
   after(() => {
     for (const v of VARIABLES) {
@@ -526,8 +527,15 @@ describe("Precio temporal de prueba (Individual, solo producción)", () => {
   });
 
   test("el Individual se cobra $100 con preferencia que vence; el Dúo no cambia", async () => {
-    const precios = await api("/api/precios");
-    assert.equal(precios.headers.get("cache-control"), "no-store");
+    // anónimo: precio oficial con caché pública
+    const anonimo = await api("/api/precios");
+    assert.equal(anonimo.headers.get("cache-control"), "public, max-age=300");
+    assert.match(anonimo.headers.get("vary") || "", /Authorization/i);
+    assert.equal((await anonimo.json()).individual.monto, 11990);
+
+    // cuenta habilitada: precio de prueba, sin caché
+    const precios = await api("/api/precios", { token: await h.login("ana@example.com") });
+    assert.equal(precios.headers.get("cache-control"), "private, no-store");
     const body = await precios.json();
     assert.equal(body.individual.monto, 100);
     assert.equal(body.pareja.monto, 21990);
@@ -544,6 +552,20 @@ describe("Precio temporal de prueba (Individual, solo producción)", () => {
     assert.equal(h.mp.preferencias[1].items[0].unit_price, 21990);
     assert.equal(h.mp.preferencias[1].expires, undefined);
     assert.equal((await estado(duo.id)).montoEsperado, 21990);
+  });
+
+  test("durante la ventana, otra cuenta paga el precio oficial y $100 no le activa el recuerdo", async () => {
+    const otra = await h.login("cliente@example.com");
+    assert.equal((await (await api("/api/precios", { token: otra })).json()).individual.monto, 11990);
+
+    const { id } = await conPreferencia("individual", "cliente@example.com");
+    assert.equal(h.mp.preferencias[0].items[0].unit_price, 11990);
+    assert.equal(h.mp.preferencias[0].expires, undefined);
+    assert.equal((await estado(id)).montoEsperado, 11990);
+
+    h.pagoAprobado("3051", id, { monto: 100 });
+    await h.webhook("3051");
+    assert.equal((await estado(id)).pagado, false);
   });
 
   test("el webhook acepta solo los $100 de la preferencia de prueba", async () => {

@@ -88,43 +88,56 @@ test("el backend no tiene importes hardcodeados fuera de config/precios.js", () 
 const { precioACobrar, estadoPrecioPrueba } = require("../../config/precios");
 
 const AHORA = new Date("2026-10-18T12:00:00-03:00");
-const PROD = { NODE_ENV: "production", PRECIO_PRUEBA_INDIVIDUAL_ARS: "100", PRECIO_PRUEBA_HASTA: "2026-10-19T23:59:00-03:00" };
+const YO = "Tester@Example.com";
+const PROD = {
+  NODE_ENV: "production",
+  PRECIO_PRUEBA_INDIVIDUAL_ARS: "100",
+  PRECIO_PRUEBA_HASTA: "2026-10-19T23:59:00-03:00",
+  PRECIO_PRUEBA_EMAILS: " tester@example.com , otra@example.com "
+};
 
-test("precio de prueba vigente: solo cambia el Individual y no toca la tabla oficial", () => {
-  const p = precioACobrar("individual", PROD, AHORA);
+test("precio de prueba vigente: solo el Individual de una cuenta habilitada", () => {
+  const p = precioACobrar("individual", YO, PROD, AHORA);
   assert.equal(p.monto, 100);
   assert.equal(p.moneda, "ARS");
   assert.equal(p.prueba, true);
   assert.equal(p.hastaIso, "2026-10-19T23:59:00-03:00");
-  assert.equal(precioACobrar("pareja", PROD, AHORA).monto, 21990);
-  assert.equal(precioACobrar("pareja", PROD, AHORA).prueba, undefined);
+  assert.equal(precioACobrar("individual", "otra@example.com", PROD, AHORA).monto, 100);
+  assert.equal(precioACobrar("pareja", YO, PROD, AHORA).monto, 21990);
+  assert.equal(precioACobrar("pareja", YO, PROD, AHORA).prueba, undefined);
   assert.equal(PRECIOS.individual.monto, 11990);
   assert.equal(precioDe("individual").monto, 11990, "la validación histórica sigue con el oficial");
 });
 
+test("con el precio de prueba activo, el resto de las cuentas paga el oficial", () => {
+  for (const email of [undefined, null, "", "cliente@example.com", "tester@example.com.ar", "xtester@example.com"]) {
+    assert.equal(precioACobrar("individual", email, PROD, AHORA), PRECIOS.individual, String(email));
+  }
+});
+
 test("sin variables se cobra el precio oficial", () => {
-  assert.equal(precioACobrar("individual", { NODE_ENV: "production" }, AHORA), PRECIOS.individual);
+  assert.equal(precioACobrar("individual", YO, { NODE_ENV: "production" }, AHORA), PRECIOS.individual);
   assert.equal(estadoPrecioPrueba({ NODE_ENV: "production" }, AHORA).motivo, "sin_configurar");
 });
 
 test("precio de prueba nunca se aplica fuera de producción", () => {
   for (const NODE_ENV of [undefined, "", "development", "test", "Production"]) {
     const env = { ...PROD, NODE_ENV };
-    assert.equal(precioACobrar("individual", env, AHORA).monto, 11990, String(NODE_ENV));
+    assert.equal(precioACobrar("individual", YO, env, AHORA).monto, 11990, String(NODE_ENV));
     assert.equal(estadoPrecioPrueba(env, AHORA).motivo, "fuera_de_produccion");
   }
 });
 
 test("precio de prueba vencido o con ventana demasiado larga vuelve al oficial", () => {
   const vencido = { ...PROD, PRECIO_PRUEBA_HASTA: "2026-10-18T11:59:59-03:00" };
-  assert.equal(precioACobrar("individual", vencido, AHORA).monto, 11990);
+  assert.equal(precioACobrar("individual", YO, vencido, AHORA).monto, 11990);
   assert.equal(estadoPrecioPrueba(vencido, AHORA).motivo, "vencido");
   // justo al vencer ya no vale
   const justo = { ...PROD, PRECIO_PRUEBA_HASTA: "2026-10-18T12:00:00-03:00" };
-  assert.equal(precioACobrar("individual", justo, AHORA).monto, 11990);
+  assert.equal(precioACobrar("individual", YO, justo, AHORA).monto, 11990);
   const largo = { ...PROD, PRECIO_PRUEBA_HASTA: "2026-10-21T12:00:01-03:00" };
   assert.equal(estadoPrecioPrueba(largo, AHORA).motivo, "ventana_demasiado_larga");
-  assert.equal(precioACobrar("individual", largo, AHORA).monto, 11990);
+  assert.equal(precioACobrar("individual", YO, largo, AHORA).monto, 11990);
 });
 
 test("configuraciones inválidas del precio de prueba no se aplican", () => {
@@ -140,17 +153,21 @@ test("configuraciones inválidas del precio de prueba no se aplican", () => {
     [{ PRECIO_PRUEBA_HASTA: "mañana" }, "fecha_invalida"],
     [{ PRECIO_PRUEBA_HASTA: "2026-10-19T23:59:00" }, "fecha_invalida"],   // sin zona horaria
     [{ PRECIO_PRUEBA_HASTA: "2026-10-19" }, "fecha_invalida"],
-    [{ PRECIO_PRUEBA_HASTA: "2026-13-45T25:99:00Z" }, "fecha_invalida"]
+    [{ PRECIO_PRUEBA_HASTA: "2026-13-45T25:99:00Z" }, "fecha_invalida"],
+    [{ PRECIO_PRUEBA_EMAILS: undefined }, "emails_invalidos"],              // obligatoria
+    [{ PRECIO_PRUEBA_EMAILS: " , " }, "emails_invalidos"],
+    [{ PRECIO_PRUEBA_EMAILS: "*" }, "emails_invalidos"],
+    [{ PRECIO_PRUEBA_EMAILS: "tester@example.com,todos" }, "emails_invalidos"]
   ];
   for (const [cambio, motivo] of casos) {
     const env = { ...PROD, ...cambio };
     assert.equal(estadoPrecioPrueba(env, AHORA).motivo, motivo, JSON.stringify(cambio));
-    assert.equal(precioACobrar("individual", env, AHORA).monto, 11990, JSON.stringify(cambio));
+    assert.equal(precioACobrar("individual", YO, env, AHORA).monto, 11990, JSON.stringify(cambio));
   }
 });
 
 test("precioACobrar no acepta packs desconocidos", () => {
   for (const pack of ["duo", "evento", "__proto__", "constructor", undefined, ""]) {
-    assert.equal(precioACobrar(pack, PROD, AHORA), null, String(pack));
+    assert.equal(precioACobrar(pack, YO, PROD, AHORA), null, String(pack));
   }
 });

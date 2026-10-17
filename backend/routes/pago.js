@@ -53,17 +53,17 @@ function cuerpoPreferencia(recuerdo, pack, precio) {
 
 /* =========================
    GET /api/precios (lo que muestra el frontend)
+   Sesión opcional: solo cambia algo para un email habilitado en el precio de prueba.
 ========================= */
-router.get("/precios", (req, res) => {
+router.get("/precios", auth, (req, res) => {
   const precios = {};
-  let hayPrueba = false;
   for (const pack of Object.keys(PRECIOS)) {
-    const p = precioACobrar(pack);
+    const p = precioACobrar(pack, req.user?.email);
     precios[pack] = { monto: p.monto, moneda: p.moneda, nombre: p.nombre };
-    hayPrueba = hayPrueba || Boolean(p.prueba);
   }
-  // Sin caché mientras hay precio de prueba: al vencer, la web muestra el oficial enseguida
-  res.set("Cache-Control", hayPrueba ? "no-store" : "public, max-age=300");
+  // Con sesión la respuesta puede ser personal: no se guarda en caché
+  res.set("Vary", "Authorization");
+  res.set("Cache-Control", req.user ? "private, no-store" : "public, max-age=300");
   res.json(precios);
 });
 
@@ -104,7 +104,8 @@ router.post("/crear-preferencia", auth, requireAuth, async (req, res) => {
     }
 
     const pack = recuerdo.pack || "individual";
-    const precio = precioACobrar(pack);
+    // El dueño ya se verificó arriba (recuerdo.userId === req.user.id)
+    const precio = precioACobrar(pack, req.user.email);
 
     if (!precio) {
       return res.status(400).json({ error: "Pack inválido" });

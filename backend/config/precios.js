@@ -26,9 +26,11 @@ function precioDe(pack) {
    Precio temporal de prueba (solo pack Individual, solo producción)
    PRECIO_PRUEBA_INDIVIDUAL_ARS=100
    PRECIO_PRUEBA_HASTA=2026-10-20T23:59:00-03:00   (ISO con zona horaria)
-   Se aplica solo si NODE_ENV=production, el importe es un entero menor al oficial
-   y la fecha de fin es futura y está a no más de PRUEBA_VENTANA_MAX_MS de ahora.
-   Al vencer vuelve solo al precio oficial; para cortarlo antes, borrar las dos
+   PRECIO_PRUEBA_EMAILS=tu-cuenta@gmail.com        (dueños de recuerdo habilitados)
+   Se aplica solo si NODE_ENV=production, el importe es un entero menor al oficial,
+   la fecha de fin es futura y está a no más de PRUEBA_VENTANA_MAX_MS de ahora, y el
+   dueño del recuerdo (sesión de Google) está en la lista. El resto paga el oficial.
+   Al vencer vuelve solo al precio oficial; para cortarlo antes, borrar las tres
    variables del .env y reiniciar el proceso.
 ========================= */
 const PACK_PRUEBA = "individual";
@@ -39,7 +41,7 @@ const PRUEBA_VENTANA_MAX_MS = 72 * 60 * 60 * 1000;
 function estadoPrecioPrueba(env = process.env, ahora = new Date()) {
   const montoTexto = env.PRECIO_PRUEBA_INDIVIDUAL_ARS;
   const hastaTexto = env.PRECIO_PRUEBA_HASTA;
-  if (!montoTexto && !hastaTexto) return { activo: false, motivo: "sin_configurar" };
+  if (!montoTexto && !hastaTexto && !env.PRECIO_PRUEBA_EMAILS) return { activo: false, motivo: "sin_configurar" };
 
   if (env.NODE_ENV !== "production") return { activo: false, motivo: "fuera_de_produccion" };
 
@@ -57,17 +59,25 @@ function estadoPrecioPrueba(env = process.env, ahora = new Date()) {
   if (hasta <= ahora) return { activo: false, motivo: "vencido", hasta };
   if (hasta - ahora > PRUEBA_VENTANA_MAX_MS) return { activo: false, motivo: "ventana_demasiado_larga", hasta };
 
-  return { activo: true, monto, hasta, hastaIso: String(hastaTexto).trim() };
+  const emails = String(env.PRECIO_PRUEBA_EMAILS || "")
+    .split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+  if (!emails.length || emails.some(e => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e))) {
+    return { activo: false, motivo: "emails_invalidos" };
+  }
+
+  return { activo: true, monto, hasta, hastaIso: String(hastaTexto).trim(), emails };
 }
 
-// Precio que se cobra HOY por el pack: el oficial, salvo el de prueba vigente del Individual.
-// Incluye `prueba` y `hasta` cuando corresponde, para expirar la preferencia y registrarlo.
-function precioACobrar(pack, env = process.env, ahora = new Date()) {
+// Precio que se cobra HOY por el pack a este dueño de recuerdo: el oficial, salvo el de
+// prueba vigente del Individual si `email` está habilitado. Incluye `prueba` y `hasta`
+// cuando corresponde, para expirar la preferencia y registrarlo.
+function precioACobrar(pack, email, env = process.env, ahora = new Date()) {
   const oficial = precioDe(pack);
   if (!oficial || pack !== PACK_PRUEBA) return oficial;
 
   const prueba = estadoPrecioPrueba(env, ahora);
   if (!prueba.activo) return oficial;
+  if (!email || !prueba.emails.includes(String(email).trim().toLowerCase())) return oficial;
 
   return Object.freeze({ ...oficial, monto: prueba.monto, prueba: true, hasta: prueba.hasta, hastaIso: prueba.hastaIso });
 }

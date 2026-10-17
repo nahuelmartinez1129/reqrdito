@@ -91,7 +91,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function obtenerPrecios() {
     try {
-      const res = await fetch(`${REQRDITO.API}/api/precios`);
+      // Con sesión, el backend puede mostrar el precio de prueba de esa cuenta
+      const res = await fetch(`${REQRDITO.API}/api/precios`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
       if (!res.ok) throw new Error("precios no disponibles");
       const data = await res.json();
       return {
