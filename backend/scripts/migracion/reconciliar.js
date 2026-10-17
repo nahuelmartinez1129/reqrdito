@@ -232,7 +232,14 @@ async function importarKeychains(prisma, docs, inf, aplicar, idsImportables) {
     if (!pack) { inf.keychains.omitidos.push({ qrId, motivo: `pack_desconocido:${k.pack}` }); continue; }
 
     const usado = k.usado === true;
-    const recuerdoId = k.recuerdoId || null;
+    // La versión Mongo llegó a guardar el texto "null" en llaveros sin vincular (usado=false):
+    // hoy esos QR redirigen a activar. Se importan libres para que sigan igual.
+    const recuerdoIdTexto = typeof k.recuerdoId === "string" ? k.recuerdoId.trim() : k.recuerdoId;
+    const sinVinculo = !recuerdoIdTexto || (typeof recuerdoIdTexto === "string" && /^(null|undefined)$/i.test(recuerdoIdTexto));
+    const recuerdoId = sinVinculo ? null : recuerdoIdTexto;
+    if (sinVinculo && recuerdoIdTexto) {
+      (inf.keychains.avisos ||= []).push({ qrId, motivo: "recuerdoId_textual_tratado_como_sin_vinculo" });
+    }
 
     if (recuerdoId) {
       if (!usado) { inf.keychains.omitidos.push({ qrId, motivo: "vinculado_pero_no_usado" }); continue; }

@@ -45,7 +45,9 @@ function exportFicticio() {
     { qrId: "KEYCCC333", pack: "individual", usado: false, recuerdoId: R3 },      // inconsistente
     { qrId: "KEYDDD444", pack: "individual", usado: true, recuerdoId: SIN_DUENIO }, // recuerdo no importado
     { qrId: "KEYEEE555", pack: "individual", usado: true, recuerdoId: R1 },        // R1 ya vinculado
-    { qrId: "KEYFFF666", pack: "trio" }
+    { qrId: "KEYFFF666", pack: "trio" },
+    // la versión Mongo guardó el texto "null" en llaveros sin vincular: hoy redirigen a activar
+    { qrId: "KEYGGG777", pack: "individual", usado: false, recuerdoId: "null", escaneos: 13, activadoEn: { $date: "2026-03-31T13:20:03Z" } }
   ]);
   return d;
 }
@@ -69,7 +71,7 @@ describe("Reconciliación histórica", () => {
       assert.equal(await prisma[m].count(), 0, m);
     }
     assert.equal(inf.recuerdos.importados, 3);
-    assert.equal(inf.keychains.importados, 2);
+    assert.equal(inf.keychains.importados, 3);
   });
 
   test("importa con reglas de mapeo seguras y es idempotente", async () => {
@@ -111,7 +113,7 @@ describe("Reconciliación histórica", () => {
     assert.deepEqual(r3.audios.sort((a, b) => a.orden - b.orden).map(a => a.url), ["/audio/a.mp3", "/audio/b.mp3"]);
 
     // keychains: válidos importados, inconsistentes reportados y NO importados
-    assert.equal(inf.keychains.importados, 2);
+    assert.equal(inf.keychains.importados, 3);
     assert.deepEqual(inf.keychains.omitidos.map(o => o.motivo).sort(), [
       "pack_desconocido:trio", "recuerdo_inexistente", "recuerdo_ya_vinculado_a_otro_llavero", "vinculado_pero_no_usado"
     ]);
@@ -120,8 +122,15 @@ describe("Reconciliación histórica", () => {
     assert.equal(k.escaneos, 7);
     assert.equal(k.pendienteImpresion, false, "los históricos no entran en la tanda a imprimir");
 
+    // recuerdoId textual "null": se importa libre (sigue yendo a activar) y conserva su historial
+    const libre = await prisma.keychain.findUnique({ where: { qrId: "KEYGGG777" } });
+    assert.equal(libre.recuerdoId, null);
+    assert.equal(libre.usado, false);
+    assert.equal(libre.escaneos, 13);
+    assert.deepEqual(inf.keychains.avisos, [{ qrId: "KEYGGG777", motivo: "recuerdoId_textual_tratado_como_sin_vinculo" }]);
+
     assert.deepEqual(inf.verificacion, {
-      users: 3, recuerdos: 3, recuerdosPagados: 2, audios: 4, keychains: 2, keychainsVinculados: 1
+      users: 3, recuerdos: 3, recuerdosPagados: 2, audios: 4, keychains: 3, keychainsVinculados: 1
     });
 
     // segunda corrida: todo existe, nada cambia
@@ -131,7 +140,7 @@ describe("Reconciliación histórica", () => {
     assert.equal(otra.recuerdos.existentes, 3);
     assert.equal(otra.users.importados, 0);
     assert.equal(otra.keychains.importados, 0);
-    assert.equal(otra.keychains.existentes, 2);
+    assert.equal(otra.keychains.existentes, 3);
     assert.deepEqual(otra.verificacion, inf.verificacion);
     assert.deepEqual(await prisma.recuerdo.findUnique({ where: { id: R1 } }), antes);
   });
