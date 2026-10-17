@@ -15,6 +15,8 @@ const prisma = require("../db/prisma");
 const enviarEmail = require("../utils/enviarEmail");
 const { isUuid } = require("../utils/validacion");
 const { MONEDA, precioDe, PRECIOS_ANTERIORES } = require("../config/precios");
+const { config } = require("../config/env");
+const metaCapi = require("./metaCapi");
 
 const PREFIJO_REFERENCIA = "REQRDITO_";
 // Un intento de envío "en curso" se considera abandonado después de este tiempo
@@ -182,9 +184,27 @@ async function aplicarPago(id, paymentApi, diag) {
 
   console.log("🟢 Pago confirmado:", recuerdo.id);
 
+  // Antes del email: si el email falla, el reintento del webhook entra como "duplicado"
+  // y no vuelve a pasar por acá (una compra = un evento)
+  await registrarCompraMeta(recuerdo, info, montoPagado, esperado.moneda);
+
   await enviarEmailPendiente(recuerdo.id);
 
   return { resultado: "pagado", recuerdoId: recuerdo.id };
+}
+
+// API de conversiones de Meta. Nunca lanza: no debe afectar la activación ni el email.
+async function registrarCompraMeta(recuerdo, info, monto, moneda) {
+  try {
+    const user = recuerdo.userId
+      ? await prisma.user.findUnique({ where: { id: recuerdo.userId }, select: { id: true, email: true } })
+      : null;
+    await metaCapi.enviarEvento(metaCapi.eventoCompra({
+      recuerdo, pago: info, emailDueno: user?.email, userId: user?.id, monto, moneda, sitio: config.frontendUrl
+    }));
+  } catch (err) {
+    console.error(`📊 Meta CAPI ${recuerdo.id}: ${err.message}`);
+  }
 }
 
 /**

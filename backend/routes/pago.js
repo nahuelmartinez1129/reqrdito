@@ -9,6 +9,7 @@ const { PRECIOS, precioACobrar } = require("../config/precios");
 const { PREFIJO_REFERENCIA } = require("../services/pagos");
 const { isUuid } = require("../utils/validacion");
 const { credencialPermitida } = require("../services/mpCredencial");
+const { datosNavegador } = require("../services/metaCapi");
 
 const router = express.Router();
 
@@ -19,7 +20,9 @@ const router = express.Router();
    (eso exige iniciar sesión) y no excluya los tipos credit_card / debit_card.
    Los datos de la tarjeta se cargan en Mercado Pago: nunca pasan por este servidor.
 ========================= */
-function cuerpoPreferencia(recuerdo, pack, precio) {
+// `navegador`: cookies de Meta, IP y user agent de quien paga (ver services/metaCapi.js);
+// vuelven en la metadata del pago para la API de conversiones.
+function cuerpoPreferencia(recuerdo, pack, precio, navegador = {}) {
   return {
     items: [
       {
@@ -33,7 +36,8 @@ function cuerpoPreferencia(recuerdo, pack, precio) {
 
     metadata: {
       recuerdo_id: recuerdo.id,
-      pack: pack
+      pack: pack,
+      ...navegador
     },
 
     back_urls: {
@@ -130,7 +134,7 @@ router.post("/crear-preferencia", auth, requireAuth, async (req, res) => {
     const preference = new Preference(client);
 
     const result = await preference.create({
-      body: cuerpoPreferencia(recuerdo, pack, precio),
+      body: cuerpoPreferencia(recuerdo, pack, precio, datosNavegador(req)),
     });
 
     if (!result || !result.init_point) {

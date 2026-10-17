@@ -40,9 +40,9 @@ test("pago.html usa /api/precios y su respaldo coincide con el backend", () => {
   assert.match(respaldo[1], /individual:\s*11990\b/);
   assert.match(respaldo[1], /pareja:\s*21990\b/);
   assert.match(html, /Recuerdo Dúo/);
-  // el navegador solo envía el id: nunca un importe
-  const envio = html.match(/body:\s*JSON\.stringify\(([^)]*)\)/);
-  assert.equal(envio[1].trim(), "{ recuerdoId }");
+  // el navegador solo envía el id (y las cookies del pixel de Meta): nunca un importe
+  const envio = html.match(/body:\s*JSON\.stringify\((\{[^}]*\})\)/);
+  assert.equal(envio[1].trim(), '{ recuerdoId, fbp: cookie("_fbp"), fbc: cookie("_fbc") }');
 });
 
 test("el formato mostrado es exactamente $11.990 ARS / $21.990 ARS", () => {
