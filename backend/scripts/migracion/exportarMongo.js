@@ -20,7 +20,10 @@ const crypto = require("crypto");
 const driver = process.env.MONGODB_DRIVER
   ? require(require.resolve("mongodb", { paths: [process.env.MONGODB_DRIVER] }))
   : require("mongodb");
-const { MongoClient, EJSON, ReadPreference } = driver;
+const { MongoClient, ReadPreference } = driver;
+// mongodb 6.x exporta EJSON; desde 7.x está en driver.BSON.EJSON
+const EJSON = driver.EJSON || (driver.BSON && driver.BSON.EJSON);
+if (!EJSON || !ReadPreference) throw new Error("Versión del driver mongodb no soportada (falta EJSON o ReadPreference)");
 
 function sha256(archivo) {
   return crypto.createHash("sha256").update(fs.readFileSync(archivo)).digest("hex");
