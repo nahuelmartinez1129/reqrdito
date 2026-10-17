@@ -46,3 +46,22 @@ test("fuera de producción los emails se simulan sin conectarse al SMTP", async 
   const r = await sendEmail("alguien@example.com", "Asunto", "recuerdo-creado.html", { CODIGO: "x", LINK_RECUERDO: "y" });
   assert.deepEqual(r, { enviado: false, simulado: true });
 });
+
+test("los emails salen de contacto@reqrdito.com y las respuestas van a EMAIL_REPLY_TO", () => {
+  const { opcionesMail } = require("../../services/emailService");
+  const anterior = process.env.EMAIL_REPLY_TO;
+  try {
+    delete process.env.EMAIL_REPLY_TO;
+    const m = opcionesMail("cliente@example.com", "Asunto", "<p>x</p>");
+    assert.equal(m.from, '"ReQRdito" <contacto@reqrdito.com>');
+    assert.equal(m.replyTo, "reqrdito@gmail.com");
+    assert.equal(m.to, "cliente@example.com");
+    assert.equal(m.subject, "Asunto");
+    assert.equal(m.html, "<p>x</p>");
+
+    process.env.EMAIL_REPLY_TO = "soporte@example.com";
+    assert.equal(opcionesMail("a@example.com", "s", "h").replyTo, "soporte@example.com");
+  } finally {
+    if (anterior === undefined) delete process.env.EMAIL_REPLY_TO; else process.env.EMAIL_REPLY_TO = anterior;
+  }
+});

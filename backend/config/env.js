@@ -45,6 +45,9 @@ const config = {
 
   get jwtExpiresIn() { return process.env.JWT_EXPIRES_IN || "30m"; },
 
+  // A dónde van las respuestas de los clientes (reqrdito.com no tiene casilla de correo)
+  get emailReplyTo() { return process.env.EMAIL_REPLY_TO || "reqrdito@gmail.com"; },
+
   // Fuera de producción los emails se simulan salvo EMAIL_ENABLED=true
   get emailEnabled() {
     if (process.env.EMAIL_ENABLED === "false") return false;

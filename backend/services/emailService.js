@@ -43,6 +43,14 @@ function renderTemplate(templateName, variables = {}) {
   return html;
 }
 
+// reqrdito.com no tiene casilla: se envía desde contacto@ (dominio autenticado en Brevo)
+// y las respuestas de los clientes van a EMAIL_REPLY_TO
+const REMITENTE = '"ReQRdito" <contacto@reqrdito.com>';
+
+function opcionesMail(to, subject, html) {
+  return { from: REMITENTE, replyTo: config.emailReplyTo, to, subject, html };
+}
+
 // 📩 Envío de email. Devuelve { enviado: true } o { enviado: false, simulado: true }
 // cuando los emails están deshabilitados (fuera de producción sin EMAIL_ENABLED=true).
 // Los errores SMTP se propagan para que quien llama decida si reintentar.
@@ -54,14 +62,9 @@ async function sendEmail(to, subject, template, variables = {}) {
     return { enviado: false, simulado: true };
   }
 
-  await transporter.sendMail({
-    from: '"ReQRdito" <contacto@reqrdito.com>',
-    to,
-    subject,
-    html,
-  });
+  await transporter.sendMail(opcionesMail(to, subject, html));
 
   return { enviado: true };
 }
 
-module.exports = { sendEmail, renderTemplate, escaparHtml };
+module.exports = { sendEmail, renderTemplate, escaparHtml, opcionesMail };
