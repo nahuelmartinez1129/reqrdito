@@ -5,7 +5,7 @@ const prisma = require("../db/prisma");
 const auth = require("../middleware/auth");
 const requireAuth = require("../middleware/requireAuth");
 const { config } = require("../config/env");
-const { PRECIOS, precioDe } = require("../config/precios");
+const { PRECIOS, precioACobrar } = require("../config/precios");
 const { PREFIJO_REFERENCIA } = require("../services/pagos");
 const { isUuid } = require("../utils/validacion");
 const { credencialPermitida } = require("../services/mpCredencial");
@@ -46,6 +46,8 @@ function cuerpoPreferencia(recuerdo, pack, precio) {
     // vuelta automática y notificaciones solo con URLs HTTPS (en local: http://localhost)
     ...(/^https:\/\//.test(config.frontendUrl) ? { auto_return: "approved" } : {}),
     ...(config.notificationUrl ? { notification_url: config.notificationUrl } : {}),
+    // Con precio de prueba, la preferencia deja de poder pagarse al terminar la ventana
+    ...(precio.prueba ? { expires: true, expiration_date_to: precio.hastaIso } : {}),
   };
 }
 
@@ -54,10 +56,14 @@ function cuerpoPreferencia(recuerdo, pack, precio) {
 ========================= */
 router.get("/precios", (req, res) => {
   const precios = {};
-  for (const [pack, p] of Object.entries(PRECIOS)) {
+  let hayPrueba = false;
+  for (const pack of Object.keys(PRECIOS)) {
+    const p = precioACobrar(pack);
     precios[pack] = { monto: p.monto, moneda: p.moneda, nombre: p.nombre };
+    hayPrueba = hayPrueba || Boolean(p.prueba);
   }
-  res.set("Cache-Control", "public, max-age=300");
+  // Sin caché mientras hay precio de prueba: al vencer, la web muestra el oficial enseguida
+  res.set("Cache-Control", hayPrueba ? "no-store" : "public, max-age=300");
   res.json(precios);
 });
 
@@ -98,10 +104,14 @@ router.post("/crear-preferencia", auth, requireAuth, async (req, res) => {
     }
 
     const pack = recuerdo.pack || "individual";
-    const precio = precioDe(pack);
+    const precio = precioACobrar(pack);
 
     if (!precio) {
       return res.status(400).json({ error: "Pack inválido" });
+    }
+
+    if (precio.prueba) {
+      console.warn(`⚠️ PRECIO DE PRUEBA: recuerdo ${recuerdo.id} · ${pack} · ${precio.monto} ${precio.moneda} (vence ${precio.hastaIso})`);
     }
 
     // Se fija el importe ANTES de crear la preferencia: el webhook valida contra este valor

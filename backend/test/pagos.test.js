@@ -506,3 +506,90 @@ describe("Confirmación del pago sin webhook de Mercado Pago (entorno local) y d
     assert.equal(r.emailPagoEnviadoEn, null);
   });
 });
+
+describe("Precio temporal de prueba (Individual, solo producción)", () => {
+  const ORIGINAL = {};
+  const VARIABLES = ["NODE_ENV", "PRECIO_PRUEBA_INDIVIDUAL_ARS", "PRECIO_PRUEBA_HASTA"];
+  const enHoras = (h) => new Date(Date.now() + h * 3600 * 1000).toISOString();
+
+  beforeEach(() => {
+    for (const v of VARIABLES) ORIGINAL[v] = process.env[v];
+    // Mercado Pago y el email están simulados (helpers.js): "production" no sale a la red
+    process.env.NODE_ENV = "production";
+    process.env.PRECIO_PRUEBA_INDIVIDUAL_ARS = "100";
+    process.env.PRECIO_PRUEBA_HASTA = enHoras(2);
+  });
+  after(() => {
+    for (const v of VARIABLES) {
+      if (ORIGINAL[v] === undefined) delete process.env[v]; else process.env[v] = ORIGINAL[v];
+    }
+  });
+
+  test("el Individual se cobra $100 con preferencia que vence; el Dúo no cambia", async () => {
+    const precios = await api("/api/precios");
+    assert.equal(precios.headers.get("cache-control"), "no-store");
+    const body = await precios.json();
+    assert.equal(body.individual.monto, 100);
+    assert.equal(body.pareja.monto, 21990);
+
+    const { id } = await conPreferencia("individual");
+    const pref = h.mp.preferencias[0];
+    assert.equal(pref.items[0].unit_price, 100);
+    assert.equal(pref.items[0].currency_id, "ARS");
+    assert.equal(pref.expires, true);
+    assert.equal(pref.expiration_date_to, process.env.PRECIO_PRUEBA_HASTA);
+    assert.equal((await estado(id)).montoEsperado, 100);
+
+    const duo = await conPreferencia("pareja", "beto@example.com");
+    assert.equal(h.mp.preferencias[1].items[0].unit_price, 21990);
+    assert.equal(h.mp.preferencias[1].expires, undefined);
+    assert.equal((await estado(duo.id)).montoEsperado, 21990);
+  });
+
+  test("el webhook acepta solo los $100 de la preferencia de prueba", async () => {
+    const { id } = await conPreferencia("individual");
+    h.pagoAprobado("3001", id, { monto: 99 });
+    h.pagoAprobado("3002", id, { monto: 11990 });
+    h.pagoAprobado("3003", id, { monto: 100, moneda: "USD" });
+    for (const p of ["3001", "3002", "3003"]) await h.webhook(p);
+    assert.equal((await estado(id)).pagado, false);
+
+    h.pagoAprobado("3004", id, { monto: 100 });
+    await h.webhook("3004");
+    await h.webhook("3004"); // notificación repetida
+    const r = await estado(id);
+    assert.equal(r.pagado, true);
+    assert.equal(r.paymentId, "3004");
+    assert.equal(Number(r.montoPagado), 100);
+    assert.equal(h.emails.length, 1, "un solo email aunque se repita la notificación");
+  });
+
+  test("al vencer vuelve el precio oficial y $100 ya no paga un recuerdo nuevo", async () => {
+    process.env.PRECIO_PRUEBA_HASTA = enHoras(-0.01);
+    assert.equal((await (await api("/api/precios")).json()).individual.monto, 11990);
+
+    const { id } = await conPreferencia("individual");
+    assert.equal(h.mp.preferencias[0].items[0].unit_price, 11990);
+    assert.equal(h.mp.preferencias[0].expires, undefined);
+
+    h.pagoAprobado("3101", id, { monto: 100 });
+    await h.webhook("3101");
+    assert.equal((await estado(id)).pagado, false);
+    const revision = await prisma.pagoRevision.findMany();
+    assert.deepEqual(revision.map(p => [p.paymentId, p.motivo]), [["3101", "importe_incorrecto"]]);
+  });
+
+  test("con el precio de prueba activo, $100 no paga recuerdos históricos sin importe registrado", async () => {
+    const token = await h.login("ana@example.com");
+    const { data } = await subirRecuerdo(token, { pack: "individual" });
+    h.pagoAprobado("3201", data.id, { monto: 100 });
+    await h.webhook("3201");
+    assert.equal((await estado(data.id)).pagado, false);
+  });
+
+  test("una ventana mayor a 72 h se ignora y se cobra el oficial", async () => {
+    process.env.PRECIO_PRUEBA_HASTA = enHoras(100);
+    await conPreferencia("individual");
+    assert.equal(h.mp.preferencias[0].items[0].unit_price, 11990);
+  });
+});

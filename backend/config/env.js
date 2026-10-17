@@ -1,6 +1,8 @@
 // Configuración leída del entorno, validada una sola vez al arrancar.
 // Nunca imprime valores: solo nombres de variables faltantes.
 
+const { estadoPrecioPrueba } = require("./precios");
+
 const esProduccion = () => process.env.NODE_ENV === "production";
 
 function lista(valor) {
@@ -75,6 +77,14 @@ function validarEntorno() {
     if (/^APP_USR-/.test(process.env.MP_ACCESS_TOKEN || "")) {
       avisos.push("MP_ACCESS_TOKEN es APP_USR- fuera de producción: solo se crean preferencias si pertenece a una cuenta de prueba de Mercado Pago (vendedor de prueba)");
     }
+  }
+
+  // Precio temporal de prueba: se informa siempre que esté configurado (activo o no)
+  const prueba = estadoPrecioPrueba();
+  if (prueba.activo) {
+    avisos.push(`PRECIO DE PRUEBA ACTIVO: Individual ${prueba.monto} ARS hasta ${prueba.hasta.toISOString()}`);
+  } else if (prueba.motivo !== "sin_configurar") {
+    avisos.push(`PRECIO_PRUEBA_* configurado pero NO aplicado (${prueba.motivo}): se cobra el precio oficial`);
   }
 
   if (!config.adminEmails.length) {
