@@ -489,7 +489,7 @@ audio::-webkit-media-controls-panel {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-@media (max-width: 1239px) {
+@media (max-width: 1319px) {
   .site-nav__toggle {
     display: inline-flex;
   }
