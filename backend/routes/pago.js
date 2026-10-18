@@ -9,7 +9,7 @@ const { PRECIOS, precioACobrar } = require("../config/precios");
 const { PREFIJO_REFERENCIA } = require("../services/pagos");
 const { isUuid } = require("../utils/validacion");
 const { credencialPermitida } = require("../services/mpCredencial");
-const { datosNavegador } = require("../services/metaCapi");
+const metaCapi = require("../services/metaCapi");
 
 const router = express.Router();
 
@@ -133,8 +133,9 @@ router.post("/crear-preferencia", auth, requireAuth, async (req, res) => {
 
     const preference = new Preference(client);
 
+    const navegador = metaCapi.datosNavegador(req);
     const result = await preference.create({
-      body: cuerpoPreferencia(recuerdo, pack, precio, datosNavegador(req)),
+      body: cuerpoPreferencia(recuerdo, pack, precio, navegador),
     });
 
     if (!result || !result.init_point) {
@@ -145,6 +146,12 @@ router.post("/crear-preferencia", auth, requireAuth, async (req, res) => {
       where: { id: recuerdo.id },
       data: { preferenciaId: result.id ? String(result.id).slice(0, 64) : null }
     });
+
+    // Sin await: Meta no debe demorar la redirección a Mercado Pago (enviarEvento nunca lanza)
+    metaCapi.enviarEvento(metaCapi.eventoInicioPago({
+      recuerdo, navegador, email: req.user.email, userId: req.user.id,
+      monto: precio.monto, moneda: precio.moneda, sitio: config.frontendUrl
+    }));
 
     res.json({
       id: result.id,

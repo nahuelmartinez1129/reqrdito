@@ -132,6 +132,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  // Para el evento InitiateCheckout del pixel de Meta
+  let packPago = "individual";
+  let montoPago = null;
+
   try {
 
     // 🔎 Buscar recuerdo real en backend
@@ -158,6 +162,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     precioBox.textContent = `${precio.toLocaleString("es-AR")} ARS`;
+    packPago = pack;
+    montoPago = precio;
 
     if (data.pagado) {
       estado.textContent = "Este recuerdo ya está pago";
@@ -210,6 +216,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (!resPago.ok || !pagoData.init_point) {
         throw new Error("Error creando preferencia");
+      }
+
+      // Mismo event_id que el que manda el backend por la API de conversiones
+      if (typeof fbq === "function") {
+        fbq("track", "InitiateCheckout", {
+          value: montoPago ?? 0,
+          currency: "ARS",
+          content_ids: [packPago],
+          content_type: "product",
+          num_items: 1
+        }, { eventID: `checkout_${recuerdoId}` });
+        // Margen para que el pixel salga antes de dejar la página
+        await new Promise(r => setTimeout(r, 300));
       }
 
       window.location.href = pagoData.init_point;

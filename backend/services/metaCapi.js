@@ -1,6 +1,7 @@
-// API de conversiones de Meta: envía el Purchase desde el servidor cuando un pago
-// queda aprobado, además del que manda el pixel desde pago-exito.html.
-// Ambos usan el mismo event_id (purchase_<recuerdoId>), así Meta cuenta una sola compra.
+// API de conversiones de Meta: envía desde el servidor los mismos eventos que el pixel,
+// con el mismo event_id para que Meta cuente uno solo:
+// - InitiateCheckout (checkout_<recuerdoId>) al crear la preferencia de pago (pago.html)
+// - Purchase (purchase_<recuerdoId>) cuando el pago queda aprobado (pago-exito.html)
 //
 // Reglas:
 // - Nunca lanza error: un fallo de Meta no debe hacer que Mercado Pago reintente
@@ -37,6 +38,49 @@ function datosNavegador(req) {
   };
 }
 
+// user_data de Meta: emails e id con hash; `nav` tiene las claves meta_* de datosNavegador
+function datosUsuario(emails, userId, nav) {
+  const em = [...new Set(emails.map(hash).filter(Boolean))];
+  const userData = {
+    em: em.length ? em : undefined,
+    external_id: userId ? [hash(userId)] : undefined,
+    client_ip_address: texto(nav.meta_ip, 64),
+    client_user_agent: texto(nav.meta_ua, 500),
+    fbp: texto(nav.meta_fbp, 200),
+    fbc: texto(nav.meta_fbc, 500)
+  };
+  return JSON.parse(JSON.stringify(userData));
+}
+
+/**
+ * Evento InitiateCheckout: la preferencia de Mercado Pago quedó creada.
+ * @param {object} p
+ * @param {object} p.recuerdo - id y pack
+ * @param {object} p.navegador - resultado de datosNavegador(req)
+ * @param {string} [p.email] - email de la cuenta de quien paga
+ * @param {string} [p.userId]
+ * @param {number} p.monto
+ * @param {string} p.moneda
+ * @param {string} p.sitio - URL del frontend
+ */
+function eventoInicioPago({ recuerdo, navegador, email, userId, monto, moneda, sitio, ahora = Date.now() }) {
+  return {
+    event_name: "InitiateCheckout",
+    event_time: Math.floor(ahora / 1000),
+    event_id: `checkout_${recuerdo.id}`,
+    action_source: "website",
+    event_source_url: `${sitio}/pago.html`,
+    user_data: datosUsuario([email], userId, navegador || {}),
+    custom_data: {
+      value: Number(monto),
+      currency: moneda,
+      content_ids: [recuerdo.pack || "individual"],
+      content_type: "product",
+      num_items: 1
+    }
+  };
+}
+
 /**
  * Evento Purchase para la API de conversiones.
  * @param {object} p
@@ -56,24 +100,13 @@ function eventoCompra({ recuerdo, pago, emailDueno, userId, monto, moneda, sitio
     ? aprobado
     : ahoraS;
 
-  const emails = [...new Set([emailDueno, pago.payer?.email].map(hash).filter(Boolean))];
-
-  const userData = {
-    em: emails.length ? emails : undefined,
-    external_id: userId ? [hash(userId)] : undefined,
-    client_ip_address: texto(meta.meta_ip, 64),
-    client_user_agent: texto(meta.meta_ua, 500),
-    fbp: texto(meta.meta_fbp, 200),
-    fbc: texto(meta.meta_fbc, 500)
-  };
-
   return {
     event_name: "Purchase",
     event_time: eventTime,
     event_id: `purchase_${recuerdo.id}`,
     action_source: "website",
     event_source_url: `${sitio}/pago-exito.html`,
-    user_data: JSON.parse(JSON.stringify(userData)),
+    user_data: datosUsuario([emailDueno, pago.payer?.email], userId, meta),
     custom_data: {
       value: Number(monto),
       currency: moneda,
@@ -116,4 +149,4 @@ async function enviarEvento(evento, { env = process.env, fetchFn = fetch } = {})
   }
 }
 
-module.exports = { datosNavegador, eventoCompra, enviarEvento, hash };
+module.exports = { datosNavegador, eventoInicioPago, eventoCompra, enviarEvento, hash };

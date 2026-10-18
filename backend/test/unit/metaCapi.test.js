@@ -2,7 +2,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 
-const { eventoCompra, enviarEvento, datosNavegador, hash } = require("../../services/metaCapi");
+const { eventoInicioPago, eventoCompra, enviarEvento, datosNavegador, hash } = require("../../services/metaCapi");
 
 const RECUERDO = { id: "11111111-2222-4333-8444-555555555555", pack: "pareja" };
 const AHORA = Date.parse("2026-10-17T20:00:00Z");
@@ -80,4 +80,28 @@ test("envía al pixel configurado con test_event_code opcional y nunca lanza", a
   assert.equal(await enviarEvento(evento(), { env, fetchFn: mal }), "error");
   const caido = async () => { throw new Error("red"); };
   assert.equal(await enviarEvento(evento(), { env, fetchFn: caido }), "error");
+});
+
+test("InitiateCheckout con el mismo event_id que el pixel de pago.html", () => {
+  const e = eventoInicioPago({
+    recuerdo: RECUERDO,
+    navegador: { meta_fbp: "fb.1.1.2", meta_ip: "1.2.3.4", meta_ua: "Mozilla" },
+    email: "Ana@Example.com",
+    userId: "u-1",
+    monto: 21990,
+    moneda: "ARS",
+    sitio: "https://www.reqrdito.com",
+    ahora: AHORA
+  });
+  assert.equal(e.event_name, "InitiateCheckout");
+  assert.equal(e.event_id, `checkout_${RECUERDO.id}`);
+  assert.equal(e.event_time, AHORA / 1000);
+  assert.equal(e.event_source_url, "https://www.reqrdito.com/pago.html");
+  assert.deepEqual(e.user_data, {
+    em: [hash("ana@example.com")], external_id: [hash("u-1")],
+    client_ip_address: "1.2.3.4", client_user_agent: "Mozilla", fbp: "fb.1.1.2"
+  });
+  assert.deepEqual(e.custom_data, {
+    value: 21990, currency: "ARS", content_ids: ["pareja"], content_type: "product", num_items: 1
+  });
 });
