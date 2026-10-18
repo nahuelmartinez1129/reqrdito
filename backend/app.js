@@ -13,6 +13,7 @@ const uploadRoutes = require("./routes/upload");
 const pagoRoutes = require("./routes/pago");
 const recuerdoRoutes = require("./routes/recuerdo");
 const webhookRoutes = require("./routes/webhook");
+const metaRoutes = require("./routes/meta");
 const descargaRoutes = require("./routes/descarga");
 const authGoogleRoutes = require("./routes/authGoogle");
 const keychainAdminRoutes = require("./routes/keychainAdminRoutes");
@@ -100,6 +101,7 @@ function crearApp({ eventsEnabled = config.eventsEnabled } = {}) {
   app.use("/api", recuerdoRoutes);
   app.use("/api", webhookRoutes);
   app.use("/api", descargaRoutes);
+  app.use("/api", metaRoutes);
 
   // KEYCHAINS
   app.use("/api/keychain", keychainRoutes);

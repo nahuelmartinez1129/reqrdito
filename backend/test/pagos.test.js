@@ -615,3 +615,69 @@ describe("Precio temporal de prueba (Individual, solo producción)", () => {
     assert.equal(h.mp.preferencias[0].items[0].unit_price, 11990);
   });
 });
+
+describe("Meta: Purchase solo con el pago validado, una vez por compra", () => {
+
+  const compras = () => h.metaEventos.filter(e => e.event_name === "Purchase");
+
+  test("pago aprobado y validado: un Purchase con event_id purchase_<id> e importe cobrado, aunque el webhook se repita", async () => {
+    const { id } = await conPreferencia("pareja");
+    assert.deepEqual(h.metaEventos.map(e => [e.event_name, e.event_id]), [["InitiateCheckout", `checkout_${id}`]]);
+
+    h.pagoAprobado("4001", id, { monto: 21990 });
+    await Promise.all([h.webhook("4001"), h.webhook("4001")]);
+    await h.webhook("4001");
+
+    assert.equal(compras().length, 1);
+    assert.equal(compras()[0].event_id, `purchase_${id}`);
+    assert.equal(compras()[0].custom_data.value, 21990);
+    assert.equal(compras()[0].custom_data.currency, "ARS");
+  });
+
+  test("pagos pendientes, rechazados o que no coinciden no generan Purchase", async () => {
+    const { id } = await conPreferencia();
+    h.pagoAprobado("4101", id, { monto: 11990, status: "pending" });
+    h.pagoAprobado("4102", id, { monto: 11990, status: "rejected" });
+    h.pagoAprobado("4103", id, { monto: 100 });
+    h.pagoAprobado("4104", id, { monto: 11990, moneda: "USD" });
+    for (const p of ["4101", "4102", "4103", "4104"]) await h.webhook(p);
+
+    assert.equal((await estado(id)).pagado, false);
+    assert.equal(compras().length, 0);
+
+    // segundo pago aprobado de un recuerdo ya pago: revisión, sin otra compra
+    h.pagoAprobado("4105", id, { monto: 11990 });
+    h.pagoAprobado("4106", id, { monto: 11990 });
+    await h.webhook("4105");
+    await h.webhook("4106");
+    assert.equal(compras().length, 1);
+  });
+
+  test("GET /api/recuerdo/:id informa la compra (importe cobrado) solo durante 24 h", async () => {
+    const { id } = await conPreferencia("pareja");
+    assert.equal((await (await api(`/api/recuerdo/${id}`)).json()).compra, undefined);
+
+    h.pagoAprobado("4201", id, { monto: 21990 });
+    await h.webhook("4201");
+    assert.deepEqual((await (await api(`/api/recuerdo/${id}`)).json()).compra, { valor: 21990, moneda: "ARS" });
+
+    // una compra vieja: la página de éxito ya no registra Purchase
+    await prisma.recuerdo.update({ where: { id }, data: { pagadoEn: new Date(Date.now() - 25 * 3600 * 1000) } });
+    const viejo = await (await api(`/api/recuerdo/${id}`)).json();
+    assert.equal(viejo.pagado, true);
+    assert.equal(viejo.compra, undefined);
+  });
+
+  test("la preferencia guarda solo cookies de Meta con formato válido", async () => {
+    const token = await h.login("ana@example.com");
+    const { data } = await subirRecuerdo(token, { pack: "individual" });
+    const res = await api("/api/crear-preferencia", {
+      method: "POST", token,
+      json: { recuerdoId: data.id, fbp: "fb.1.1760000000000.123456789", fbc: "<script>" }
+    });
+    assert.equal(res.status, 200);
+    const meta = h.mp.preferencias[0].metadata;
+    assert.equal(meta.meta_fbp, "fb.1.1760000000000.123456789");
+    assert.equal(meta.meta_fbc, undefined);
+  });
+});

@@ -123,6 +123,12 @@ class Payment {
 }
 mockModule("mercadopago", { MercadoPagoConfig, Preference, Payment });
 
+/* ---------- Meta (API de conversiones) ---------- */
+// Los eventos quedan en metaEventos en lugar de salir a graph.facebook.com
+const metaEventos = [];
+const metaCapi = require("../services/metaCapi");
+metaCapi.enviarEvento = async (evento) => { metaEventos.push(evento); return "enviado"; };
+
 /* ---------- App ---------- */
 const jwt = require("jsonwebtoken");
 const prisma = require("../db/prisma");
@@ -160,6 +166,7 @@ async function limpiarBase() {
   );
   emails.length = 0;
   emails.fallar = false;
+  metaEventos.length = 0;
   mp.pagos.clear();
   mp.preferencias.length = 0;
   mp.consultas = 0;
@@ -268,6 +275,7 @@ module.exports = {
   ADMIN,
   prisma,
   emails,
+  metaEventos,
   mp,
   iniciar,
   iniciarConEventos,

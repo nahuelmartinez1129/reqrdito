@@ -21,6 +21,17 @@ router.post("/recuerdo", (req, res) => {
 });
 
 
+// Evento Purchase del pixel en pago-exito.html: solo para un pago confirmado hace poco
+// (Meta deduplica con la API de conversiones dentro de las 48 h) y con el importe cobrado.
+// Visitar la página de una compra vieja no genera otra compra.
+const VENTANA_COMPRA_MS = 24 * 3600 * 1000;
+
+function compraReciente(recuerdo, ahora = Date.now()) {
+  const pagadoEn = recuerdo.pagadoEn?.getTime();
+  if (!pagadoEn || ahora - pagadoEn > VENTANA_COMPRA_MS || recuerdo.montoPagado == null) return {};
+  return { compra: { valor: Number(recuerdo.montoPagado), moneda: recuerdo.moneda || "ARS" } };
+}
+
 /* =========================
    GET /api/recuerdo/:id
 ========================= */
@@ -51,7 +62,8 @@ router.get("/recuerdo/:id", async (req, res) => {
       pack: recuerdo.pack || "individual",
       audios: ordenarAudios(recuerdo.audios),
       qrUrl: recuerdo.qrUrl,
-      creadoEn: recuerdo.createdAt
+      creadoEn: recuerdo.createdAt,
+      ...compraReciente(recuerdo)
     });
 
   } catch (err) {
