@@ -32,6 +32,20 @@ function compraReciente(recuerdo, ahora = Date.now()) {
   return { compra: { valor: Number(recuerdo.montoPagado), moneda: recuerdo.moneda || "ARS" } };
 }
 
+// Fotos, mensaje, contador y canción (solo lo que se cargó).
+// La fecha va como "AAAA-MM-DD": sin hora, para que no cambie de día por la zona horaria.
+function personalizacionPublica(recuerdo) {
+  const datos = {};
+  if (recuerdo.fotos?.length) datos.fotos = ordenarAudios(recuerdo.fotos); // mismo formato { url, orden }
+  if (recuerdo.mensaje) datos.mensaje = recuerdo.mensaje;
+  if (recuerdo.fecha) {
+    datos.fecha = recuerdo.fecha.toISOString().slice(0, 10);
+    datos.fechaTitulo = recuerdo.fechaTitulo || "Desde";
+  }
+  if (recuerdo.cancionUrl) datos.cancionUrl = recuerdo.cancionUrl;
+  return datos;
+}
+
 /* =========================
    GET /api/recuerdo/:id
 ========================= */
@@ -40,7 +54,7 @@ router.get("/recuerdo/:id", async (req, res) => {
     const recuerdo = isUuid(req.params.id)
       ? await prisma.recuerdo.findUnique({
           where: { id: req.params.id },
-          include: { audios: true }
+          include: { audios: true, fotos: true }
         })
       : null;
 
@@ -63,6 +77,7 @@ router.get("/recuerdo/:id", async (req, res) => {
       audios: ordenarAudios(recuerdo.audios),
       qrUrl: recuerdo.qrUrl,
       creadoEn: recuerdo.createdAt,
+      ...personalizacionPublica(recuerdo),
       ...compraReciente(recuerdo)
     });
 
@@ -240,13 +255,14 @@ router.delete("/recuerdos/:id", auth, requireAuth, async (req, res) => {
       }
 
       const audios = await prisma.recuerdoAudio.findMany({ where: { recuerdoId: id } });
+      const fotos = await prisma.recuerdoFoto.findMany({ where: { recuerdoId: id } });
 
-      // audios en cascada; el llavero vinculado queda con recuerdo_id NULL (y usado)
+      // audios y fotos en cascada; el llavero vinculado queda con recuerdo_id NULL (y usado)
       await prisma.recuerdo.delete({ where: { id } });
 
       // Después de confirmar el borrado, apartar SOLO archivos que ningún otro
       // registro use (uploads/eliminados/<id>/; no se eliminan del disco)
-      const candidatos = [...audios.map(a => a.url), recuerdo.qrUrl].filter(Boolean);
+      const candidatos = [...audios.map(a => a.url), ...fotos.map(f => f.url), recuerdo.qrUrl].filter(Boolean);
       const enUso = await prisma.recuerdoAudio.findMany({
         where: { url: { in: candidatos } },
         select: { url: true }

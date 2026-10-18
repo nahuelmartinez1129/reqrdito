@@ -67,8 +67,9 @@
   align-items: center;
   gap: 1.25rem;
 
-  /* QR enmarcado como objeto físico */
-  img {
+  /* QR enmarcado como objeto físico (la foto del recuerdo tiene su propio marco) */
+  > img,
+  .rv-qr img {
     display: block;
     width: 232px;
     max-width: 100%;
@@ -89,4 +90,283 @@
 .recuerdo-audio {
   width: 100%;
   margin-top: 0;
+}
+
+/* =========================
+   VISTA DEL RECUERDO (js/recuerdo-vista.js): foto, contador, mensaje, audio, canción
+========================= */
+
+$letra-manuscrita: "Caveat", "Segoe Script", cursive;
+
+.recuerdo-card--listo {
+  max-width: 480px;
+  padding-top: clamp(1.5rem, 5vw, 2.25rem);
+}
+
+.rv {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.35rem;
+  width: 100%;
+}
+
+/* Foto tipo polaroid */
+.rv-foto {
+  align-self: center;
+  width: min(100%, 320px);
+  margin: 0.25rem 0 0.25rem;
+  padding: 12px 12px 44px;
+  background: white;
+  border: 1px solid v.$crema-borde-suave;
+  border-radius: 6px;
+  box-shadow: v.$sombra-md;
+  transform: rotate(-2deg);
+
+  position: relative;
+}
+
+/* Las fotos van apiladas: la activa aparece con un fundido y un zoom lento */
+.rv-fotos {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 2px;
+  background: v.$crema-claro;
+  touch-action: pan-y;
+  cursor: pointer;
+
+  img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+
+    &.activa {
+      opacity: 1;
+      animation: rvZoomLento 6s ease-out forwards;
+    }
+
+    &:only-child {
+      animation: none;
+    }
+  }
+}
+
+@keyframes rvZoomLento {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+/* Puntitos en la franja blanca de la polaroid */
+.rv-fotos-puntos {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+
+  button {
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: v.$crema-borde-fuerte;
+    cursor: pointer;
+    transition: background-color v.$dur v.$ease, transform v.$dur v.$ease;
+
+    &.activo {
+      background: v.$verde-oscuro;
+      transform: scale(1.25);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-fotos img {
+    transition: none;
+
+    &.activa {
+      animation: none;
+    }
+  }
+}
+
+.rv-nombre {
+  font-family: $letra-manuscrita;
+  font-weight: 700;
+  font-size: clamp(2.2rem, 1.6rem + 3vw, 2.9rem);
+  line-height: 1.05;
+  letter-spacing: 0;
+  color: v.$verde-oscuro;
+  overflow-wrap: anywhere;
+}
+
+/* Contador */
+.rv-contador {
+  background: v.$verde-suave;
+  border: 1px solid rgba(v.$verde-oscuro, 0.12);
+  border-radius: v.$radius-md;
+  padding: 1.1rem 1rem;
+
+  p {
+    margin: 0 !important;
+  }
+}
+
+.rv-contador-titulo {
+  font-size: 0.85rem !important;
+  color: v.$tinta-tenue !important;
+}
+
+.rv-contador-grande {
+  font-size: clamp(1.25rem, 1.05rem + 1vw, 1.55rem) !important;
+  font-weight: 700;
+  color: v.$verde-oscuro !important;
+  line-height: 1.25;
+  margin: 0.3rem 0 !important;
+}
+
+.rv-contador-vivo {
+  font-size: 0.85rem !important;
+  font-variant-numeric: tabular-nums;
+  color: v.$tinta-suave !important;
+}
+
+.rv-contador-proximo:not(:empty) {
+  margin-top: 0.6rem !important;
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  color: v.$dorado-texto !important;
+}
+
+/* Mensaje escrito */
+.rv-mensaje {
+  font-size: 1.02rem !important;
+  line-height: 1.6;
+  color: v.$tinta !important;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  margin: 0 !important;
+  padding: 0 0.25rem;
+}
+
+.rv-subtitulo {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: v.$verde-oscuro;
+  margin-bottom: 0.35rem;
+}
+
+.rv-ayuda {
+  font-size: 0.85rem !important;
+  color: v.$tinta-tenue !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.rv-audio,
+.rv-cancion {
+  background: v.$crema-claro;
+  border: 1px solid v.$crema-borde-suave;
+  border-radius: v.$radius-md;
+  padding: 1rem;
+}
+
+.rv-cancion iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  margin-top: 0.5rem;
+}
+
+.rv-youtube {
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+/* QR al final */
+.rv-qr {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed v.$crema-borde;
+
+  img {
+    width: 180px;
+    margin-bottom: 0.75rem;
+  }
+
+  p {
+    font-size: 0.85rem !important;
+    color: v.$tinta-tenue !important;
+    margin: 0 !important;
+  }
+}
+
+/* =========================
+   EJEMPLO (ejemplo.html)
+========================= */
+
+.ejemplo-body {
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: 4.75rem;
+}
+
+.ejemplo-aviso {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.7rem 1rem;
+  background: v.$verde-profundo;
+  color: v.$manteca;
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.ejemplo-aviso-btn {
+  padding: 0.35rem 0.9rem;
+  border-radius: v.$radius-pill;
+  background: v.$naranja;
+  color: v.$verde-profundo;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ejemplo-cta {
+  @include m.button-green;
+  margin-bottom: 1rem;
+}
+
+/* Incrustado en la home: sin barra ni botón, y sin el QR (ya está al lado) */
+.ejemplo-body--embed {
+  padding: 1.1rem 0.75rem 1.5rem;
+  justify-content: flex-start;
+
+  .ejemplo-aviso,
+  .ejemplo-cta,
+  .rv-qr {
+    display: none;
+  }
+
+  .recuerdo-card {
+    padding: 1.25rem 1rem 1.5rem;
+  }
 }

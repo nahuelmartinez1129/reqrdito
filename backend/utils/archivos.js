@@ -10,6 +10,7 @@ const DIRS = {
   temp: path.join(UPLOADS, "temp"),
   audio: path.join(UPLOADS, "audio"),
   qr: path.join(UPLOADS, "qr"),
+  foto: path.join(UPLOADS, "foto"),
   // Archivos de recuerdos borrados: se apartan, no se eliminan
   eliminados: path.join(UPLOADS, "eliminados")
 };
@@ -22,10 +23,10 @@ function borrarSiExiste(filePath) {
   }
 }
 
-// Ruta local de una URL pública /audio/<archivo> o /qr/<archivo>; null si no corresponde
+// Ruta local de una URL pública /audio/<archivo>, /qr/<archivo> o /foto/<archivo>; null si no corresponde
 function rutaLocal(urlPublica) {
   if (typeof urlPublica !== "string") return null;
-  const m = urlPublica.match(/^\/(audio|qr)\/([A-Za-z0-9._-]+)$/);
+  const m = urlPublica.match(/^\/(audio|qr|foto)\/([A-Za-z0-9._-]+)$/);
   if (!m || m[2].startsWith(".")) return null;
   return path.join(DIRS[m[1]], m[2]);
 }

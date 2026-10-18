@@ -53,9 +53,9 @@ function importesEsperados(recuerdo) {
   }
 
   const actual = precioDe(recuerdo.pack);
-  const anterior = PRECIOS_ANTERIORES[recuerdo.pack];
+  const anteriores = PRECIOS_ANTERIORES[recuerdo.pack] || [];
   return {
-    importes: [anterior, actual?.monto].filter(Boolean),
+    importes: [...anteriores, actual?.monto].filter(Boolean),
     moneda: MONEDA,
     legacy: true
   };

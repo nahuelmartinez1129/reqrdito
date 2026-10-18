@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Ilustración: una pareja caminando de la mano por la playa">
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9FD3E0"/>
+      <stop offset="1" stop-color="#E6F3EF"/>
+    </linearGradient>
+    <linearGradient id="mar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4FA3A5"/>
+      <stop offset="1" stop-color="#79C0B5"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#cielo)"/>
+  <circle cx="620" cy="190" r="70" fill="#FFF1C2"/>
+  <g fill="#FFFFFF" opacity="0.85">
+    <ellipse cx="200" cy="200" rx="110" ry="26"/><ellipse cx="260" cy="182" rx="60" ry="22"/>
+    <ellipse cx="520" cy="320" rx="90" ry="20"/>
+  </g>
+  <rect y="520" width="800" height="200" fill="url(#mar)"/>
+  <g fill="none" stroke="#E6F3EF" stroke-width="5" stroke-linecap="round" opacity="0.7">
+    <path d="M60 580 q30 -12 60 0 t60 0"/><path d="M420 620 q30 -12 60 0 t60 0"/><path d="M240 670 q30 -12 60 0 t60 0"/>
+  </g>
+  <path d="M0 690 C 200 660, 420 700, 800 670 V 1000 H 0 Z" fill="#F6E3C1"/>
+  <path d="M0 700 C 200 672, 420 712, 800 682" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
+  <!-- pareja de la mano -->
+  <g fill="#166D20">
+    <circle cx="360" cy="742" r="20"/>
+    <path d="M340 860 L 346 780 C 348 766, 372 766, 374 780 L 380 860 Z"/>
+    <rect x="342" y="858" width="10" height="44" rx="4"/><rect x="368" y="858" width="10" height="44" rx="4"/>
+    <circle cx="440" cy="736" r="21"/>
+    <path d="M416 870 L 420 778 C 422 762, 458 762, 460 778 L 466 870 Z" fill="#EBAF2B"/>
+    <rect x="426" y="866" width="10" height="38" rx="4"/><rect x="446" y="866" width="10" height="38" rx="4"/>
+    <path d="M376 800 C 392 814, 408 814, 422 800" fill="none" stroke="#166D20" stroke-width="9" stroke-linecap="round"/>
+  </g>
+  <!-- huellas -->
+  <g fill="#E3C99C">
+    <ellipse cx="300" cy="930" rx="8" ry="12"/><ellipse cx="270" cy="960" rx="8" ry="12"/>
+    <ellipse cx="520" cy="940" rx="8" ry="12"/><ellipse cx="550" cy="970" rx="8" ry="12"/>
+  </g>
+</svg>

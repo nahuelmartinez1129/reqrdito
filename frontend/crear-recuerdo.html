@@ -12,7 +12,7 @@
 <link rel="manifest" href="/manifest.json">
 
 <meta name="theme-color" content="#6BAC73">
-  <link rel="stylesheet" href="css/main.css?v=2026.1500">
+  <link rel="stylesheet" href="css/main.css?v=2026.1020">
   <!-- Meta Pixel Code -->
   <script>
   !function(f,b,e,v,n,t,s)
@@ -25,7 +25,7 @@
   'https://connect.facebook.net/en_US/fbevents.js');
   fbq('init', '1037382502691718');
   </script>
-  <script src="js/meta.js?v=2026.1018"></script>
+  <script src="js/meta.js?v=2026.1019"></script>
   <script>
   // Entró a armar un recuerdo (pixel + API de conversiones, ver js/meta.js)
   reqrditoMeta.evento("ViewContent", { content_name: 'Crear recuerdo', content_type: 'product' });
@@ -39,60 +39,141 @@
 
 <div class="crear-card">
   <h1>Crear tu recuerdo</h1>
-  <p>Elegí el tipo de recuerdo y subí tus audios</p>
 
-  <div class="pack-selector">
-    <button type="button" class="pack-btn active" data-pack="individual">
-      Individual<br><small>1 audio · 1 QR</small>
-    </button>
-
-    <button type="button" class="pack-btn" data-pack="pareja">
-      Dúo<br><small>2 audios · 1 QR</small>
-    </button>
+  <!-- Progreso del asistente (lo actualiza js/crear-recuerdo.js) -->
+  <div class="wizard-progreso" aria-live="polite">
+    <p class="wizard-paso-texto"><span id="pasoNumero">Paso 1 de 7</span> · <strong id="pasoNombre">Tipo de recuerdo</strong></p>
+    <div class="wizard-barra" aria-hidden="true"><span id="pasoBarra"></span></div>
   </div>
 
-  <form>
-    <div class="form-group">
-      <label>Nombre del recuerdo</label>
-      <input type="text" id="nombre" required>
-    </div>
+  <form class="wizard" novalidate>
 
-   <div class="form-group">
-  <label>Audio principal</label>
+    <!-- PASO 1: tipo -->
+    <section class="paso" data-paso="1" data-nombre="Tipo de recuerdo">
+      <h2 class="paso-titulo">¿Cuántos audios va a tener?</h2>
+      <p class="paso-ayuda">Los dos van en un mismo QR. En el Dúo suenan uno después del otro.</p>
+      <div class="pack-selector">
+        <button type="button" class="pack-btn active" data-pack="individual">
+          Individual<br><small>1 audio · 1 QR</small>
+        </button>
 
-  <input type="file" id="audio1">
+        <button type="button" class="pack-btn" data-pack="pareja">
+          Dúo<br><small>2 audios · 1 QR</small>
+        </button>
+      </div>
+    </section>
 
-  
+    <!-- PASO 2: audios -->
+    <section class="paso" data-paso="2" data-nombre="Tus audios" hidden>
+      <h2 class="paso-titulo">Subí o grabá tu audio</h2>
+      <p class="paso-ayuda">Podés elegir un archivo o grabarlo ahora desde el navegador. Antes de seguir, escuchalo acá abajo.</p>
 
-  <!-- 👇 UN SOLO AUDIO -->
-  <audio id="preview1" controls></audio>
+      <div class="form-group">
+        <label>Audio principal</label>
+        <input type="file" id="audio1">
+        <audio id="preview1" controls></audio>
+        <button type="button" onclick="grabarAudio1()">Grabar</button>
+        <div id="recIndicator1" class="rec-indicator hidden">
+          <span class="rec-dot"></span> Grabando...
+        </div>
+        <button type="button" onclick="detenerAudio1()">Detener</button>
+      </div>
 
-  <button type="button" onclick="grabarAudio1()">Grabar</button>
-  <div id="recIndicator1" class="rec-indicator hidden">
-  <span class="rec-dot"></span> Grabando...
-</div>
-<button type="button" onclick="detenerAudio1()">Detener</button>
+      <div class="form-group oculto" id="grupoAudio2">
+        <label>Segundo audio</label>
+        <input type="file" id="audio2">
+        <audio id="preview2" controls></audio>
+        <button type="button" onclick="grabarAudio2()">Grabar</button>
+        <div id="recIndicator2" class="rec-indicator hidden">
+          <span class="rec-dot"></span> Grabando...
+        </div>
+        <button type="button" onclick="detenerAudio2()">Detener</button>
+      </div>
+    </section>
 
-</div>
-    <div class="form-group oculto" id="grupoAudio2">
-  <label>Segundo audio</label>
+    <!-- PASO 3: nombre y mensaje -->
+    <section class="paso" data-paso="3" data-nombre="Nombre y mensaje" hidden>
+      <h2 class="paso-titulo">¿Para quién es?</h2>
+      <p class="paso-ayuda">El nombre es el título que se ve al abrir el QR.</p>
 
-  <input type="file" id="audio2">
+      <div class="form-group">
+        <label for="nombre">Nombre del recuerdo</label>
+        <input type="text" id="nombre" maxlength="120" placeholder="Ej: Para Sofi, en nuestro aniversario" required>
+      </div>
 
+      <div class="form-group">
+        <label for="mensajeTexto">Un mensaje escrito <span class="opcional">opcional</span></label>
+        <textarea id="mensajeTexto" maxlength="600" rows="4" placeholder="Escribí lo que quieras que lea al escanear el QR…"></textarea>
+        <small id="mensajeContador">0 / 600</small>
+      </div>
+    </section>
 
-  <!-- 👇 UN SOLO AUDIO -->
-  <audio id="preview2" controls></audio>
+    <!-- PASO 4: fotos -->
+    <section class="paso" data-paso="4" data-nombre="Fotos" data-opcional hidden>
+      <h2 class="paso-titulo">Sumá fotos <span class="opcional">opcional</span></h2>
+      <p class="paso-ayuda">Hasta 4 fotos. Aparecen arriba de todo, como una polaroid, y se van pasando solas. Quedan mejor las verticales o cuadradas.</p>
 
-  <button type="button" onclick="grabarAudio2()">Grabar</button>
-  <div id="recIndicator2" class="rec-indicator hidden">
-  <span class="rec-dot"></span> Grabando...
-</div>
-<button type="button" onclick="detenerAudio2()">Detener</button>
+      <div class="form-group">
+        <!-- Un solo selector: se pueden elegir varias a la vez y volver a abrirlo para sumar más -->
+        <label for="foto" id="fotoBoton" class="fotos-boton">
+          <span>Elegir fotos</span>
+          <small>JPG, PNG o WebP · podés elegir varias a la vez</small>
+        </label>
+        <input type="file" id="foto" class="fotos-input" accept="image/jpeg,image/png,image/webp" multiple>
+        <ol id="fotosLista" class="fotos-lista" aria-label="Fotos elegidas, en el orden en que se muestran"></ol>
+        <small id="fotosContador">Hasta 4 fotos. Si elegís más de una, se van pasando solas.</small>
+      </div>
+    </section>
 
-</div>
+    <!-- PASO 5: fecha -->
+    <section class="paso" data-paso="5" data-nombre="Fecha especial" data-opcional hidden>
+      <h2 class="paso-titulo">¿Hay una fecha especial? <span class="opcional">opcional</span></h2>
+      <p class="paso-ayuda">Aparece un contador con todo el tiempo que pasó desde ese día, o una cuenta regresiva si es una fecha futura.</p>
 
-    <button type="button" id="btnContinuar">Continuar</button>
+      <div class="form-group">
+        <label for="fecha">¿Qué pasó ese día?</label>
+        <div class="fecha-fila">
+          <select id="fechaTitulo" aria-label="Qué pasó en esa fecha">
+            <option value="Juntos desde">Juntos desde</option>
+            <option value="Nos conocimos">Nos conocimos</option>
+            <option value="Amigos desde">Amigos desde</option>
+            <option value="Nos casamos">Nos casamos</option>
+            <option value="Nació">Nació</option>
+            <option value="Llegó a casa">Llegó a casa (mascota)</option>
+            <option value="Desde">Otra fecha</option>
+          </select>
+          <input type="date" id="fecha" min="1900-01-01" max="2100-12-31" aria-label="Fecha">
+        </div>
+        <small id="fechaPreview">Elegí la fecha y te mostramos cómo se va a ver.</small>
+      </div>
+    </section>
+
+    <!-- PASO 6: canción -->
+    <section class="paso" data-paso="6" data-nombre="Canción" data-opcional hidden>
+      <h2 class="paso-titulo">¿Tienen una canción? <span class="opcional">opcional</span></h2>
+      <p class="paso-ayuda">Suena ahí mismo, sin salir de la página.</p>
+
+      <div class="form-group">
+        <label for="cancion">Link de Spotify o YouTube</label>
+        <input type="url" id="cancion" inputmode="url" placeholder="https://open.spotify.com/track/…">
+        <small id="cancionAyuda">En Spotify o YouTube: Compartir → Copiar enlace, y pegalo acá.</small>
+      </div>
+    </section>
+
+    <!-- PASO 7: revisión -->
+    <section class="paso" data-paso="7" data-nombre="Revisá y continuá" hidden>
+      <h2 class="paso-titulo">Revisá antes de continuar</h2>
+      <p class="paso-ayuda">Después del pago no se pueden cambiar los audios, las fotos, la fecha ni la canción.</p>
+      <ul class="resumen" id="resumen"></ul>
+      <button type="button" id="btnContinuar">Guardar y continuar</button>
+    </section>
+
     <p id="estado"></p>
+
+    <div class="wizard-nav">
+      <button type="button" id="btnAtras" class="wizard-atras">Atrás</button>
+      <button type="button" id="btnSiguiente" class="wizard-siguiente">Siguiente</button>
+    </div>
   </form>
 </div>
 
@@ -110,7 +191,8 @@
 <script src="js/config.js?v=2026.1600"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
 <script src="js/auth-init.js?v=2026.1600"></script>
-<script src="js/crear-recuerdo.js?v=2026.1600"></script>
+<script src="js/recuerdo-vista.js?v=2026.1020"></script>
+<script src="js/crear-recuerdo.js?v=2026.1020"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
 if (window.lucide) {

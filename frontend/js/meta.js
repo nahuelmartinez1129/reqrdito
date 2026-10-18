@@ -6,7 +6,15 @@
 // InitiateCheckout y Purchase NO pasan por acá: el backend los manda al crear la
 // preferencia y al confirmar el pago, con sus propios ids.
 // Se carga en <head>, justo después del código base del pixel (fbq('init', ...)).
+// En un iframe no hace nada (ver abajo).
 (function () {
+  // Dentro de un iframe (el ejemplo incrustado en la home) no se registra nada:
+  // la visita ya la cuenta la página que lo contiene
+  if (window.self !== window.top) {
+    window.reqrditoMeta = { evento: function () {} };
+    return;
+  }
+
   var REPLICADOS = { PageView: true, ViewContent: true };
   var pendientes = [];
   var cargada = document.readyState === "complete";

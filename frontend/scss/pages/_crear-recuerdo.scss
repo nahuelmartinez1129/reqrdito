@@ -528,3 +528,325 @@ button[onclick*="detener"] {
     background: #93201A;
   }
 }
+
+/* =========================
+   ASISTENTE POR PASOS (crear-recuerdo.html)
+========================= */
+
+.wizard-progreso {
+  margin: 0.25rem 0 1.75rem;
+}
+
+.crear-card .wizard-paso-texto {
+  margin: 0 0 0.55rem;
+  font-size: 0.85rem;
+  color: v.$tinta-tenue;
+
+  strong {
+    color: v.$verde-oscuro;
+  }
+}
+
+.wizard-barra {
+  height: 6px;
+  border-radius: v.$radius-pill;
+  background: v.$crema-borde-suave;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, v.$verde-claro, v.$verde-oscuro);
+    transition: width 0.35s v.$ease;
+  }
+}
+
+.paso {
+  animation: pasoEntra 0.35s v.$ease;
+
+  &[hidden] {
+    display: none;
+  }
+
+  .pack-selector {
+    margin-bottom: 0.5rem;
+  }
+}
+
+@keyframes pasoEntra {
+  from { opacity: 0; transform: translateX(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.paso-titulo {
+  font-size: clamp(1.2rem, 1.05rem + 0.7vw, 1.4rem);
+  color: v.$verde-oscuro;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+}
+
+.crear-card .paso-ayuda {
+  text-align: left;
+  font-size: 0.92rem;
+  margin-bottom: 1.4rem;
+}
+
+.opcional {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: v.$radius-pill;
+  background: v.$dorado-suave;
+  color: v.$dorado-texto;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+/* Campos nuevos con el mismo estilo que los existentes */
+.form-group {
+  > textarea,
+  > .fecha-fila {
+    flex: 1 1 100%;
+  }
+
+  textarea,
+  select,
+  input[type="date"],
+  input[type="url"] {
+    @include m.field;
+    font-family: inherit;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.5;
+  }
+
+  input.invalido {
+    border-color: v.$error;
+    box-shadow: 0 0 0 4px rgba(v.$error, 0.12);
+  }
+}
+
+.fecha-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Fotos: un solo selector (input oculto detrás del botón) + miniaturas numeradas */
+.fotos-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.form-group > .fotos-boton {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1.4rem 1rem;
+  border: 2px dashed v.$crema-borde-fuerte;
+  border-radius: v.$radius-md;
+  background: v.$crema-claro;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color v.$dur v.$ease, background-color v.$dur v.$ease;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.3rem;
+    border-radius: v.$radius-pill;
+    background: v.$verde-oscuro;
+    color: v.$manteca;
+    font-weight: 600;
+    font-size: 0.95rem;
+
+    &::before {
+      content: "+";
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+  }
+
+  small {
+    font-weight: 400;
+  }
+
+  &:hover {
+    border-color: v.$verde-claro;
+    background: v.$verde-tenue;
+  }
+
+  &.oculto {
+    display: none;
+  }
+}
+
+.form-group:has(.fotos-input:focus-visible) .fotos-boton {
+  outline: 3px solid rgba(v.$verde-oscuro, 0.35);
+  outline-offset: 2px;
+}
+
+.form-group > .fotos-lista {
+  flex: 1 1 100%;
+}
+
+.fotos-lista {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+
+  &:empty {
+    display: none;
+  }
+
+  li {
+    position: relative;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 4px solid white;
+    box-shadow: v.$sombra-sm;
+  }
+}
+
+.fotos-numero {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: v.$radius-pill;
+  background: rgba(v.$verde-profundo, 0.85);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+}
+
+.fotos-quitar {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: v.$error;
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: v.$sombra-sm;
+}
+
+/* Atrás / Siguiente */
+.wizard-nav {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+
+  button[hidden] {
+    display: none;
+  }
+}
+
+.wizard-atras {
+  @include m.button-ghost;
+  flex: 0 0 auto;
+}
+
+.wizard-siguiente {
+  @include m.button-green;
+  flex: 1 1 auto;
+  margin-left: auto;
+}
+
+/* Resumen del último paso */
+.resumen {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  border: 1px solid v.$crema-borde-suave;
+  border-radius: v.$radius-md;
+  background: v.$crema-claro;
+
+  li {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 1rem;
+
+    + li {
+      border-top: 1px solid v.$crema-borde-suave;
+    }
+  }
+}
+
+.resumen-etiqueta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: v.$tinta-tenue;
+}
+
+.resumen-valor {
+  font-size: 0.92rem;
+  color: v.$tinta;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  img {
+    display: block;
+    width: 48px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+}
+
+.resumen-cambiar {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: v.$verde-oscuro;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.resumen-fotos {
+  display: flex !important;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}

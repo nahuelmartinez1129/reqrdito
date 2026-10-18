@@ -1131,25 +1131,156 @@ $nav-bp: 1240px; // debajo de este ancho la cuenta va en el menú desplegable
   padding: 1rem 0.9rem 1.1rem;
 }
 
-.browser__title {
-  font-size: 0.82rem;
+.browser__foto {
+  width: 64px;
+  height: 80px;
+  object-fit: cover;
+  padding: 4px 4px 12px;
+  background: white;
+  border-radius: 3px;
+  box-shadow: v.$sombra-sm;
+  transform: rotate(-3deg);
+}
+
+.browser__nombre {
+  font-family: "Caveat", "Segoe Script", cursive;
+  font-size: 1.35rem;
   font-weight: 700;
+  line-height: 1;
   color: v.$verde-oscuro;
 }
 
-.browser__line {
-  display: block;
-  width: 85%;
-  height: 8px;
-  border-radius: 4px;
-  background: v.$crema-borde-suave;
+/* Tres polaroids apiladas: la de arriba va cambiando */
+.mini-fotos {
+  position: relative;
+  width: 110px;
+  height: 140px;
 
-  &--short {
-    width: 55%;
+  img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    padding: 6px 6px 20px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.55);
+    animation: miniFotos 9s infinite;
+
+    &:nth-child(1) { transform: rotate(9deg) translateX(18px); animation-delay: -6s; }
+    &:nth-child(2) { transform: rotate(-8deg) translateX(-18px); animation-delay: -3s; }
+    &:nth-child(3) { transform: rotate(-1deg); animation-delay: 0s; }
   }
 }
 
-@media (max-width: 899px) {
+@keyframes miniFotos {
+  0%, 28% { opacity: 1; z-index: 3; }
+  33%, 95% { opacity: 0.55; z-index: 1; }
+  100% { opacity: 1; z-index: 3; }
+}
+
+/* Contador en miniatura */
+.mini-contador {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  width: min(86%, 250px);
+  border-radius: 14px;
+  background: v.$verde-suave;
+  text-align: center;
+  box-shadow: 0 16px 30px -16px rgba(0, 0, 0, 0.5);
+
+  small {
+    font-size: 0.66rem;
+    color: v.$tinta-suave;
+  }
+
+  strong {
+    font-size: 0.98rem;
+    color: v.$verde-oscuro;
+    line-height: 1.2;
+  }
+}
+
+.mini-contador__seg {
+  display: inline-block;
+  min-width: 1.2em;
+  color: v.$verde-oscuro;
+  animation: tic 1s steps(1) infinite;
+}
+
+@keyframes tic {
+  50% { opacity: 0.45; }
+}
+
+/* Mensaje escrito + canción */
+.mini-cierre {
+  display: grid;
+  gap: 0.7rem;
+  width: min(86%, 250px);
+}
+
+.mini-cierre__mensaje {
+  padding: 0.8rem 0.9rem;
+  border-radius: 14px;
+  background: v.$papel;
+  color: v.$tinta;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  text-align: center;
+  box-shadow: 0 16px 30px -16px rgba(0, 0, 0, 0.5);
+}
+
+.mini-cierre__cancion {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  background: #1DB954;
+  color: #04220F;
+  font-size: 0.8rem;
+  font-weight: 700;
+
+  [data-lucide] {
+    width: 16px;
+    height: 16px;
+  }
+
+  em {
+    margin-left: auto;
+    font-style: normal;
+  }
+}
+
+.experience__nota {
+  max-width: 640px;
+  margin: 2rem auto 0;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: v.$manteca;
+}
+
+.section-head--light > p:not(.eyebrow) {
+  color: rgba(v.$manteca, 0.78);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini-fotos img,
+  .mini-contador__seg {
+    animation: none;
+  }
+}
+
+@media (max-width: 1023px) and (min-width: 640px) {
+  .story {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
   .story {
     grid-template-columns: minmax(0, 1fr);
     max-width: 520px;
@@ -1601,5 +1732,337 @@ $nav-bp: 1240px; // debajo de este ancho la cuenta va en el menú desplegable
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   NOVEDADES: foto, contador y canción (hero, ejemplo e ideas)
+========================================================= */
+
+.hero__nota {
+  margin: -1.1rem 0 1.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: v.$tinta-tenue;
+  animation: heroIn 0.9s v.$ease 0.27s both;
+}
+
+.phone__foto {
+  display: block;
+  width: 62%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  margin: 0 auto 0.7rem;
+  padding: 5px 5px 16px;
+  background: white;
+  border-radius: 4px;
+  box-shadow: v.$sombra-sm;
+  transform: rotate(-2deg);
+}
+
+.phone__title--manuscrita {
+  font-family: "Caveat", "Segoe Script", cursive;
+  font-size: 1.5rem;
+  letter-spacing: 0;
+  margin-bottom: 0.2rem;
+}
+
+.phone__contador {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: v.$verde-oscuro;
+  background: v.$verde-suave;
+  border-radius: v.$radius-pill;
+  padding: 0.3rem 0.6rem;
+  margin: 0 auto 0.85rem;
+  width: fit-content;
+}
+
+/* ---------- Ejemplo real dentro de un celular ---------- */
+
+.landing .demo {
+  background: v.$verde-tenue;
+}
+
+.demo__inner {
+  max-width: $max;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+}
+
+.demo__copy {
+  > p:not(.eyebrow) {
+    margin-top: 0.9rem;
+    font-size: 1.08rem;
+    color: v.$tinta-suave;
+  }
+}
+
+.demo__list {
+  list-style: none;
+  margin: 1.75rem 0 2rem;
+  display: grid;
+  gap: 1rem;
+
+  li {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+  }
+
+  [data-lucide] {
+    @include m.icon-badge(42px, 10px, v.$verde-suave, v.$verde-oscuro, v.$radius-sm);
+    flex: none;
+  }
+
+  h3 {
+    font-size: 1rem;
+    color: v.$verde-oscuro;
+    margin-bottom: 0.15rem;
+  }
+
+  p {
+    font-size: 0.92rem;
+    color: v.$tinta-suave;
+  }
+}
+
+.demo__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+}
+
+.demo__qr {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  color: v.$tinta-tenue;
+
+  img {
+    width: 84px;
+    height: 84px;
+    padding: 6px;
+    background: white;
+    border: 1px solid v.$crema-borde;
+    border-radius: v.$radius-sm;
+  }
+}
+
+.demo__phone {
+  justify-self: center;
+  width: min(100%, 330px);
+  height: 640px;
+  padding: 11px;
+  border-radius: 46px;
+  background: #13261A;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.08),
+    0 40px 70px -30px rgba(0, 0, 0, 0.55);
+}
+
+.demo__screen {
+  height: 100%;
+  border-radius: 36px;
+  overflow: hidden;
+  background: v.$crema-claro;
+
+  iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+}
+
+@media (max-width: 899px) {
+  .demo__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .demo__phone {
+    height: 580px;
+  }
+}
+
+/* ---------- Ideas para regalarlo ---------- */
+
+.ideas__grid {
+  list-style: none;
+  max-width: $max;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+
+  li {
+    @include m.card;
+    padding: 1.4rem 1.3rem;
+  }
+
+  [data-lucide] {
+    @include m.icon-badge(44px, 10px, v.$dorado-suave, v.$dorado-texto, v.$radius-sm);
+    margin-bottom: 0.9rem;
+  }
+
+  h3 {
+    font-size: 1.02rem;
+    color: v.$verde-oscuro;
+    margin-bottom: 0.3rem;
+  }
+
+  p {
+    font-size: 0.92rem;
+    color: v.$tinta-suave;
+  }
+}
+
+@media (max-width: 899px) {
+  .ideas__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .ideas__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Precios ---------- */
+
+.landing .pricing {
+  background: v.$blanco;
+}
+
+.pricing__grid {
+  max-width: 880px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.plan {
+  @include m.card;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+}
+
+.plan--destacado {
+  border: 2px solid v.$verde-claro;
+  background: linear-gradient(180deg, v.$verde-tenue, v.$blanco 45%);
+  box-shadow: v.$sombra-md;
+}
+
+.plan__badge {
+  position: absolute;
+  top: -0.8rem;
+  right: 1.5rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: v.$radius-pill;
+  background: v.$naranja;
+  color: v.$verde-profundo;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.plan__nombre {
+  font-size: 1.35rem;
+  color: v.$verde-oscuro;
+}
+
+.plan__para {
+  margin-top: 0.2rem;
+  font-size: 0.92rem;
+  color: v.$tinta-tenue;
+}
+
+.plan__precio {
+  margin-top: 1.1rem;
+  font-size: clamp(2.3rem, 1.9rem + 1.6vw, 2.9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: v.$tinta;
+
+  small {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: v.$tinta-tenue;
+  }
+}
+
+.plan__pago {
+  margin-top: 0.45rem;
+  font-size: 0.85rem;
+  color: v.$tinta-tenue;
+}
+
+.plan__lista {
+  list-style: none;
+  margin: 1.5rem 0 1.75rem;
+  display: grid;
+  gap: 0.7rem;
+  flex: 1;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.95rem;
+    color: v.$tinta-suave;
+  }
+
+  strong {
+    color: v.$tinta;
+  }
+
+  [data-lucide] {
+    flex: none;
+    width: 19px;
+    height: 19px;
+    margin-top: 0.1rem;
+    color: v.$verde-oscuro;
+  }
+}
+
+.plan__cta {
+  width: 100%;
+  justify-content: center;
+}
+
+.pricing__nota {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.75rem;
+  font-size: 0.9rem;
+  color: v.$tinta-tenue;
+  text-align: center;
+
+  [data-lucide] {
+    width: 17px;
+    height: 17px;
+    color: v.$verde-oscuro;
+    flex: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .pricing__grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -77,6 +77,19 @@ const convertirAudioMock = async (input, output) => {
 convertirAudioMock.AudioInvalidoError = AudioInvalidoError;
 mockModule(path.join(ROOT, "utils/convertirAudio.js"), convertirAudioMock);
 
+/* ---------- ffmpeg (convertirImagen) ---------- */
+// Mismo control de formato que el real; la "conversión" copia el archivo
+const convertirImagenReal = require("../utils/convertirImagen");
+const convertirImagenMock = async (input, output) => {
+  if (!convertirImagenReal.esImagenAceptada(input)) {
+    throw new convertirImagenReal.ImagenInvalidaError("Formato de imagen no aceptado");
+  }
+  fs.copyFileSync(input, output);
+  return output;
+};
+Object.assign(convertirImagenMock, convertirImagenReal);
+mockModule(path.join(ROOT, "utils/convertirImagen.js"), convertirImagenMock);
+
 /* ---------- Google ---------- */
 // El "idToken" de prueba es un JSON con el payload; "invalido" falla.
 class OAuth2Client {
@@ -206,6 +219,11 @@ function tokenPara(email, extra = {}) {
   return jwt.sign({ email, ...extra }, process.env.JWT_SECRET, { expiresIn: "5m" });
 }
 
+// JPEG mínimo con firma válida (el doble de convertirImagen solo mira la firma)
+function fotoFalsa(tipo = "image/jpeg") {
+  return new Blob([Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46, 0x49, 0x46, 0, 1])], { type: tipo });
+}
+
 function audioFalso() {
   return new Blob([Buffer.from("audio-de-prueba")], { type: "audio/webm" });
 }
@@ -218,7 +236,9 @@ function borrarArchivosSubidos(rutasPublicas) {
       ? path.join(ROOT, "uploads/audio", path.basename(ruta))
       : ruta.startsWith("/qr/")
         ? path.join(ROOT, "uploads/qr", path.basename(ruta))
-        : null;
+        : ruta.startsWith("/foto/")
+          ? path.join(ROOT, "uploads/foto", path.basename(ruta))
+          : null;
     if (local && fs.existsSync(local)) fs.unlinkSync(local);
   }
 }
@@ -233,18 +253,21 @@ function borrarApartados(recuerdoIds) {
 
 // Sube un recuerdo y registra sus archivos para limpiarlos al final
 function crearSubidor(archivosCreados) {
-  return async function subirRecuerdo(token, { nombre = "Abuela", pack = "individual", key, dosAudios = false, audio, base } = {}) {
+  return async function subirRecuerdo(token, { nombre = "Abuela", pack = "individual", key, dosAudios = false, audio, base, foto, extra = {} } = {}) {
     const form = new FormData();
     if (nombre !== null) form.append("nombre", nombre);
     form.append("pack", pack);
     form.append("audio1", audio || audioFalso(), "grabacion.webm");
     if (dosAudios) form.append("audio2", audioFalso(), "grabacion2.webm");
+    // foto: un Blob o una lista (hasta 4, en orden)
+    for (const [i, f] of [].concat(foto || []).entries()) form.append("foto", f, `foto${i + 1}.jpg`);
+    for (const [campo, valor] of Object.entries(extra)) form.append(campo, valor);
     const ruta = key !== undefined ? `/api/upload?key=${encodeURIComponent(key)}` : "/api/upload";
     const res = await api(ruta, { method: "POST", token, form, base });
     const data = await res.json();
     if (data.id) {
-      const r = await prisma.recuerdo.findUnique({ where: { id: data.id }, include: { audios: true } });
-      if (r) archivosCreados.push(r.qrUrl, ...r.audios.map(a => a.url));
+      const r = await prisma.recuerdo.findUnique({ where: { id: data.id }, include: { audios: true, fotos: true } });
+      if (r) archivosCreados.push(r.qrUrl, ...r.fotos.map(f => f.url), ...r.audios.map(a => a.url));
     }
     return { res, data };
   };
@@ -286,6 +309,7 @@ module.exports = {
   loginAdmin,
   tokenPara,
   audioFalso,
+  fotoFalsa,
   borrarArchivosSubidos,
   borrarApartados,
   crearSubidor,

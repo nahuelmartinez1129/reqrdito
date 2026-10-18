@@ -26,7 +26,7 @@ Cada recuerdo tiene a lo sumo un pago aprobado (`pagado`, `payment_id`, `payer_e
 `pagado_en`, `monto_pagado`). Al crear la preferencia se guarda `monto_esperado` y `moneda`;
 el webhook valida el pago real contra esos valores. El email de pago es durable
 (`email_pago_enviado_en`, `email_pago_intento_en`, `email_pago_intentos`).
-Los precios viven **solo** en `config/precios.js` (Individual 11.990 ARS · Dúo 21.990 ARS).
+Los precios viven **solo** en `config/precios.js` (Individual 11.990 ARS · Dúo 14.990 ARS desde el 2026-10-19; antes 21.990).
 `keychains.pendiente_impresion` reemplaza la lista en memoria del panel de llaveros.
 
 Datos derivados que **ya no se duplican**: el nombre y el audio de un llavero salen del

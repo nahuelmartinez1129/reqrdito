@@ -5,7 +5,7 @@ Sirve para hacer una compra real de control del pack **Individual** a un importe
 
 ## Precio original (no cambia)
 
-`config/precios.js`: Individual **11.990 ARS** · Dúo **21.990 ARS**. El precio de prueba no
+`config/precios.js`: Individual **11.990 ARS** · Dúo **14.990 ARS**. El precio de prueba no
 modifica esa tabla: es una excepción que el backend aplica solo mientras se cumplen todas
 las condiciones.
 
@@ -47,7 +47,7 @@ PRECIO_PRUEBA_EMAILS=<cuenta de Google con la que se crea el recuerdo de prueba>
 Después `pm2 restart reqrdito-backend --update-env` y verificar:
 ```bash
 pm2 logs reqrdito-backend --lines 30 | grep -i "precio de prueba"
-curl -s https://api.reqrdito.com/api/precios   # sin sesión: 11990 y 21990 (no cambia para el público)
+curl -s https://api.reqrdito.com/api/precios   # sin sesión: 11990 y 14990 (no cambia para el público)
 ```
 
 ## Restaurar el precio normal

@@ -74,7 +74,7 @@ Eventos (`events`, QR de eventos) no se importan: el módulo está deshabilitado
 
 - Los recuerdos ya pagados no se modifican.
 - Preferencias creadas **antes** de este cambio (sin `monto_esperado`) y pagadas después:
-  se acepta la tarifa anterior (6.900 / 10.900) o la vigente (11.990 / 21.990) **del mismo
+  se acepta la tarifa anterior (Individual 6.900; Dúo 10.900 o 21.990) o la vigente (11.990 / 14.990) **del mismo
   pack**, y el pago queda anotado en `pagos_revision` con motivo `sin_monto_registrado`.
 - Cualquier otro importe o moneda no marca el recuerdo como pagado y queda en
   `pagos_revision` (`importe_incorrecto`, `moneda_incorrecta`, `pago_duplicado`, …).

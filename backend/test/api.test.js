@@ -261,7 +261,7 @@ describe("Recuerdos: creación, pago y consulta", () => {
     assert.deepEqual(r.audios.map(a => a.orden).sort(), [1, 2]);
 
     await api("/api/crear-preferencia", { method: "POST", token, json: { recuerdoId: ok.data.id } });
-    assert.equal(h.mp.preferencias[0].items[0].unit_price, 21990);
+    assert.equal(h.mp.preferencias[0].items[0].unit_price, 14990);
     assert.equal(h.mp.preferencias[0].items[0].title, "Recuerdo QR – Dúo");
   });
 
@@ -738,5 +738,80 @@ describe("Integridad referencial y restricciones", () => {
       prisma.recuerdo.create({ data: { id: "8d9f0c1e-1111-4222-8333-444455556666", userId: u.id, nombre: "y", paymentId: "77" } }),
       /P2002|unique/i
     );
+  });
+});
+
+describe("Personalización: foto, mensaje, fecha con contador y canción", () => {
+
+  async function pagar(id) {
+    await prisma.recuerdo.update({ where: { id }, data: { pagado: true } });
+    return (await api(`/api/recuerdo/${id}`)).json();
+  }
+
+  test("se guarda todo lo opcional y la página pública lo devuelve", async () => {
+    const token = await h.login("ana@example.com");
+    const { res, data } = await subirRecuerdo(token, {
+      foto: [h.fotoFalsa(), h.fotoFalsa("image/png"), h.fotoFalsa()],
+      extra: {
+        mensaje: "Feliz aniversario", fecha: "2023-03-15", fechaTitulo: "Juntos desde",
+        cancion: "https://open.spotify.com/intl-es/track/4uLU6hMCjMI75M1A2tKUQC?si=x"
+      }
+    });
+    assert.equal(res.status, 200);
+
+    const pub = await pagar(data.id);
+    assert.deepEqual(pub.fotos.map(f => f.orden), [1, 2, 3]);
+    for (const f of pub.fotos) assert.match(f.url, /^\/foto\/[0-9a-f-]{36}\.jpg$/);
+    assert.equal(pub.mensaje, "Feliz aniversario");
+    assert.equal(pub.fecha, "2023-03-15");
+    assert.equal(pub.fechaTitulo, "Juntos desde");
+    assert.equal(pub.cancionUrl, "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC");
+    assert.equal((await api(pub.fotos[0].url)).status, 200);
+  });
+
+  test("hasta 4 fotos: una quinta se rechaza sin crear nada", async () => {
+    const token = await h.login("ana@example.com");
+    const cuatro = await subirRecuerdo(token, { foto: Array.from({ length: 4 }, () => h.fotoFalsa()) });
+    assert.equal(cuatro.res.status, 200);
+    assert.equal((await pagar(cuatro.data.id)).fotos.length, 4);
+
+    const cinco = await subirRecuerdo(token, { foto: Array.from({ length: 5 }, () => h.fotoFalsa()) });
+    assert.equal(cinco.res.status, 400);
+    assert.equal(await prisma.recuerdo.count(), 1);
+  });
+
+  test("borrar el recuerdo aparta también sus fotos", async () => {
+    const token = await h.login("ana@example.com");
+    const { data } = await subirRecuerdo(token, { foto: [h.fotoFalsa(), h.fotoFalsa()] });
+    recuerdosBorrados.push(data.id);
+    const res = await api(`/api/recuerdos/${data.id}`, { method: "DELETE", token });
+    assert.equal(res.status, 200);
+    assert.equal(await prisma.recuerdoFoto.count(), 0);
+    const apartados = path.join(h.ROOT, "uploads/eliminados", data.id);
+    assert.equal(fs.readdirSync(apartados).filter(f => f.endsWith(".jpg")).length, 2);
+  });
+
+  test("sin personalización el recuerdo funciona como antes y no expone campos vacíos", async () => {
+    const token = await h.login("ana@example.com");
+    const { data } = await subirRecuerdo(token);
+    const pub = await pagar(data.id);
+    for (const campo of ["fotos", "mensaje", "fecha", "fechaTitulo", "cancionUrl"]) {
+      assert.ok(!(campo in pub), campo);
+    }
+  });
+
+  test("rechaza foto que no es imagen, canción ajena y fecha inválida sin crear nada", async () => {
+    const token = await h.login("ana@example.com");
+    const casos = [
+      [{ foto: new Blob(["<svg></svg>"], { type: "image/jpeg" }) }, 422],
+      [{ foto: new Blob(["hola"], { type: "text/plain" }) }, 400],
+      [{ extra: { cancion: "https://evil.com/cancion" } }, 400],
+      [{ extra: { fecha: "2023-02-30" } }, 400]
+    ];
+    for (const [opciones, status] of casos) {
+      const { res } = await subirRecuerdo(token, opciones);
+      assert.equal(res.status, status, JSON.stringify(Object.keys(opciones)));
+    }
+    assert.equal(await prisma.recuerdo.count(), 0);
   });
 });

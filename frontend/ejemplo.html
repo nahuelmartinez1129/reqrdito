@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/img/favicon-64x64.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#6BAC73">
+  <title>Ejemplo de recuerdo | ReQRdito</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Así se ve un recuerdo de ReQRdito al escanear el QR: foto, mensaje de voz, contador de tiempo juntos y su canción.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ReQRdito">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:url" content="https://www.reqrdito.com/ejemplo.html">
+  <meta property="og:title" content="Así se ve un recuerdo de ReQRdito">
+  <meta property="og:description" content="Foto, mensaje de voz, contador de tiempo juntos y su canción, en un QR.">
+  <meta property="og:image" content="https://www.reqrdito.com/img/og-reqrdito.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap">
+  <link rel="stylesheet" href="css/main.css?v=2026.1020" />
+  <!-- Meta Pixel Code -->
+  <script>
+  // Incrustado en la home (iframe): sin pixel, la visita la registra la home
+  if (window.self === window.top)
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  if (window.fbq) fbq('init', '1037382502691718');
+  </script>
+  <script src="js/meta.js?v=2026.1019"></script>
+  <noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1037382502691718&ev=PageView&noscript=1"
+  /></noscript>
+  <!-- End Meta Pixel Code -->
+</head>
+
+<body class="recuerdo-body ejemplo-body">
+  <script>if (new URLSearchParams(location.search).has("embed")) document.body.classList.add("ejemplo-body--embed");</script>
+
+  <div class="ejemplo-aviso" role="note">
+    <span>👀 Esto es un ejemplo: así lo ve quien escanea tu QR</span>
+    <a href="crear-recuerdo.html" class="ejemplo-aviso-btn">Crear el mío</a>
+  </div>
+
+  <div class="recuerdo-card recuerdo-card--listo">
+    <div class="contenido">
+      <div id="vista" class="rv"></div>
+      <div class="rv-qr">
+        <img src="ejemplo/qr.png" alt="Código QR de este ejemplo" width="180" height="180" />
+        <p>Escanealo con tu celular para verlo como lo vería quien recibe tu regalo.</p>
+      </div>
+    </div>
+  </div>
+
+  <a href="crear-recuerdo.html" class="ejemplo-cta">Quiero regalar uno así</a>
+
+<script src="js/config.js?v=2026.1600"></script>
+<script src="js/recuerdo-vista.js?v=2026.1020"></script>
+<script>
+  // Fecha de ejemplo: siempre "hace 3 años y unos meses", para que el contador se vea vivo
+  const hoy = new Date();
+  const desde = new Date(hoy.getFullYear() - 3, hoy.getMonth() - 4, 15);
+  const dos = n => String(n).padStart(2, "0");
+
+  RecuerdoVista.mostrar(document.getElementById("vista"), {
+    nombre: "Para Sofi, en nuestro aniversario",
+    fotos: [
+      { url: "ejemplo/foto.svg", orden: 1 },
+      { url: "ejemplo/foto2.svg", orden: 2 },
+      { url: "ejemplo/foto3.svg", orden: 3 }
+    ],
+    fecha: `${desde.getFullYear()}-${dos(desde.getMonth() + 1)}-${dos(desde.getDate())}`,
+    fechaTitulo: "Juntos desde",
+    mensaje: "Gracias por cada mate, cada viaje y cada domingo de lluvia.\nMi lugar favorito sigue siendo al lado tuyo.\n\nTe amo. — Tomi",
+    audios: [{ url: "ejemplo/voz.mp3", orden: 1 }],
+    cancionUrl: "https://open.spotify.com/track/34gCuhDGsG4bRPIf9bb02f"
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Ilustración: una pareja mirando el atardecer desde una loma">
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F6C99A"/>
+      <stop offset="0.45" stop-color="#F3A97E"/>
+      <stop offset="0.75" stop-color="#EBAF2B"/>
+      <stop offset="1" stop-color="#F9ECD9"/>
+    </linearGradient>
+    <radialGradient id="sol" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFF6DD"/>
+      <stop offset="0.6" stop-color="#FFE3A3"/>
+      <stop offset="1" stop-color="#FFE3A3" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#cielo)"/>
+  <circle cx="400" cy="560" r="230" fill="url(#sol)"/>
+  <circle cx="400" cy="560" r="110" fill="#FFF3D1"/>
+  <!-- nubes -->
+  <g fill="#FFF7EC" opacity="0.7">
+    <ellipse cx="170" cy="250" rx="120" ry="26"/>
+    <ellipse cx="240" cy="230" rx="70" ry="24"/>
+    <ellipse cx="630" cy="330" rx="110" ry="22"/>
+    <ellipse cx="580" cy="312" rx="60" ry="20"/>
+  </g>
+  <!-- aves -->
+  <g fill="none" stroke="#7A4A2A" stroke-width="4" stroke-linecap="round" opacity="0.55">
+    <path d="M520 220 q12 -12 24 0 q12 -12 24 0"/>
+    <path d="M590 180 q9 -9 18 0 q9 -9 18 0"/>
+  </g>
+  <!-- colinas -->
+  <path d="M0 700 C 160 640, 300 690, 420 660 S 680 620, 800 660 V 1000 H 0 Z" fill="#6BAC73"/>
+  <path d="M0 780 C 200 720, 360 790, 520 750 S 720 720, 800 740 V 1000 H 0 Z" fill="#1B7D27"/>
+  <path d="M0 860 C 220 820, 420 880, 800 830 V 1000 H 0 Z" fill="#166D20"/>
+  <!-- pareja sentada (silueta) -->
+  <g fill="#0E4715">
+    <!-- persona izquierda -->
+    <circle cx="352" cy="676" r="22"/>
+    <path d="M318 760 C 318 718, 334 700, 352 700 C 372 700, 386 716, 388 742 L 392 770 L 316 770 Z"/>
+    <!-- persona derecha, apoyada -->
+    <circle cx="410" cy="682" r="20"/>
+    <path d="M380 770 C 380 730, 392 706, 410 706 C 430 706, 444 724, 446 752 L 448 770 Z"/>
+    <!-- brazo sobre el hombro -->
+    <path d="M362 712 C 380 700, 400 700, 416 712 L 412 720 C 398 712, 382 712, 368 722 Z"/>
+  </g>
+  <!-- corazón pequeño -->
+  <path d="M381 640 c -6 -10 -22 -6 -20 6 c 2 10 20 20 20 20 c 0 0 18 -10 20 -20 c 2 -12 -14 -16 -20 -6 z" fill="#FFF3D1" opacity="0.9"/>
+</svg>

@@ -10,11 +10,28 @@
 <link rel="manifest" href="/manifest.json">
 
 <meta name="theme-color" content="#6BAC73">
-  <title>ReQRdito | Audios en código QR</title>
+  <title>ReQRdito | Recuerdos en código QR: voz, fotos y canción</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="facebook-domain-verification" content="gquzz1ojssxqf366rh5f2fhjueph9b" />
-  <meta name="description" content="Guardá una voz, una dedicatoria o un mensaje en un QR personalizado. Quien lo escanee lo escucha al instante desde su celular.">
-  <link rel="stylesheet" href="css/main.css?v=2026.300">
+  <meta name="description" content="Un recuerdo en un QR: tu voz, tus fotos, el tiempo que llevan juntos y su canción. Quien lo escanee lo abre al instante desde su celular. Desde $11.990, pago único.">
+  <!-- Vista previa al compartir el link (WhatsApp, Instagram, Facebook, anuncios) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ReQRdito">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:url" content="https://www.reqrdito.com/">
+  <meta property="og:title" content="Un recuerdo para volver a vivir, en un QR">
+  <meta property="og:description" content="Tu voz, tus fotos, el tiempo que llevan juntos y su canción. Se abre con la cámara del celular. Desde $11.990, pago único.">
+  <meta property="og:image" content="https://www.reqrdito.com/img/og-reqrdito.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:alt" content="ReQRdito: una foto tipo polaroid, un QR y la frase «Un recuerdo para volver a vivir».">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://www.reqrdito.com/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap">
+  <link rel="stylesheet" href="css/main.css?v=2026.1020">
   <!-- Meta Pixel Code -->
   <script>
   !function(f,b,e,v,n,t,s)
@@ -27,7 +44,7 @@
   'https://connect.facebook.net/en_US/fbevents.js');
   fbq('init', '1037382502691718');
   </script>
-  <script src="js/meta.js?v=2026.1018"></script>
+  <script src="js/meta.js?v=2026.1019"></script>
   <noscript><img height="1" width="1" style="display:none"
   src="https://www.facebook.com/tr?id=1037382502691718&ev=PageView&noscript=1"
   /></noscript>
@@ -68,7 +85,9 @@
     <div class="site-nav__menu" id="navMenu">
       <nav class="site-nav__links" aria-label="Secciones">
         <a href="#ocasiones">Ocasiones</a>
+        <a href="#ejemplo">Ejemplo</a>
         <a href="#como-funciona">Cómo funciona</a>
+        <a href="#precios">Precios</a>
         <a href="#preguntas">Preguntas</a>
       </nav>
 
@@ -101,29 +120,32 @@
     <div class="hero__inner">
 
       <div class="hero__copy">
-        <p class="eyebrow">Recuerdos en audio · QR personalizado</p>
-        <h1>Hay palabras que merecen <em>quedarse</em>.</h1>
+        <p class="eyebrow">Voz · foto · fecha · canción · en un QR</p>
+        <h1>Un recuerdo para <em>volver a vivir</em>.</h1>
         <p class="hero__lead">
-          Guardá una voz, una dedicatoria o un mensaje significativo en un QR personalizado.
-          Quien lo escanee lo escucha al instante, desde su celular.
+          Tu voz, tus fotos, el tiempo que llevan juntos y su canción, en un QR personalizado.
+          Quien lo escanee lo abre al instante desde su celular: lo escucha, lo ve y lo siente.
         </p>
 
         <div class="hero__actions">
           <a href="crear-recuerdo.html" class="btn-primary btn-lg">
             Crear mi recuerdo <i data-lucide="headphones"></i>
           </a>
-          <a href="#como-funciona" class="btn-ghost btn-lg">Ver cómo funciona</a>
+          <a href="#ejemplo" class="btn-ghost btn-lg">Ver un ejemplo</a>
         </div>
+
+        <p class="hero__nota">Desde <strong data-precio="individual">$11.990</strong> · pago único · sin suscripción · el QR no vence</p>
 
         <ul class="hero__facts">
           <li><i data-lucide="smartphone"></i> Sin instalar apps</li>
-          <li><i data-lucide="mic"></i> Subí o grabá tu audio</li>
+          <li><i data-lucide="mic"></i> Tu voz, subida o grabada</li>
+          <li><i data-lucide="image"></i> Fotos, contador y canción</li>
           <li><i data-lucide="mail"></i> Te llega por correo</li>
         </ul>
       </div>
 
       <div class="hero__visual" role="img"
-           aria-label="Ilustración: una tarjeta con un QR de ejemplo y un celular reproduciendo un recuerdo en audio">
+           aria-label="Ilustración: una tarjeta con un QR de ejemplo y un celular mostrando un recuerdo con fotos, contador y audio">
 
         <div class="qr-card" aria-hidden="true">
           <svg class="qr-card__code"><use href="#demo-qr"></use></svg>
@@ -134,8 +156,9 @@
         <div class="phone" aria-hidden="true">
           <div class="phone__screen">
             <div class="phone__card">
-              <p class="phone__title">🎧 Tu recuerdo está listo</p>
-              <p class="phone__text">Este recuerdo fue creado especialmente para vos 💚</p>
+              <img class="phone__foto" src="ejemplo/foto.svg" alt="" width="120" height="150">
+              <p class="phone__title phone__title--manuscrita">Para Sofi</p>
+              <p class="phone__contador">3 años, 4 meses y 3 días juntos</p>
 
               <div class="player">
                 <span class="player__btn"></span>
@@ -159,7 +182,7 @@
     <div class="section-head">
       <p class="eyebrow">Para quién es ReQRdito</p>
       <h2 id="ocasiones-title">Un mensaje para cada historia</h2>
-      <p>Una voz conocida cambia todo. Estas son algunas ideas de qué grabar.</p>
+      <p>Una voz conocida, sus fotos y su canción cambian todo. Estas son algunas ideas para armar el tuyo.</p>
     </div>
 
     <div class="bento">
@@ -187,7 +210,7 @@
       <article class="bento__item bento__item--pets">
         <i data-lucide="paw-print"></i>
         <h3>Mascotas</h3>
-        <p>Su historia, sus apodos, el día que llegó a casa: un audio para quien siempre está.</p>
+        <p>Sus fotos, sus apodos y el contador desde el día que llegó a casa: un recuerdo para quien siempre está.</p>
       </article>
 
       <article class="bento__item bento__item--gifts">
@@ -195,6 +218,41 @@
         <h3>Regalos y homenajes</h3>
         <p>Un detalle diferente, moderno y emocional. Descargá el QR e imprimilo en una tarjeta, un cuadro o el envoltorio.</p>
       </article>
+    </div>
+  </section>
+
+  <!-- =========================
+       EJEMPLO REAL (ejemplo.html dentro de un celular)
+  ========================= -->
+  <section class="demo" id="ejemplo" aria-labelledby="ejemplo-title">
+    <div class="demo__inner">
+      <div class="demo__copy">
+        <p class="eyebrow">Probalo antes de crear el tuyo</p>
+        <h2 id="ejemplo-title">Esto es exactamente lo que recibe</h2>
+        <p>Una página hecha para esa persona, con todo lo que le pongas adentro. Tocá play en el celular de la derecha o escaneá el QR con el tuyo.</p>
+
+        <ul class="demo__list">
+          <li><i data-lucide="mic"></i><div><h3>Tu voz</h3><p>Uno o dos mensajes de voz, grabados por vos. Es la parte que emociona.</p></div></li>
+          <li><i data-lucide="image"></i><div><h3>Hasta 4 fotos</h3><p>Enmarcadas como polaroids, que se van pasando solas con una animación.</p></div></li>
+          <li><i data-lucide="calendar-heart"></i><div><h3>El tiempo juntos</h3><p>Un contador en vivo desde la fecha que pongas, o una cuenta regresiva si es una fecha futura.</p></div></li>
+          <li><i data-lucide="music"></i><div><h3>Su canción</h3><p>De Spotify o YouTube: suena ahí mismo, sin salir de la página.</p></div></li>
+          <li><i data-lucide="pen-line"></i><div><h3>Un mensaje escrito</h3><p>Lo que le dirías vos, con tus palabras.</p></div></li>
+        </ul>
+
+        <div class="demo__acciones">
+          <a href="ejemplo.html" class="btn-ghost btn-lg" target="_blank" rel="noopener">Abrir el ejemplo completo</a>
+          <div class="demo__qr">
+            <img src="ejemplo/qr.png" alt="QR del ejemplo" width="96" height="96" loading="lazy">
+            <span>Escanealo<br>con tu celular</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo__phone" aria-label="Vista previa del ejemplo en un celular">
+        <div class="demo__screen">
+          <iframe src="ejemplo.html?embed=1" title="Ejemplo de recuerdo de ReQRdito" loading="lazy"></iframe>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -210,12 +268,13 @@
     <ol class="how__steps">
       <li class="how__step">
         <span class="how__num" aria-hidden="true">01</span>
-        <h3>Cargá tu audio</h3>
-        <p>Elegí <strong>Individual</strong> (1 audio) o <strong>Dúo</strong> (2 audios), ponele un nombre y subí un archivo o grabalo desde el navegador. Para continuar, iniciás sesión con Google.</p>
+        <h3>Armá tu recuerdo</h3>
+        <p>Elegí <strong>Individual</strong> (1 audio) o <strong>Dúo</strong> (2 audios), ponele un nombre y subí un archivo o grabalo desde el navegador. Si querés, sumá hasta 4 fotos, una fecha especial, un mensaje y su canción. Para continuar, iniciás sesión con Google.</p>
         <div class="how__ui" aria-hidden="true">
           <span class="chip chip--active">Individual · 1 audio</span>
           <span class="chip">Dúo · 2 audios</span>
           <span class="chip chip--rec">Grabar</span>
+          <span class="chip">+ Foto · fecha · canción</span>
         </div>
       </li>
 
@@ -231,7 +290,7 @@
       <li class="how__step">
         <span class="how__num" aria-hidden="true">03</span>
         <h3>Recibí tu QR</h3>
-        <p>Lo ves al instante con tu audio, te enviamos el enlace por correo y podés descargar el QR desde Mis recuerdos.</p>
+        <p>Lo ves al instante con tu voz, tus fotos y su canción, te enviamos el enlace por correo y podés descargar el QR desde Mis recuerdos.</p>
         <div class="how__ui" aria-hidden="true">
           <svg class="how__qr"><use href="#demo-qr"></use></svg>
           <span class="chip"><i data-lucide="download"></i> Descargar QR</span>
@@ -245,12 +304,61 @@
   </section>
 
   <!-- =========================
+       PRECIOS (los importes salen de GET /api/precios; el texto es el respaldo)
+  ========================= -->
+  <section class="pricing" id="precios" aria-labelledby="precios-title">
+    <div class="section-head">
+      <p class="eyebrow">Precios</p>
+      <h2 id="precios-title">Un pago, un recuerdo para siempre</h2>
+      <p>Los dos packs incluyen todo: hasta 4 fotos, contador, canción y mensaje. Solo cambia la cantidad de audios.</p>
+    </div>
+
+    <div class="pricing__grid">
+      <article class="plan">
+        <h3 class="plan__nombre">Individual</h3>
+        <p class="plan__para">Para un mensaje tuyo</p>
+        <p class="plan__precio"><span data-precio="individual">$11.990</span> <small>ARS</small></p>
+        <p class="plan__pago">Pago único · sin suscripción</p>
+        <ul class="plan__lista">
+          <li><i data-lucide="mic"></i> <span><strong>1 mensaje de voz</strong></span></li>
+          <li><i data-lucide="image"></i> <span>Hasta 4 fotos que pasan solas</span></li>
+          <li><i data-lucide="calendar-heart"></i> <span>Fecha con contador en vivo</span></li>
+          <li><i data-lucide="music"></i> <span>Su canción de Spotify o YouTube</span></li>
+          <li><i data-lucide="pen-line"></i> <span>Mensaje escrito</span></li>
+          <li><i data-lucide="qr-code"></i> <span>QR para descargar e imprimir, que no vence</span></li>
+        </ul>
+        <a href="crear-recuerdo.html?tipo=individual" class="btn-ghost btn-lg plan__cta">Crear Individual</a>
+      </article>
+
+      <article class="plan plan--destacado">
+        <span class="plan__badge">Para dos voces</span>
+        <h3 class="plan__nombre">Dúo</h3>
+        <p class="plan__para">Para dos mensajes en un mismo QR</p>
+        <p class="plan__precio"><span data-precio="pareja">$14.990</span> <small>ARS</small></p>
+        <p class="plan__pago">Pago único · sin suscripción</p>
+        <ul class="plan__lista">
+          <li><i data-lucide="mic"></i> <span><strong>2 mensajes de voz</strong>, uno después del otro</span></li>
+          <li><i data-lucide="image"></i> <span>Hasta 4 fotos que pasan solas</span></li>
+          <li><i data-lucide="calendar-heart"></i> <span>Fecha con contador en vivo</span></li>
+          <li><i data-lucide="music"></i> <span>Su canción de Spotify o YouTube</span></li>
+          <li><i data-lucide="pen-line"></i> <span>Mensaje escrito</span></li>
+          <li><i data-lucide="qr-code"></i> <span>QR para descargar e imprimir, que no vence</span></li>
+        </ul>
+        <a href="crear-recuerdo.html?tipo=pareja" class="btn-primary btn-lg plan__cta">Crear Dúo</a>
+      </article>
+    </div>
+
+    <p class="pricing__nota"><i data-lucide="lock"></i> Pagás con tarjeta de crédito o débito por Mercado Pago, sin necesidad de tener cuenta.</p>
+  </section>
+
+  <!-- =========================
        EXPERIENCIA
   ========================= -->
   <section class="experience" aria-labelledby="experiencia-title">
     <div class="section-head section-head--light">
       <p class="eyebrow">La experiencia</p>
       <h2 id="experiencia-title">Qué pasa cuando alguien escanea tu QR</h2>
+      <p>Todo pasa en su celular, en segundos. Esto es lo que ve, en orden.</p>
     </div>
 
     <ol class="story">
@@ -261,7 +369,7 @@
           </span>
         </div>
         <h3><span>1</span> Apunta la cámara</h3>
-        <p>Con la cámara del celular alcanza: no hace falta instalar nada.</p>
+        <p>Con la cámara del celular alcanza: no hace falta instalar ninguna app.</p>
       </li>
 
       <li class="story__frame">
@@ -269,14 +377,37 @@
           <span class="browser">
             <span class="browser__bar">reqrdito.com/recuerdo</span>
             <span class="browser__body">
-              <span class="browser__title">🎧 Tu recuerdo está listo</span>
-              <span class="browser__line"></span>
-              <span class="browser__line browser__line--short"></span>
+              <img class="browser__foto" src="ejemplo/foto.svg" alt="" width="64" height="80" loading="lazy">
+              <span class="browser__nombre">Para Sofi</span>
             </span>
           </span>
         </div>
-        <h3><span>2</span> Se abre tu recuerdo</h3>
-        <p>La página del recuerdo se abre en el navegador, sin cuentas ni contraseñas para quien lo escucha.</p>
+        <h3><span>2</span> Se abre su página</h3>
+        <p>Una página hecha para esa persona, con el nombre que elegiste. Se abre en el navegador, sin cuentas ni contraseñas.</p>
+      </li>
+
+      <li class="story__frame">
+        <div class="story__visual" aria-hidden="true">
+          <span class="mini-fotos">
+            <img src="ejemplo/foto3.svg" alt="" width="84" height="105" loading="lazy">
+            <img src="ejemplo/foto2.svg" alt="" width="84" height="105" loading="lazy">
+            <img src="ejemplo/foto.svg" alt="" width="84" height="105" loading="lazy">
+          </span>
+        </div>
+        <h3><span>3</span> Ve sus fotos</h3>
+        <p>Hasta 4 fotos, enmarcadas como polaroids, que se van pasando solas con una animación. También las puede pasar tocando.</p>
+      </li>
+
+      <li class="story__frame">
+        <div class="story__visual" aria-hidden="true">
+          <span class="mini-contador">
+            <small>Juntos desde el 15 de junio de 2023</small>
+            <strong>3 años, 4 meses y 3 días</strong>
+            <small>1.221 días · 19 h 38 min <b class="mini-contador__seg">42</b> s</small>
+          </span>
+        </div>
+        <h3><span>4</span> Ve el tiempo que pasó</h3>
+        <p>Un contador en vivo desde la fecha que elegiste, que avanza segundo a segundo. Si la fecha es futura, es una cuenta regresiva.</p>
       </li>
 
       <li class="story__frame">
@@ -288,10 +419,43 @@
             </span>
           </span>
         </div>
-        <h3><span>3</span> Escucha tu voz</h3>
-        <p>El audio se reproduce ahí mismo. Con el pack Dúo, los dos audios suenan uno después del otro.</p>
+        <h3><span>5</span> Escucha tu voz</h3>
+        <p>Tu mensaje de voz se reproduce ahí mismo. Con el pack Dúo, los dos audios suenan uno después del otro.</p>
+      </li>
+
+      <li class="story__frame">
+        <div class="story__visual" aria-hidden="true">
+          <span class="mini-cierre">
+            <span class="mini-cierre__mensaje">“Mi lugar favorito sigue siendo al lado tuyo.”</span>
+            <span class="mini-cierre__cancion"><i data-lucide="music"></i> Nuestra canción <em>▶</em></span>
+          </span>
+        </div>
+        <h3><span>6</span> Lee tu mensaje y escucha su canción</h3>
+        <p>Tu mensaje escrito y su canción de Spotify o YouTube, que suena sin salir de la página.</p>
       </li>
     </ol>
+
+    <p class="experience__nota">Y el QR no vence: lo puede volver a abrir todas las veces que quiera.</p>
+  </section>
+
+  <!-- =========================
+       IDEAS PARA REGALARLO
+  ========================= -->
+  <section class="ideas" id="ideas" aria-labelledby="ideas-title">
+    <div class="section-head">
+      <p class="eyebrow">El QR es tuyo para imprimir</p>
+      <h2 id="ideas-title">Ideas para regalarlo</h2>
+      <p>Descargás el QR desde Mis recuerdos y lo ponés donde quieras: cualquier celular lo lee con la cámara.</p>
+    </div>
+
+    <ul class="ideas__grid">
+      <li><i data-lucide="gift"></i><h3>En la tarjeta del regalo</h3><p>Para que lo escuche apenas lo abre.</p></li>
+      <li><i data-lucide="flower-2"></i><h3>En un ramo de flores</h3><p>Una etiqueta chiquita colgando del ramo.</p></li>
+      <li><i data-lucide="mail-open"></i><h3>Dentro de una carta</h3><p>La carta se lee; el QR se escucha.</p></li>
+      <li><i data-lucide="frame"></i><h3>En un cuadro con su foto</h3><p>Impreso en una esquina, para volver a escucharlo siempre.</p></li>
+      <li><i data-lucide="key-round"></i><h3>En un llavero ReQRdito</h3><p>Tu recuerdo, siempre a mano, en un llavero con QR.</p></li>
+      <li><i data-lucide="send"></i><h3>Por WhatsApp</h3><p>¿No llegás a imprimirlo? Mandale el enlace y lo abre al instante.</p></li>
+    </ul>
   </section>
 
   <!-- =========================
@@ -302,7 +466,7 @@
       <div class="trust__intro">
         <p class="eyebrow">Claro desde el principio</p>
         <h2 id="confianza-title">Cómo cuidamos tu recuerdo</h2>
-        <p>Sin letra chica: así funciona el acceso a tus audios.</p>
+        <p>Sin letra chica: así funciona el acceso a tus recuerdos.</p>
       </div>
 
       <ul class="trust__list">
@@ -351,6 +515,36 @@
 
       <div class="faq-box">
         <details name="faq">
+          <summary>¿Cuánto cuesta?</summary>
+          <p>Individual <span data-precio="individual">$11.990</span> y Dúo <span data-precio="pareja">$14.990</span>, en pesos argentinos. Es un pago único: sin suscripción y el QR no vence. Pagás con tarjeta de crédito o débito por Mercado Pago, sin necesidad de tener cuenta.</p>
+        </details>
+
+        <details name="faq">
+          <summary>¿Cuándo me llega?</summary>
+          <p>Al instante. Apenas Mercado Pago confirma el pago, tu recuerdo se activa, lo ves en pantalla y te llega el enlace por correo. Si no lo ves, revisá la carpeta de spam o entrá a Mis recuerdos.</p>
+        </details>
+
+        <details name="faq">
+          <summary>¿Puedo agregar fotos o una canción?</summary>
+          <p>Sí, es opcional: al crear tu recuerdo podés sumar hasta 4 fotos (se van pasando solas), un mensaje escrito, una fecha especial (aparece un contador con el tiempo que pasó, o una cuenta regresiva) y una canción de Spotify o YouTube. Viene incluido en todos los packs.</p>
+        </details>
+
+        <details name="faq">
+          <summary>¿Lo puede ver cualquiera?</summary>
+          <p>No. Solo quien tenga el QR o el enlace del recuerdo.</p>
+        </details>
+
+        <details name="faq">
+          <summary>¿Qué pasa si falla el pago?</summary>
+          <p>No se te cobra nada y tu recuerdo queda guardado: podés volver a intentar el pago cuando quieras. Se activa recién cuando el pago se confirma.</p>
+        </details>
+
+        <details name="faq">
+          <summary>¿Puedo cambiarlo después de pagar?</summary>
+          <p>Podés cambiar el nombre desde Mis recuerdos. Los audios, las fotos, la fecha y la canción quedan como los cargaste, así que revisalos antes de pagar. Si algo salió mal, escribinos y lo resolvemos.</p>
+        </details>
+
+        <details name="faq">
           <summary>¿El QR vence?</summary>
           <p>No, el QR no tiene fecha de vencimiento. Si alguna vez querés, podés eliminar el recuerdo desde Mis recuerdos.</p>
         </details>
@@ -372,7 +566,7 @@
 
         <details name="faq">
           <summary>¿Qué diferencia hay entre Individual y Dúo?</summary>
-          <p>Individual incluye 1 audio y 1 QR. Dúo incluye 2 audios en un mismo QR, que se reproducen uno después del otro.</p>
+          <p>Los dos incluyen hasta 4 fotos, mensaje escrito, fecha con contador y canción. Individual tiene 1 audio y Dúo tiene 2 audios en un mismo QR, que se reproducen uno después del otro.</p>
         </details>
 
         <details name="faq">
@@ -389,7 +583,7 @@
   <section class="final-cta" aria-labelledby="cta-title">
     <div class="final-cta__panel">
       <h2 id="cta-title">¿Qué querés que recuerden de vos?</h2>
-      <p>Crealo hoy y regalá una voz que se puede volver a escuchar.</p>
+      <p>Tu voz, sus fotos y su canción, en un QR para volver a abrir siempre.</p>
       <a href="crear-recuerdo.html" class="btn-primary btn-lg">
         Crear mi recuerdo <i data-lucide="headphones"></i>
       </a>
@@ -406,7 +600,7 @@
 
     <div class="site-footer__brand">
       <img src="img/reqrdito-logo.png" alt="Logo ReQRdito">
-      <p>Audios en código QR.</p>
+      <p>Recuerdos en código QR.</p>
     </div>
 
     <nav class="site-footer__nav" aria-label="Enlaces del pie">
@@ -471,6 +665,23 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.classList.remove("is-active");
   };
 });
+</script>
+
+<!-- Precios: los importes salen del backend (config/precios.js vía GET /api/precios).
+     El texto de los [data-precio] es el respaldo si la consulta falla, y debe
+     coincidir con el backend (lo verifica test/unit/precios.test.js). -->
+<script>
+(async () => {
+  try {
+    const res = await fetch(`${REQRDITO.API}/api/precios`);
+    if (!res.ok) return;
+    const precios = await res.json();
+    document.querySelectorAll("[data-precio]").forEach(el => {
+      const monto = precios[el.dataset.precio]?.monto;
+      if (Number.isFinite(monto)) el.textContent = `$${monto.toLocaleString("es-AR")}`;
+    });
+  } catch { /* queda el precio escrito en la página */ }
+})();
 </script>
 
 <!-- Menú móvil (solo presentación) -->

@@ -6,14 +6,15 @@ const MONEDA = "ARS";
 
 const PRECIOS = Object.freeze({
   individual: Object.freeze({ monto: 11990, moneda: MONEDA, nombre: "Individual", titulo: "Recuerdo QR – Individual" }),
-  pareja: Object.freeze({ monto: 21990, moneda: MONEDA, nombre: "Dúo", titulo: "Recuerdo QR – Dúo" })
+  pareja: Object.freeze({ monto: 14990, moneda: MONEDA, nombre: "Dúo", titulo: "Recuerdo QR – Dúo" })
 });
 
-// Tarifa anterior. Solo se acepta para preferencias creadas antes de que el
+// Tarifas anteriores. Solo se aceptan para preferencias creadas antes de que el
 // backend empezara a guardar `monto_esperado` (ver services/pagos.js).
+// Dúo: 10.900 y después 21.990 (hasta el 2026-10-19, cuando pasó a 14.990).
 const PRECIOS_ANTERIORES = Object.freeze({
-  individual: 6900,
-  pareja: 10900
+  individual: Object.freeze([6900]),
+  pareja: Object.freeze([10900, 21990])
 });
 
 // Precio oficial del pack (nunca el de prueba). Lo usa la validación de pagos

@@ -8,11 +8,11 @@ const { PRECIOS, PRECIOS_ANTERIORES, MONEDA, precioDe } = require("../../config/
 
 const FRONTEND = path.join(__dirname, "../../../frontend");
 
-test("precios oficiales: Individual $11.990 ARS y Dúo $21.990 ARS", () => {
+test("precios oficiales: Individual $11.990 ARS y Dúo $14.990 ARS", () => {
   assert.equal(MONEDA, "ARS");
   assert.deepEqual(
     { individual: PRECIOS.individual.monto, pareja: PRECIOS.pareja.monto },
-    { individual: 11990, pareja: 21990 }
+    { individual: 11990, pareja: 14990 }
   );
   assert.equal(PRECIOS.pareja.nombre, "Dúo");
   assert.equal(PRECIOS.individual.moneda, "ARS");
@@ -22,14 +22,14 @@ test("precios oficiales: Individual $11.990 ARS y Dúo $21.990 ARS", () => {
 
 test("precioDe solo devuelve packs conocidos", () => {
   assert.equal(precioDe("individual").monto, 11990);
-  assert.equal(precioDe("pareja").monto, 21990);
+  assert.equal(precioDe("pareja").monto, 14990);
   for (const pack of ["duo", "evento", "__proto__", "constructor", undefined, ""]) {
     assert.equal(precioDe(pack), null, String(pack));
   }
 });
 
 test("la tarifa anterior solo se conserva para preferencias históricas", () => {
-  assert.deepEqual(PRECIOS_ANTERIORES, { individual: 6900, pareja: 10900 });
+  assert.deepEqual(PRECIOS_ANTERIORES, { individual: [6900], pareja: [10900, 21990] });
 });
 
 test("pago.html usa /api/precios y su respaldo coincide con el backend", () => {
@@ -38,18 +38,30 @@ test("pago.html usa /api/precios y su respaldo coincide con el backend", () => {
   const respaldo = html.match(/PRECIOS_RESPALDO\s*=\s*\{([^}]*)\}/);
   assert.ok(respaldo, "falta PRECIOS_RESPALDO");
   assert.match(respaldo[1], /individual:\s*11990\b/);
-  assert.match(respaldo[1], /pareja:\s*21990\b/);
+  assert.match(respaldo[1], /pareja:\s*14990\b/);
   assert.match(html, /Recuerdo Dúo/);
   // el navegador solo envía el id (y las cookies del pixel de Meta): nunca un importe
   const envio = html.match(/body:\s*JSON\.stringify\((\{[^}]*\})\)/);
   assert.equal(envio[1].trim(), '{ recuerdoId, fbp: cookie("_fbp"), fbc: cookie("_fbc") }');
 });
 
-test("el formato mostrado es exactamente $11.990 ARS / $21.990 ARS", () => {
+test("la landing usa /api/precios y su respaldo coincide con el backend", () => {
+  const html = fs.readFileSync(path.join(FRONTEND, "index.html"), "utf8");
+  assert.match(html, /api\/precios/);
+  const formato = (n) => `$${n.toLocaleString("es-AR")}`;
+  const mostrados = [...html.matchAll(/data-precio="(\w+)">([^<]*)</g)];
+  assert.ok(mostrados.length >= 4, "faltan precios en la landing");
+  for (const [, pack, texto] of mostrados) {
+    assert.ok(PRECIOS[pack], `pack desconocido: ${pack}`);
+    assert.equal(texto, formato(PRECIOS[pack].monto), `precio de ${pack} en index.html`);
+  }
+});
+
+test("el formato mostrado es exactamente $11.990 ARS / $14.990 ARS", () => {
   // misma expresión que pago.html
   const formato = (n) => `$${n.toLocaleString("es-AR")} ARS`;
   assert.equal(formato(PRECIOS.individual.monto), "$11.990 ARS");
-  assert.equal(formato(PRECIOS.pareja.monto), "$21.990 ARS");
+  assert.equal(formato(PRECIOS.pareja.monto), "$14.990 ARS");
 });
 
 test("no quedan precios viejos en pantallas ni scripts activos del frontend", () => {
@@ -78,7 +90,7 @@ test("el backend no tiene importes hardcodeados fuera de config/precios.js", () 
   const raiz = path.join(__dirname, "../..");
   for (const f of ["routes/pago.js", "routes/webhook.js", "services/pagos.js"]) {
     const contenido = fs.readFileSync(path.join(raiz, f), "utf8");
-    assert.ok(!/\b(6900|10900|11990|21990)\b/.test(contenido), f);
+    assert.ok(!/\b(6900|10900|11990|14990|21990)\b/.test(contenido), f);
   }
 });
 
@@ -103,7 +115,7 @@ test("precio de prueba vigente: solo el Individual de una cuenta habilitada", ()
   assert.equal(p.prueba, true);
   assert.equal(p.hastaIso, "2026-10-19T23:59:00-03:00");
   assert.equal(precioACobrar("individual", "otra@example.com", PROD, AHORA).monto, 100);
-  assert.equal(precioACobrar("pareja", YO, PROD, AHORA).monto, 21990);
+  assert.equal(precioACobrar("pareja", YO, PROD, AHORA).monto, 14990);
   assert.equal(precioACobrar("pareja", YO, PROD, AHORA).prueba, undefined);
   assert.equal(PRECIOS.individual.monto, 11990);
   assert.equal(precioDe("individual").monto, 11990, "la validación histórica sigue con el oficial");

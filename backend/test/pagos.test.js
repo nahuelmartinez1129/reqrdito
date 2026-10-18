@@ -45,11 +45,11 @@ describe("Preferencias: el importe lo fija el backend", () => {
     assert.equal(r.preferenciaId, "pref-1");
   });
 
-  test("Dúo genera una preferencia por exactamente $21.990 ARS", async () => {
+  test("Dúo genera una preferencia por exactamente $14.990 ARS", async () => {
     const { id } = await conPreferencia("pareja");
-    assert.equal(h.mp.preferencias[0].items[0].unit_price, 21990);
+    assert.equal(h.mp.preferencias[0].items[0].unit_price, 14990);
     assert.equal(h.mp.preferencias[0].items[0].currency_id, "ARS");
-    assert.equal((await estado(id)).montoEsperado, 21990);
+    assert.equal((await estado(id)).montoEsperado, 14990);
   });
 
   test("el navegador no puede manipular el importe, la moneda ni el pack", async () => {
@@ -146,7 +146,7 @@ describe("Webhook: validación del pago real", () => {
     h.pagoAprobado("102", id, { monto: 11991 });
     h.pagoAprobado("103", id, { monto: 6900 });          // tarifa anterior: no vale para preferencias nuevas
     h.pagoAprobado("104", id, { monto: 11990, moneda: "USD" });
-    h.pagoAprobado("105", id, { monto: 21990 });         // precio de otro pack
+    h.pagoAprobado("105", id, { monto: 14990 });         // precio de otro pack
 
     for (const p of ["101", "102", "103", "104", "105"]) {
       assert.equal((await h.webhook(p)).status, 200, p);
@@ -170,16 +170,16 @@ describe("Webhook: validación del pago real", () => {
     assert.equal((await estado(id)).pagado, true);
   });
 
-  test("Dúo valida contra $21.990 (el importe de Individual no alcanza)", async () => {
+  test("Dúo valida contra $14.990 (el importe de Individual no alcanza)", async () => {
     const { id } = await conPreferencia("pareja");
     h.pagoAprobado("201", id, { monto: 11990 });
     await h.webhook("201");
     assert.equal((await estado(id)).pagado, false);
-    h.pagoAprobado("202", id, { monto: 21990 });
+    h.pagoAprobado("202", id, { monto: 14990 });
     await h.webhook("202");
     const r = await estado(id);
     assert.equal(r.pagado, true);
-    assert.equal(Number(r.montoPagado), 21990);
+    assert.equal(Number(r.montoPagado), 14990);
   });
 
   test("importes con decimales equivalentes se aceptan (11990.00)", async () => {
@@ -538,7 +538,7 @@ describe("Precio temporal de prueba (Individual, solo producción)", () => {
     assert.equal(precios.headers.get("cache-control"), "private, no-store");
     const body = await precios.json();
     assert.equal(body.individual.monto, 100);
-    assert.equal(body.pareja.monto, 21990);
+    assert.equal(body.pareja.monto, 14990);
 
     const { id } = await conPreferencia("individual");
     const pref = h.mp.preferencias[0];
@@ -549,9 +549,9 @@ describe("Precio temporal de prueba (Individual, solo producción)", () => {
     assert.equal((await estado(id)).montoEsperado, 100);
 
     const duo = await conPreferencia("pareja", "beto@example.com");
-    assert.equal(h.mp.preferencias[1].items[0].unit_price, 21990);
+    assert.equal(h.mp.preferencias[1].items[0].unit_price, 14990);
     assert.equal(h.mp.preferencias[1].expires, undefined);
-    assert.equal((await estado(duo.id)).montoEsperado, 21990);
+    assert.equal((await estado(duo.id)).montoEsperado, 14990);
   });
 
   test("durante la ventana, otra cuenta paga el precio oficial y $100 no le activa el recuerdo", async () => {
@@ -624,13 +624,13 @@ describe("Meta: Purchase solo con el pago validado, una vez por compra", () => {
     const { id } = await conPreferencia("pareja");
     assert.deepEqual(h.metaEventos.map(e => [e.event_name, e.event_id]), [["InitiateCheckout", `checkout_${id}`]]);
 
-    h.pagoAprobado("4001", id, { monto: 21990 });
+    h.pagoAprobado("4001", id, { monto: 14990 });
     await Promise.all([h.webhook("4001"), h.webhook("4001")]);
     await h.webhook("4001");
 
     assert.equal(compras().length, 1);
     assert.equal(compras()[0].event_id, `purchase_${id}`);
-    assert.equal(compras()[0].custom_data.value, 21990);
+    assert.equal(compras()[0].custom_data.value, 14990);
     assert.equal(compras()[0].custom_data.currency, "ARS");
   });
 
@@ -657,9 +657,9 @@ describe("Meta: Purchase solo con el pago validado, una vez por compra", () => {
     const { id } = await conPreferencia("pareja");
     assert.equal((await (await api(`/api/recuerdo/${id}`)).json()).compra, undefined);
 
-    h.pagoAprobado("4201", id, { monto: 21990 });
+    h.pagoAprobado("4201", id, { monto: 14990 });
     await h.webhook("4201");
-    assert.deepEqual((await (await api(`/api/recuerdo/${id}`)).json()).compra, { valor: 21990, moneda: "ARS" });
+    assert.deepEqual((await (await api(`/api/recuerdo/${id}`)).json()).compra, { valor: 14990, moneda: "ARS" });
 
     // una compra vieja: la página de éxito ya no registra Purchase
     await prisma.recuerdo.update({ where: { id }, data: { pagadoEn: new Date(Date.now() - 25 * 3600 * 1000) } });

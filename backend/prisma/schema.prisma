@@ -50,6 +50,14 @@ model Recuerdo {
   payerEmail String?   @map("payer_email") @db.VarChar(320)
   pagadoEn   DateTime? @map("pagado_en") @db.Timestamptz(6)
 
+  // Personalización opcional de la página del QR (recuerdo.html); las fotos van en RecuerdoFoto
+  mensaje     String?   @db.VarChar(600)
+  // Fecha del contador ("Juntos desde", "Faltan…" si es futura) y su título
+  fecha       DateTime? @db.Date
+  fechaTitulo String?   @map("fecha_titulo") @db.VarChar(60)
+  // Canción de Spotify o YouTube, guardada en forma canónica (ver utils/cancion.js)
+  cancionUrl  String?   @map("cancion_url") @db.VarChar(200)
+
   // Importe fijado al crear la preferencia (fuente: config/precios.js).
   // NULL en recuerdos históricos o preferencias anteriores a este campo.
   montoEsperado       Int?      @map("monto_esperado")
@@ -67,11 +75,27 @@ model Recuerdo {
 
   user            User            @relation(fields: [userId], references: [id], onDelete: Restrict)
   audios          RecuerdoAudio[]
+  fotos           RecuerdoFoto[]
   keychain        Keychain?
   pagosEnRevision PagoRevision[]
 
   @@index([userId, pagado, createdAt(sort: Desc)])
   @@map("recuerdos")
+}
+
+/// Fotos opcionales de un recuerdo (hasta 4; se muestran en ese orden, pasando solas).
+/// El archivo vive en disco (uploads/foto); acá solo se guarda su ruta pública.
+model RecuerdoFoto {
+  id         String   @id @default(uuid()) @db.Uuid
+  recuerdoId String   @map("recuerdo_id") @db.Uuid
+  url        String
+  orden      Int      @db.SmallInt
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  recuerdo Recuerdo @relation(fields: [recuerdoId], references: [id], onDelete: Cascade)
+
+  @@unique([recuerdoId, orden])
+  @@map("recuerdo_fotos")
 }
 
 /// Archivos de audio de un recuerdo (1 en pack individual, 2 en pareja).

@@ -12,7 +12,10 @@
 <meta name="theme-color" content="#6BAC73">
   <title>Mi Recuerdo | ReQRdito</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="css/main.css?v=2026.01" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap">
+  <link rel="stylesheet" href="css/main.css?v=2026.1020" />
   <!-- Meta Pixel Code -->
   <script>
   !function(f,b,e,v,n,t,s)
@@ -25,7 +28,7 @@
   'https://connect.facebook.net/en_US/fbevents.js');
   fbq('init', '1037382502691718');
   </script>
-  <script src="js/meta.js?v=2026.1018"></script>
+  <script src="js/meta.js?v=2026.1019"></script>
   <noscript><img height="1" width="1" style="display:none"
   src="https://www.facebook.com/tr?id=1037382502691718&ev=PageView&noscript=1"
   /></noscript>
@@ -45,15 +48,20 @@
     <div id="spinner" class="spinner"></div>
 
     <div id="contenido" class="contenido" style="display:none">
-      <img id="qrImg" alt="Código QR del recuerdo" />
-
-      
+      <!-- foto, nombre, contador, mensaje, audios y canción (js/recuerdo-vista.js) -->
+      <div id="vista" class="rv"></div>
 
       <div id="audioContainer"></div>
+
+      <div class="rv-qr">
+        <img id="qrImg" alt="Código QR del recuerdo" />
+        <p>Escaneá o compartí este código para volver a este recuerdo.</p>
+      </div>
     </div>
   </div>
 
 <script src="js/config.js?v=2026.1600"></script>
+<script src="js/recuerdo-vista.js?v=2026.1020"></script>
 <script>
 const params = new URLSearchParams(window.location.search);
 
@@ -175,34 +183,19 @@ function mostrarEvento(data) {
    ORIGINAL (NO TOCADO)
 ========================= */
 function mostrarRecuerdo(data) {
-  titulo.textContent = "🎧 Tu recuerdo está listo";
-  mensaje.textContent = "Este recuerdo fue creado especialmente para vos 💚";
-
   document.getElementById("spinner").style.display = "none";
+  // el nombre y lo demás los muestra la vista; el encabezado de espera se oculta
+  titulo.style.display = "none";
+  mensaje.style.display = "none";
+  document.getElementById("card").classList.add("recuerdo-card--listo");
   contenido.style.display = "block";
 
   qrImg.src = `${REQRDITO.API}${data.qrUrl}`;
-  
 
-  let index = 0;
-  const audios = data.audios?.length
-    ? data.audios.sort((a,b)=>a.orden-b.orden).map(a => a.url)
-    : [data.audioUrl];
+  // recuerdos históricos con audioUrl en vez de audios[]
+  if (!data.audios?.length && data.audioUrl) data.audios = [{ url: data.audioUrl, orden: 1 }];
 
-  const audio = document.createElement("audio");
-  audio.controls = true;
-  audio.src = `${REQRDITO.API}${audios[0]}`;
-  audio.className = "recuerdo-audio";
-
-  audio.onended = () => {
-    index++;
-    if (audios[index]) {
-      audio.src = `${REQRDITO.API}${audios[index]}`;
-      audio.play();
-    }
-  };
-
-  audioContainer.appendChild(audio);
+  RecuerdoVista.mostrar(document.getElementById("vista"), data, { base: REQRDITO.API });
 }
 </script>
 

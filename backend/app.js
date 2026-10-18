@@ -26,7 +26,7 @@ const requireAdmin = require("./middleware/requireAdmin");
 // - routes/public.js → lectura de data/recuerdos.json (4 registros históricos, ver docs/)
 
 // Carpetas de archivos subidos (los audios viven en disco, no en la base)
-for (const dir of [DIRS.temp, DIRS.audio, DIRS.qr]) {
+for (const dir of [DIRS.temp, DIRS.audio, DIRS.qr, DIRS.foto]) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
@@ -73,9 +73,10 @@ function crearApp({ eventsEnabled = config.eventsEnabled } = {}) {
 
   const estatico = { dotfiles: "deny", index: false, redirect: false };
 
-  // audios y QR de recuerdos
+  // audios, QR y fotos de recuerdos
   app.use("/audio", express.static(DIRS.audio, estatico));
   app.use("/qr", express.static(DIRS.qr, estatico));
+  app.use("/foto", express.static(DIRS.foto, estatico));
 
   /* =========================
      SALUD (API + PostgreSQL)
